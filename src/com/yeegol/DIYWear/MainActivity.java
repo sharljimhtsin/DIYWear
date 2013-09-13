@@ -356,6 +356,21 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	private void prepareGoodsInfoWindows() {
+		mPopupWindow = new PopupWindow(mContext);
+		// get layout inflater
+		LayoutInflater inflater = LayoutInflater.from(mContext);
+		LinearLayout layout = (LinearLayout) inflater.inflate(
+				R.layout.view_goods_info, null);
+		TextView nameTextView = (TextView) layout
+				.findViewById(R.id.TextView_view_goods_info_name);
+		nameTextView.setText(mCurrentGoods.getName());
+		// attach view to popupWindow & show
+		mPopupWindow.setOnDismissListener(null);
+		mPopupWindow.setOutsideTouchable(false);
+		mPopupWindow.setContentView(layout);
+		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
+		mPopupWindow.update(mSurfaceView.getWidth() / 2,
+				mSurfaceView.getHeight() / 2);
 		LogUtil.logDebug(mCurrentGoods.getName(), TAG);
 	}
 
@@ -393,6 +408,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			listView.addView(layout);
 		}
 		mPopupWindow.setOnDismissListener(this);
+		mPopupWindow.setOutsideTouchable(true);
 		mPopupWindow.setContentView(listView);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(mSurfaceView.getWidth() / 2,
@@ -689,7 +705,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// close pop-up window by back key
 		if (mPopupWindow != null && mPopupWindow.isShowing()) {
 			mPopupWindow.dismiss();
-			toggleButton(mCartButton, true);
 			return;
 		}
 		// hide goods list by back key
@@ -703,6 +718,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void onDismiss() {
+		toggleButton(mCartButton, true);
 	}
 
 	/**

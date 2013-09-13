@@ -29,6 +29,11 @@
     <string name="main_type_down_clothes">下装</string>
     <string name="main_type_upper_clothes">上装</string>
     <string name="main_type_wears">服装</string>
+    <string name="view_goods_info_detail">详情</string>
+    <string name="view_goods_info_remove">移除</string>
+    <string name="view_goods_info_recommend">搭配推荐</string>
+    <string name="view_goods_info_previous">《</string>
+    <string name="view_goods_info_next">》</string>
 
     <!-- system strings -->
     <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>
