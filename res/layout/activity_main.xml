@@ -1,0 +1,127 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity" >
+
+    <LinearLayout
+        android:id="@+id/LinearLayout_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageButton
+            android:id="@+id/Button_showType"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight=".2"
+            android:background="@drawable/bg_button"
+            android:src="@drawable/icon_list" />
+
+        <TextView
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight=".6"
+            android:text="@string/main_user_experience"
+            android:textColor="@android:color/black" />
+
+        <ImageButton
+            android:id="@+id/Button_showFunction"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight=".2"
+            android:background="@drawable/bg_button"
+            android:src="@drawable/icon_function" />
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <!-- http://stackoverflow.com/questions/6668269/android-resizing-problem-with-linearlayout-and-tiled-background -->
+
+        <LinearLayout
+            android:id="@+id/LinearLayout_goodsList"
+            android:layout_width="match_parent"
+            android:layout_height="100dip"
+            android:background="@drawable/bg_goods_list_scale"
+            android:visibility="gone" >
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/Button_cart"
+        android:layout_width="100dip"
+        android:layout_height="50dip"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/popup_goods_list"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/LinearLayout_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/LinearLayout_header" >
+
+        <LinearLayout
+            android:id="@+id/LinearLayout_goodsType"
+            android:layout_width="100dip"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_goods_type"
+            android:orientation="vertical"
+            android:visibility="gone" >
+        </LinearLayout>
+
+        <com.yeegol.DIYWear.clz.MySurfaceView
+            android:id="@+id/surface_main"
+            android:layout_width="match_parent"
+            android:layout_height="800dip" />
+
+        <LinearLayout
+            android:id="@+id/LinearLayout_functionArea"
+            android:layout_width="100dip"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_function"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <Button
+                android:id="@+id/Button_switchToMan"
+                android:layout_width="100dip"
+                android:layout_height="50dip"
+                android:text="@string/main_male" />
+
+            <Button
+                android:id="@+id/Button_switchToWoman"
+                android:layout_width="100dip"
+                android:layout_height="50dip"
+                android:text="@string/main_female" />
+
+            <Button
+                android:id="@+id/Button_turnBack"
+                android:layout_width="100dip"
+                android:layout_height="50dip"
+                android:text="@string/main_turn" />
+
+            <Button
+                android:id="@+id/Button_undo"
+                android:layout_width="100dip"
+                android:layout_height="50dip"
+                android:text="@string/main_undo" />
+
+            <Button
+                android:id="@+id/Button_save"
+                android:layout_width="100dip"
+                android:layout_height="50dip"
+                android:text="@string/main_save" />
+
+            <Button
+                android:id="@+id/Button_share"
+                android:layout_width="100dip"
+                android:layout_height="50dip"
+                android:text="@string/main_share" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

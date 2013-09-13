@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- UI strings -->
+    <string name="app_name">DIYWear</string>
+    <string name="main_user_experience">用户体验</string>
+    <string name="main_goods_list">商品列表</string>
+    <string name="main_function_list">功能列表</string>
+    <string name="main_male">男士</string>
+    <string name="main_female">女士</string>
+    <string name="main_turn">转身</string>
+    <string name="main_undo">撤除</string>
+    <string name="main_save">保存</string>
+    <string name="main_share">分享</string>
+    <string name="popup_goods_list">商品清单</string>
+    <string name="popup_all_to_cart">全部放入购物车</string>
+    <string name="popup_price">价格</string>
+    <string name="popup_cart">购物车</string>
+    <string name="popup_remove">删除</string>
+    <string name="progress_dialog_title">请等待</string>
+    <string name="progress_dialog_content">载入中……</string>
+    <string name="toast_add_to_cart_successlly">已加入购物车</string>
+    <string name="toast_remove_from_list_successlly">已移除</string>
+    <string name="toast_do_not_add_it_twice">请勿重复添加</string>
+    <string name="toast_all_add_to_cart_successlly">已全部加入购物车</string>
+    <string name="main_type_shoes">鞋子</string>
+    <string name="main_type_shawl">围巾</string>
+    <string name="main_type_coat">外套</string>
+    <string name="main_type_down_clothes">下装</string>
+    <string name="main_type_upper_clothes">上装</string>
+    <string name="main_type_wears">服装</string>
+
+    <!-- system strings -->
+    <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>
+    <string name="api_key_old">d3c111daa7f83ab4b6930e2e45113dd4</string>
+    <string name="api_domain_api">http://api.ihomebay.com/</string>
+    <string name="api_domain_api_pure">api.ihomebay.com</string>
+    <string name="api_domain_file">http://files.ihomebay.com/</string>
+    <string name="api_domain_file_pure">files.ihomebay.com</string>
+    <string name="tag_id">0</string>
+    <string name="tag_name">1</string>
+    <string name="tag_dress_map_id">2</string>
+
+</resources>

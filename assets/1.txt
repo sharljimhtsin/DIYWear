@@ -1,0 +1,5 @@
+body={"x":179,"y":85,"width":146,"height":470,"type":"yeegol","offsetX":-45, "offsetY":22, "tipX":223, "tipY":166, "pissX":246, "pissY":281, "handY":{"up":252,"down":322},"ankleY":487.2}
+face={"x":222,"y":32,"width":58,"height":77}
+hair={"x":222,"y":31,"width":48,"height":42}
+shadow0={"x":124,"y":499,"width":156,"height":55}
+underwear={"x":197,"y":137,"width":96,"height":420}
