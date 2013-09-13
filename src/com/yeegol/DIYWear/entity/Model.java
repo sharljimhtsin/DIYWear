@@ -310,9 +310,10 @@ public class Model {
 					public void done(Bitmap b) {
 						canvas.drawBitmap(
 								b,
-								layer_pos.get(SHOES_LAYER + currentDirection)[0],
-								layer_pos.get(SHOES_LAYER + currentDirection)[1],
-								null);
+								layer_pos.get(SHOES_LAYER + "#"
+										+ currentDirection)[0],
+								layer_pos.get(SHOES_LAYER + "#"
+										+ currentDirection)[1], null);
 					}
 				});
 				break;
@@ -323,9 +324,10 @@ public class Model {
 					public void done(Bitmap b) {
 						canvas.drawBitmap(
 								b,
-								layer_pos.get(SHAWL_LAYER + currentDirection)[0],
-								layer_pos.get(SHAWL_LAYER + currentDirection)[1],
-								null);
+								layer_pos.get(SHAWL_LAYER + "#"
+										+ currentDirection)[0],
+								layer_pos.get(SHAWL_LAYER + "#"
+										+ currentDirection)[1], null);
 					}
 				});
 				break;
@@ -336,9 +338,9 @@ public class Model {
 					public void done(Bitmap b) {
 						canvas.drawBitmap(
 								b,
-								layer_pos.get(DOWN_CLOTHES_LAYER
+								layer_pos.get(DOWN_CLOTHES_LAYER + "#"
 										+ currentDirection)[0],
-								layer_pos.get(DOWN_CLOTHES_LAYER
+								layer_pos.get(DOWN_CLOTHES_LAYER + "#"
 										+ currentDirection)[1], null);
 					}
 				});
@@ -350,9 +352,9 @@ public class Model {
 					public void done(Bitmap b) {
 						canvas.drawBitmap(
 								b,
-								layer_pos.get(UPPER_CLOTHES_LAYER
+								layer_pos.get(UPPER_CLOTHES_LAYER + "#"
 										+ currentDirection)[0],
-								layer_pos.get(UPPER_CLOTHES_LAYER
+								layer_pos.get(UPPER_CLOTHES_LAYER + "#"
 										+ currentDirection)[1], null);
 					}
 				});
@@ -364,9 +366,10 @@ public class Model {
 					public void done(Bitmap b) {
 						canvas.drawBitmap(
 								b,
-								layer_pos.get(COAT_LAYER + currentDirection)[0],
-								layer_pos.get(COAT_LAYER + currentDirection)[1],
-								null);
+								layer_pos.get(COAT_LAYER + "#"
+										+ currentDirection)[0],
+								layer_pos.get(COAT_LAYER + "#"
+										+ currentDirection)[1], null);
 					}
 				});
 				break;
@@ -377,9 +380,9 @@ public class Model {
 					public void done(Bitmap b) {
 						canvas.drawBitmap(
 								b,
-								layer_pos.get(ACCESSORY_LAYER
+								layer_pos.get(ACCESSORY_LAYER + "#"
 										+ currentDirection)[0],
-								layer_pos.get(ACCESSORY_LAYER
+								layer_pos.get(ACCESSORY_LAYER + "#"
 										+ currentDirection)[1], null);
 					}
 				});

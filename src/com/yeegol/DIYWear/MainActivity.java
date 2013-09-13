@@ -81,6 +81,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	int mCurrentLayer;
 
+	Goods mCurrentGoods;
+
 	ProgressDialog mProgressDialog;
 
 	SparseArray<Goods> mTempCart;
@@ -140,6 +142,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					ImageView i = (ImageView) ((Object[]) msg.obj)[0];
 					Bitmap b = (Bitmap) ((Object[]) msg.obj)[1];
 					i.setImageBitmap(b);
+					break;
+				case 7:
+					mCurrentGoods = mTempCart.get(StrUtil.ObjToInt(msg.obj));
+					prepareGoodsInfoWindows();
 					break;
 				case 97:
 					mProgressDialog.show();
@@ -347,6 +353,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		default:
 			break;
 		}
+	}
+
+	private void prepareGoodsInfoWindows() {
+		LogUtil.logDebug(mCurrentGoods.getName(), TAG);
 	}
 
 	private void prepareCartWindows() {
@@ -695,33 +705,73 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	public void onDismiss() {
 	}
 
+	/**
+	 * function to auto detect current layer finger touched
+	 * 
+	 * @param x
+	 * @param y
+	 * @return current layer
+	 * @see "http://docs.oracle.com/javase/6/docs/api/java/util/Comparator.html#compare%28T,%20T%29"
+	 */
+	private int detectLayer(float x, float y) {
+		int currentLayer = -1;
+		List<String> l = new ArrayList<String>();
+		// purge invalid layer data
+		for (String key : Model.getInstance().getLayer_pos().keySet()) {
+			if (key.indexOf("#") == -1 || key.indexOf(mCurrentDirect) == -1) {
+				continue;
+			}
+			l.add(key);
+		}
+		// sort from MAX to MIN
+		Collections.sort(l, new Comparator<String>() {
+
+			@Override
+			public int compare(String lhs, String rhs) {
+				int old = StrUtil.StringToInt(lhs.split("#")[0]);
+				int neo = StrUtil.StringToInt(rhs.split("#")[0]);
+				return -old + neo;
+			}
+		});
+		// detect layer by finger's x,y position,from outer to inner
+		for (String key : l) {
+			Integer[] pos = Model.getInstance().getLayer_pos().get(key);
+			int xStart = pos[0];
+			int yStart = pos[1];
+			int xEnd = xStart + pos[2];
+			int yEnd = yStart + pos[3];
+			if (xStart < x && x < xEnd && yStart < y && y < yEnd) {
+				currentLayer = StrUtil.StringToInt(key.split("#")[0]);
+				break;
+			}
+		}
+		return currentLayer;
+	}
+
+	int layer = -1; // identifier of layer finger touch on surfaceView
+
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			for (String key : Model.getInstance().getLayer_pos().keySet()) {
-				if (key.indexOf("#") == -1) {
-					continue;
-				}
-				List<String> l = new ArrayList<String>(Model.getInstance()
-						.getLayer_pos().keySet());
-				Collections.sort(l, new Comparator<String>() {
-
-					@Override
-					public int compare(String lhs, String rhs) {
-						// TODO Auto-generated method stub
-						return 0;
-					}
-				});
-			}
+			// check which layer first
+			layer = detectLayer(event.getX(), event.getY());
+			LogUtil.logDebug("Current layer is " + layer, TAG);
 			LogUtil.logDebug(
-					"tip,and x:" + event.getX() + ",y:" + event.getY(), TAG);
+					"lip,and x:" + event.getX() + ",y:" + event.getY(), TAG);
 			break;
 		case MotionEvent.ACTION_MOVE:
 			LogUtil.logDebug("X is " + event.getX(), TAG);
 			LogUtil.logDebug("Y is " + event.getY(), TAG);
 			break;
 		case MotionEvent.ACTION_UP:
+			if (layer != -1) {
+				mHandler.sendMessage(mHandler.obtainMessage(7, layer));
+			}
+			layer = -1;
+			LogUtil.logDebug(
+					"lip over,and x:" + event.getX() + ",y:" + event.getY(),
+					TAG);
 			break;
 		case MotionEvent.ACTION_CANCEL:
 			break;
