@@ -305,18 +305,24 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			toggleVisibilty(mFunctionLayout);
 			break;
 		case R.id.Button_switchToMan:
+			toggleSex(1);
 			break;
 		case R.id.Button_switchToWoman:
+			toggleSex(2);
 			break;
 		case R.id.Button_turnBack:
 			toggleDirection();
 			mHandler.sendMessage(mHandler.obtainMessage(2));
 			break;
 		case R.id.Button_undo:
+			reset();
+			mHandler.sendMessage(mHandler.obtainMessage(2));
 			break;
 		case R.id.Button_save:
+			// TODO
 			break;
 		case R.id.Button_share:
+			// TODO
 			break;
 		case R.id.Button_cart:
 			if (toggleButton(v, false)) {
@@ -795,5 +801,32 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			break;
 		}
 		return true;
+	}
+
+	/**
+	 * reset model to original status
+	 */
+	private void reset() {
+		Model.getInstance().getLayers().clear();
+		Model.getInstance().getLayer_pos().clear();
+		Model.getInstance().resetLinkedList();
+		mTempCart.clear();
+		mCart.clear();
+	}
+
+	/**
+	 * switch model's gender
+	 * 
+	 * @param gender
+	 *            target sex,1 for male,2 for female
+	 */
+	private void toggleSex(int gender) {
+		if (mBrandModel.getGender() == gender) {
+			NotificUtil.showShortToast(R.string.toast_no_need_to_switch);
+		} else {
+			if (Model.getInstance().getModels().size() == 1) {
+				NotificUtil.showShortToast(R.string.toast_only_one_model_now);
+			}
+		}
 	}
 }

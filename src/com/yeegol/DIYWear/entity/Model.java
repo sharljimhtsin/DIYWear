@@ -75,6 +75,10 @@ public class Model {
 		bitmapCache = new LruCache<String, Bitmap>(cacheSize);
 		layer_pos = new HashMap<String, Integer[]>();
 		layers = new LinkedList<MyBitmap>();
+		resetLinkedList();
+	}
+
+	public void resetLinkedList() {
 		// fill layer container with empty value
 		for (int i = 0; i < LAYER_COUNT; i++) {
 			layers.add(null); // never do remove/add action after filled it
