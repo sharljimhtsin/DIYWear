@@ -39,6 +39,7 @@ public class DataHolder {
 		charMapping.put("衬衫", Model.UPPER_CLOTHES_LAYER);
 		charMapping.put("T恤", Model.UPPER_CLOTHES_LAYER);
 		charMapping.put("围巾", Model.SHAWL_LAYER);
+		charMapping.put("鞋子", Model.SHOES_LAYER);
 	}
 
 	public int getResIdByPinyin(String s) {

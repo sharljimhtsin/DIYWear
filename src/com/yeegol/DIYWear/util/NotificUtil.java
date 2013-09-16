@@ -3,6 +3,8 @@
  */
 package com.yeegol.DIYWear.util;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.widget.Toast;
 
 import com.yeegol.DIYWear.res.DataHolder;
@@ -32,5 +34,11 @@ public class NotificUtil {
 	public static void showLongToast(int resId) {
 		Toast.makeText(DataHolder.getInstance().getContext(), resId,
 				Toast.LENGTH_LONG).show();
+	}
+
+	public static void showAlertDia(String info, String msg, Context context) {
+		AlertDialog dialog = new AlertDialog.Builder(context).setMessage(msg)
+				.setTitle(info).create();
+		dialog.show();
 	}
 }

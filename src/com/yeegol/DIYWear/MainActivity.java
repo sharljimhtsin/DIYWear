@@ -37,6 +37,7 @@ import android.widget.TextView;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MySurfaceView;
 import com.yeegol.DIYWear.entity.Category;
+import com.yeegol.DIYWear.entity.Collocation;
 import com.yeegol.DIYWear.entity.Goods;
 import com.yeegol.DIYWear.entity.Model;
 import com.yeegol.DIYWear.entity.Model.BrandModel;
@@ -93,6 +94,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	PopupWindow mPopupWindow;
 
+	List<Collocation> mColList;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -145,7 +148,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					break;
 				case 7:
 					mCurrentGoods = mTempCart.get(StrUtil.ObjToInt(msg.obj));
-					prepareGoodsInfoWindows();
+					// avoid removed layer
+					if (mCurrentGoods != null) {
+						prepareGoodsInfoWindow();
+					}
 					break;
 				case 97:
 					mProgressDialog.show();
@@ -326,7 +332,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			break;
 		case R.id.Button_cart:
 			if (toggleButton(v, false)) {
-				prepareCartWindows();
+				prepareCartWindow();
 			} else {
 				// make button UN-click-able
 				v.setClickable(false);
@@ -354,22 +360,113 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					.showShortToast(R.string.toast_remove_from_list_successlly);
 			// refresh current cart window
 			mPopupWindow.dismiss(); // close old one
-			prepareCartWindows(); // generate new one
+			prepareCartWindow(); // generate new one
 			break;
 		default:
 			break;
 		}
 	}
 
-	private void prepareGoodsInfoWindows() {
+	private void prepareGoodsInfoWindow() {
 		mPopupWindow = new PopupWindow(mContext);
 		// get layout inflater
 		LayoutInflater inflater = LayoutInflater.from(mContext);
 		LinearLayout layout = (LinearLayout) inflater.inflate(
 				R.layout.view_goods_info, null);
+		// get controls
 		TextView nameTextView = (TextView) layout
 				.findViewById(R.id.TextView_view_goods_info_name);
+		TextView dressWayLabelTextView = (TextView) layout
+				.findViewById(R.id.TextView_view_goods_info_dress_way_label);
+		Button dressWayOneButton = (Button) layout
+				.findViewById(R.id.Button_view_goods_info_dress_way_one);
+		Button dressWayTwoButton = (Button) layout
+				.findViewById(R.id.Button_view_goods_info_dress_way_two);
+		Button detailButton = (Button) layout
+				.findViewById(R.id.Button_view_goods_info_detail);
+		Button removeButton = (Button) layout
+				.findViewById(R.id.Button_view_goods_info_remove);
+		Button previousButton = (Button) layout
+				.findViewById(R.id.Button_view_goods_info_previous);
+		Button nextButton = (Button) layout
+				.findViewById(R.id.Button_view_goods_info_next);
+		final ImageView previewImageView = (ImageView) layout
+				.findViewById(R.id.ImageView_view_goods_info_preview);
+		// handler
+		final Handler handler = new Handler(new Callback() {
+
+			@Override
+			public boolean handleMessage(Message msg) {
+				switch (msg.what) {
+				case 0:
+
+					break;
+				case 1:
+					NotificUtil.showAlertDia("info", mCurrentGoods.toString(),
+							mContext);
+					break;
+				default:
+					break;
+				}
+				return true;
+			}
+		});
+		// listener
+		OnClickListener listener = new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				switch (v.getId()) {
+				case R.id.Button_view_goods_info_remove:
+					// get its layer
+					int layer = mTempCart.keyAt(mTempCart
+							.indexOfValue(mCurrentGoods));
+					// remove the layer & data related
+					Model.getInstance().setLayer(layer, null);
+					mTempCart.remove(layer);
+					mCart.remove(mCurrentGoods);
+					// refresh UI
+					drawModel();
+					// disable it to ensure to be click once
+					v.setClickable(false);
+					break;
+				case R.id.Button_view_goods_info_dress_way_one:
+					break;
+				case R.id.Button_view_goods_info_dress_way_two:
+					break;
+				case R.id.Button_view_goods_info_detail:
+					handler.sendMessage(handler.obtainMessage(1));
+					break;
+				case R.id.Button_view_goods_info_next:
+					break;
+				case R.id.Button_view_goods_info_previous:
+					break;
+				case R.id.ImageView_view_goods_info_preview:
+					break;
+				default:
+					break;
+				}
+			}
+		};
+		// set value
 		nameTextView.setText(mCurrentGoods.getName());
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				mColList = Collocation.doCollocationgetList(0,
+						mCurrentGoods.getId(), mBrandModel.getGender(), "",
+						StrUtil.intToString(mBrandModel.getAgeGroup()), 0, 0);
+				handler.sendMessage(handler.obtainMessage(0));
+			}
+		}).start();
+		dressWayOneButton.setOnClickListener(listener);
+		dressWayTwoButton.setOnClickListener(listener);
+		detailButton.setOnClickListener(listener);
+		removeButton.setOnClickListener(listener);
+		previousButton.setOnClickListener(listener);
+		nextButton.setOnClickListener(listener);
+		previewImageView.setOnClickListener(listener);
 		// attach view to popupWindow & show
 		mPopupWindow.setOnDismissListener(null);
 		mPopupWindow.setOutsideTouchable(false);
@@ -380,7 +477,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		LogUtil.logDebug(mCurrentGoods.getName(), TAG);
 	}
 
-	private void prepareCartWindows() {
+	private void prepareCartWindow() {
 		mPopupWindow = new PopupWindow(mContext);
 		LinearLayout listView = new LinearLayout(mContext);
 		listView.setOrientation(LinearLayout.VERTICAL);
@@ -541,50 +638,55 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						mBrandModel.getAgeGroup());
 			}
 		};
+		// pick the top of the tree
+		Category treeTop;
+		if (mBrandModel.getGender() == 1) {
+			treeTop = mCategoryList.get(0);
+		} else {
+			treeTop = mCategoryList.get(1);
+		}
 		// build the bar
-		for (Category category : mCategoryList) {
+		buildLeftSidebarRecursively(treeTop.getChildren(), mTypeLayout,
+				listener);
+	}
+
+	/**
+	 * build the category list recursively
+	 * 
+	 * @param category
+	 *            category list from top
+	 * @param viewRoot
+	 *            container of views
+	 * @param listener
+	 *            onClickListener
+	 */
+	private void buildLeftSidebarRecursively(List<Category> category,
+			LinearLayout viewRoot, OnClickListener listener) {
+		for (Category c : category) {
 			TextView textView = new TextView(mContext);
 			textView.setWidth(100);
 			textView.setHeight(50);
-			textView.setTag(R.string.tag_id, category.getTitle().getId()); // category
-																			// id
-			textView.setTag(R.string.tag_dress_map_id, category.getTitle()
+			textView.setTag(R.string.tag_id, c.getTitle().getId()); // category
+																	// id
+			textView.setTag(R.string.tag_dress_map_id, c.getTitle()
 					.getDressMapId()); // dress-depth id
-			textView.setTag(R.string.tag_name, category.getTitle().getName()); // category
-																				// name
-			textView.setText(category.getTitle().getName());
+			textView.setTag(R.string.tag_name, c.getTitle().getName()); // category
+																		// name
+			textView.setText(c.getTitle().getName());
 			textView.setGravity(Gravity.CENTER);
-			textView.setOnClickListener(listener);
-			if (category.getChildren() == null) {
-				mTypeLayout.addView(textView);
-				// insert the divider
-				View view = new View(mContext);
-				view.setLayoutParams(new LayoutParams(
-						LayoutParams.MATCH_PARENT, 1));
-				view.setBackgroundColor(Color.BLACK);
-				mTypeLayout.addView(view);
+			viewRoot.addView(textView);
+			// insert the divider
+			View view = new View(mContext);
+			view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
+			view.setBackgroundColor(Color.BLACK);
+			viewRoot.addView(view);
+			if (c.getChildren() != null) {
+				buildLeftSidebarRecursively(c.getChildren(), viewRoot, listener);
+				textView.setTextSize(25);
+				textView.setOnClickListener(null);
 			} else {
-				for (Category c : category.getChildren()) {
-					TextView textView2 = new TextView(mContext);
-					textView2.setWidth(100);
-					textView2.setHeight(50);
-					textView2.setTag(R.string.tag_id, c.getTitle().getId()); // category
-																				// id
-					textView2.setTag(R.string.tag_dress_map_id, c.getTitle()
-							.getDressMapId()); // dress-depth id
-					textView2.setTag(R.string.tag_name, c.getTitle().getName()); // category
-																					// name
-					textView2.setText(c.getTitle().getName());
-					textView2.setGravity(Gravity.CENTER);
-					textView2.setOnClickListener(listener);
-					mTypeLayout.addView(textView2);
-					// insert the divider
-					View view = new View(mContext);
-					view.setLayoutParams(new LayoutParams(
-							LayoutParams.MATCH_PARENT, 1));
-					view.setBackgroundColor(Color.BLACK);
-					mTypeLayout.addView(view);
-				}
+				textView.setTextSize(15);
+				textView.setOnClickListener(listener);
 			}
 		}
 	}

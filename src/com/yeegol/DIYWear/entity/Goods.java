@@ -226,4 +226,17 @@ public class Goods {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "name is " + name + "tagPrice is " + tagPrice + "salePrice is "
+				+ salePrice + "categoryName is " + categoryName
+				+ "brandCnName is " + brandCnName + "brandEnName is "
+				+ brandEnName + "goodsName is " + goodsName;
+	}
 }
