@@ -416,6 +416,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void onClick(View v) {
+				// get location of current entity
+				int index = mColList.indexOf(previewImageView.getTag());
 				switch (v.getId()) {
 				case R.id.Button_view_goods_info_remove:
 					// get its layer
@@ -437,11 +439,68 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				case R.id.Button_view_goods_info_detail:
 					handler.sendMessage(handler.obtainMessage(1));
 					break;
-				case R.id.Button_view_goods_info_next:
-					break;
 				case R.id.Button_view_goods_info_previous:
+					// check if is the first
+					if (index == 0) {
+						return;
+					}
+					// bind the object
+					previewImageView.setTag(mColList.get(index - 1));
+					// set image
+					new Thread(new Runnable() {
+						public void run() {
+							previewImageView.setImageBitmap(null);
+						}
+					}).start();
 					break;
 				case R.id.ImageView_view_goods_info_preview:
+					final Collocation collocation = (Collocation) v.getTag();
+					mHandler.sendMessage(mHandler.obtainMessage(97));
+					new Thread(new Runnable() {
+						public void run() {
+							com.yeegol.DIYWear.entity.Collocation.Model model = Collocation
+									.doCollocationgetInfo(collocation.getId());
+							String[] ids = model.getGoodsIds().split(",");
+							List<Goods> list = new ArrayList<Goods>();
+							for (String id : ids) {
+								Goods goods = Goods.doGoodsgetInfo(StrUtil
+										.StringToInt(id));
+								// wear it
+								Model.getInstance()
+										.setLayer(
+												DataHolder
+														.getInstance()
+														.getMappingLayerByName(
+																goods.getCategoryName()),
+												new MyBitmap(
+														NetUtil.getImageFromWeb(
+																NetUtil.buildURLForNormal(
+																		goods.getPreview(),
+																		mCurrentDirect),
+																NetUtil.DOMAIN_FILE_PURE),
+														NetUtil.buildURLForNormal(
+																goods.getPreview(),
+																mCurrentDirect),
+														mCurrentDirect));
+								list.add(goods);
+							}
+							mHandler.sendMessage(mHandler.obtainMessage(98));
+						}
+					}).start();
+					break;
+				case R.id.Button_view_goods_info_next:
+					// check if is the last
+					if (index == mColList.size() - 1) {
+						return;
+					}
+					// bind object
+					previewImageView.setTag(mColList.get(index + 1));
+					// set image
+					new Thread(new Runnable() {
+						public void run() {
+							previewImageView.setImageBitmap(null);
+						}
+					}).start();
 					break;
 				default:
 					break;
