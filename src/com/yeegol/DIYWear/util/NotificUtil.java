@@ -36,9 +36,15 @@ public class NotificUtil {
 				Toast.LENGTH_LONG).show();
 	}
 
-	public static void showAlertDia(String info, String msg, Context context) {
+	public static void showAlertDia(String title, String msg, Context context) {
 		AlertDialog dialog = new AlertDialog.Builder(context).setMessage(msg)
-				.setTitle(info).create();
+				.setTitle(title).create();
+		dialog.show();
+	}
+
+	public static void showAlertDia(int resId, String msg, Context context) {
+		AlertDialog dialog = new AlertDialog.Builder(context).setMessage(msg)
+				.setTitle(resId).create();
 		dialog.show();
 	}
 }

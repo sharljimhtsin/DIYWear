@@ -399,11 +399,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			public boolean handleMessage(Message msg) {
 				switch (msg.what) {
 				case 0:
-
+					if (mColList != null) {
+						previewImageView.setTag(mColList.get(0));
+					}
 					break;
 				case 1:
-					NotificUtil.showAlertDia("info", mCurrentGoods.toString(),
-							mContext);
+					NotificUtil.showAlertDia(R.string.alert_dial_info_title,
+							mCurrentGoods.toString(), mContext);
 					break;
 				default:
 					break;
@@ -417,12 +419,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			@Override
 			public void onClick(View v) {
 				// get location of current entity
-				int index = mColList.indexOf(previewImageView.getTag());
+				int index = -1;
+				if (mColList != null) {
+					index = mColList.indexOf(previewImageView.getTag());
+				}
+				// get its layer
+				int layer = mTempCart.keyAt(mTempCart
+						.indexOfValue(mCurrentGoods));
 				switch (v.getId()) {
 				case R.id.Button_view_goods_info_remove:
-					// get its layer
-					int layer = mTempCart.keyAt(mTempCart
-							.indexOfValue(mCurrentGoods));
 					// remove the layer & data related
 					Model.getInstance().setLayer(layer, null);
 					mTempCart.remove(layer);
@@ -433,15 +438,21 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					v.setClickable(false);
 					break;
 				case R.id.Button_view_goods_info_dress_way_one:
+					DataHolder.getInstance().mapThisToLow(layer);
+					// refresh UI
+					drawModel();
 					break;
 				case R.id.Button_view_goods_info_dress_way_two:
+					DataHolder.getInstance().mapThisToHigh(layer);
+					// refresh UI
+					drawModel();
 					break;
 				case R.id.Button_view_goods_info_detail:
 					handler.sendMessage(handler.obtainMessage(1));
 					break;
 				case R.id.Button_view_goods_info_previous:
 					// check if is the first
-					if (index == 0) {
+					if (index == 0 || index == -1) {
 						return;
 					}
 					// bind the object
@@ -454,6 +465,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					}).start();
 					break;
 				case R.id.ImageView_view_goods_info_preview:
+					if (index == -1) {
+						return;
+					}
 					final Collocation collocation = (Collocation) v.getTag();
 					mHandler.sendMessage(mHandler.obtainMessage(97));
 					new Thread(new Runnable() {
@@ -466,31 +480,24 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 								Goods goods = Goods.doGoodsgetInfo(StrUtil
 										.StringToInt(id));
 								// wear it
-								Model.getInstance()
-										.setLayer(
-												DataHolder
-														.getInstance()
-														.getMappingLayerByName(
-																goods.getCategoryName()),
-												new MyBitmap(
-														NetUtil.getImageFromWeb(
-																NetUtil.buildURLForNormal(
-																		goods.getPreview(),
-																		mCurrentDirect),
-																NetUtil.DOMAIN_FILE_PURE),
-														NetUtil.buildURLForNormal(
-																goods.getPreview(),
-																mCurrentDirect),
-														mCurrentDirect));
+								setGoods(
+										goods,
+										mCurrentDirect,
+										DataHolder
+												.getInstance()
+												.getMappingLayerByName(
+														goods.getCategoryName()));
 								list.add(goods);
 							}
+							// refresh UI
+							drawModel();
 							mHandler.sendMessage(mHandler.obtainMessage(98));
 						}
 					}).start();
 					break;
 				case R.id.Button_view_goods_info_next:
 					// check if is the last
-					if (index == mColList.size() - 1) {
+					if (index == -1 || index == mColList.size() - 1) {
 						return;
 					}
 					// bind object
@@ -773,6 +780,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * fill the goods list with every item
 	 */
 	private void buildBottomBar() {
+		// clear all views first
+		mListLayout.removeAllViews();
+		if (mGoodsList == null) {
+			mHandler.sendMessage(mHandler.obtainMessage(98));
+			NotificUtil
+					.showShortToast(R.string.toast_no_goods_item_under_the_type);
+			return;
+		}
 		// listener for each item click
 		OnClickListener listener = new OnClickListener() {
 
@@ -786,24 +801,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						// get the goods object
 						Goods goods = mGoodsList.get(StrUtil.ObjToInt(v
 								.getTag()));
-						// add to temporary cart,not final
-						mTempCart.put(mCurrentLayer, goods);
-						// build the URI
-						String url = NetUtil.buildURLForNormal(
-								goods.getPreview(), mCurrentDirect);
-						// retrieve the goods's image
-						Bitmap bm = NetUtil.getImageFromWeb(url,
-								NetUtil.DOMAIN_FILE_PURE);
-						// set it
-						Model.getInstance().setLayer(mCurrentLayer,
-								new MyBitmap(bm, url, mCurrentDirect));
-						// get the goods's [x,y] data
-						String json = NetUtil.getTextFromWeb(NetUtil
-								.buildURLForNormalConf(goods.getPreview()),
-								NetUtil.DOMAIN_FILE_PURE);
-						// set it
-						Model.getInstance().setPosDescribe(json, mCurrentLayer,
-								mCurrentDirect);
+						setGoods(goods, mCurrentDirect, mCurrentLayer);
 						// notice UI thread to refresh
 						mHandler.sendMessage(mHandler.obtainMessage(3));
 						LogUtil.logDebug(TAG, "current id = " + goods.getName());
@@ -811,8 +809,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}).start();
 			}
 		};
-		// clear all views first
-		mListLayout.removeAllViews();
 		int i = 0;
 		for (final Goods goods : mGoodsList) {
 			final ImageView imageView = new ImageView(mContext);
@@ -840,6 +836,23 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mListLayout.setVisibility(View.VISIBLE);
 		mCartButton.setVisibility(View.GONE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));
+	}
+
+	private void setGoods(Goods goods, String direct, int layer) {
+		// add to temporary cart,not final
+		mTempCart.put(layer, goods);
+		// build the URI
+		String url = NetUtil.buildURLForNormal(goods.getPreview(), direct);
+		// retrieve the goods's image
+		Bitmap bm = NetUtil.getImageFromWeb(url, NetUtil.DOMAIN_FILE_PURE);
+		// set it
+		Model.getInstance().setLayer(layer, new MyBitmap(bm, url, direct));
+		// get the goods's [x,y] data
+		String json = NetUtil.getTextFromWeb(
+				NetUtil.buildURLForNormalConf(goods.getPreview()),
+				NetUtil.DOMAIN_FILE_PURE);
+		// set it
+		Model.getInstance().setPosDescribe(json, layer, direct);
 	}
 
 	/**
@@ -973,6 +986,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		Model.getInstance().resetLinkedList();
 		mTempCart.clear();
 		mCart.clear();
+		DataHolder.getInstance().resetLayerMapping();
 	}
 
 	/**

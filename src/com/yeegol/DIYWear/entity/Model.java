@@ -23,6 +23,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yeegol.DIYWear.R;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MyBitmap.onBitmapDone;
+import com.yeegol.DIYWear.res.DataHolder;
 import com.yeegol.DIYWear.util.JSONUtil;
 import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.StrUtil;
@@ -270,7 +271,8 @@ public class Model {
 				i++;
 				continue;
 			}
-			switch (i) {
+			final int j = i;
+			switch (DataHolder.getInstance().getMappingLayer(i)) {
 			case BG_LAYER:
 				canvas.drawBitmap(BitmapFactory.decodeResource(
 						context.getResources(), R.drawable.bg_main), 0f, 0f,
@@ -278,46 +280,38 @@ public class Model {
 				break;
 			case MODEL_SHADOW_LAYER:
 				canvas.drawBitmap(b.getBitmap(),
-						layer_pos.get(String.valueOf(MODEL_SHADOW_LAYER))[0],
-						layer_pos.get(String.valueOf(MODEL_SHADOW_LAYER))[1],
-						null);
+						layer_pos.get(String.valueOf(j))[0],
+						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_BODY_LAYER:
 				canvas.drawBitmap(b.getBitmap(),
-						layer_pos.get(String.valueOf(MODEL_BODY_LAYER))[0],
-						layer_pos.get(String.valueOf(MODEL_BODY_LAYER))[1],
-						null);
+						layer_pos.get(String.valueOf(j))[0],
+						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_FACE_LAYER:
 				canvas.drawBitmap(b.getBitmap(),
-						layer_pos.get(String.valueOf(MODEL_FACE_LAYER))[0],
-						layer_pos.get(String.valueOf(MODEL_FACE_LAYER))[1],
-						null);
+						layer_pos.get(String.valueOf(j))[0],
+						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_HAIR_LAYER:
 				canvas.drawBitmap(b.getBitmap(),
-						layer_pos.get(String.valueOf(MODEL_HAIR_LAYER))[0],
-						layer_pos.get(String.valueOf(MODEL_HAIR_LAYER))[1],
-						null);
+						layer_pos.get(String.valueOf(j))[0],
+						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_UNDERWEAR_LAYER:
-				canvas.drawBitmap(
-						b.getBitmap(),
-						layer_pos.get(String.valueOf(MODEL_UNDERWEAR_LAYER))[0],
-						layer_pos.get(String.valueOf(MODEL_UNDERWEAR_LAYER))[1],
-						null);
+				canvas.drawBitmap(b.getBitmap(),
+						layer_pos.get(String.valueOf(j))[0],
+						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case SHOES_LAYER:
 				b.getBitmapWithDirection(currentDirection, new onBitmapDone() {
 
 					@Override
 					public void done(Bitmap b) {
-						canvas.drawBitmap(
-								b,
-								layer_pos.get(SHOES_LAYER + "#"
-										+ currentDirection)[0],
-								layer_pos.get(SHOES_LAYER + "#"
-										+ currentDirection)[1], null);
+						canvas.drawBitmap(b,
+								layer_pos.get(j + "#" + currentDirection)[0],
+								layer_pos.get(j + "#" + currentDirection)[1],
+								null);
 					}
 				});
 				break;
@@ -326,12 +320,10 @@ public class Model {
 
 					@Override
 					public void done(Bitmap b) {
-						canvas.drawBitmap(
-								b,
-								layer_pos.get(SHAWL_LAYER + "#"
-										+ currentDirection)[0],
-								layer_pos.get(SHAWL_LAYER + "#"
-										+ currentDirection)[1], null);
+						canvas.drawBitmap(b,
+								layer_pos.get(j + "#" + currentDirection)[0],
+								layer_pos.get(j + "#" + currentDirection)[1],
+								null);
 					}
 				});
 				break;
@@ -340,12 +332,10 @@ public class Model {
 
 					@Override
 					public void done(Bitmap b) {
-						canvas.drawBitmap(
-								b,
-								layer_pos.get(DOWN_CLOTHES_LAYER + "#"
-										+ currentDirection)[0],
-								layer_pos.get(DOWN_CLOTHES_LAYER + "#"
-										+ currentDirection)[1], null);
+						canvas.drawBitmap(b,
+								layer_pos.get(j + "#" + currentDirection)[0],
+								layer_pos.get(j + "#" + currentDirection)[1],
+								null);
 					}
 				});
 				break;
@@ -354,12 +344,10 @@ public class Model {
 
 					@Override
 					public void done(Bitmap b) {
-						canvas.drawBitmap(
-								b,
-								layer_pos.get(UPPER_CLOTHES_LAYER + "#"
-										+ currentDirection)[0],
-								layer_pos.get(UPPER_CLOTHES_LAYER + "#"
-										+ currentDirection)[1], null);
+						canvas.drawBitmap(b,
+								layer_pos.get(j + "#" + currentDirection)[0],
+								layer_pos.get(j + "#" + currentDirection)[1],
+								null);
 					}
 				});
 				break;
@@ -368,12 +356,10 @@ public class Model {
 
 					@Override
 					public void done(Bitmap b) {
-						canvas.drawBitmap(
-								b,
-								layer_pos.get(COAT_LAYER + "#"
-										+ currentDirection)[0],
-								layer_pos.get(COAT_LAYER + "#"
-										+ currentDirection)[1], null);
+						canvas.drawBitmap(b,
+								layer_pos.get(j + "#" + currentDirection)[0],
+								layer_pos.get(j + "#" + currentDirection)[1],
+								null);
 					}
 				});
 				break;
@@ -382,12 +368,10 @@ public class Model {
 
 					@Override
 					public void done(Bitmap b) {
-						canvas.drawBitmap(
-								b,
-								layer_pos.get(ACCESSORY_LAYER + "#"
-										+ currentDirection)[0],
-								layer_pos.get(ACCESSORY_LAYER + "#"
-										+ currentDirection)[1], null);
+						canvas.drawBitmap(b,
+								layer_pos.get(j + "#" + currentDirection)[0],
+								layer_pos.get(j + "#" + currentDirection)[1],
+								null);
 					}
 				});
 				break;

@@ -8,6 +8,8 @@ import java.lang.Thread.State;
 import android.os.Handler;
 
 /**
+ * utils class for multi-thread holder
+ * 
  * @author sharl
  * 
  */

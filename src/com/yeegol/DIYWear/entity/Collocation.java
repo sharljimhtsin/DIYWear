@@ -44,6 +44,10 @@ public class Collocation {
 		String json = NetUtil.getTextFromWeb(NetUtil.buildURL(pairs),
 				NetUtil.DOMAIN_API_PURE);
 		json = JSONUtil.getValueByName(json, "rows");
+		// there is no recommend goods
+		if (json.equals("false")) {
+			return null;
+		}
 		return JSONUtil.getObjectInArray(json,
 				new TypeToken<List<Collocation>>() {
 				}.getType());

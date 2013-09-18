@@ -34,8 +34,12 @@
     <string name="view_goods_info_recommend">搭配推荐</string>
     <string name="view_goods_info_previous">《</string>
     <string name="view_goods_info_next">》</string>
+    <string name="view_goods_info_wear_inner">穿在内</string>
+    <string name="view_goods_info_wear_outter">穿在外</string>
     <string name="toast_no_need_to_switch">无需切换</string>
     <string name="toast_only_one_model_now">只有一个模特</string>
+    <string name="toast_no_goods_item_under_the_type">该类别下无商品</string>
+    <string name="alert_dial_info_title">商品信息</string>
 
     <!-- system strings -->
     <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>

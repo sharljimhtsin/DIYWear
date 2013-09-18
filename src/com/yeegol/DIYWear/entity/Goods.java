@@ -62,6 +62,10 @@ public class Goods {
 		String content = NetUtil.getTextFromWeb(NetUtil.buildURL(pairs),
 				NetUtil.DOMAIN_API_PURE);
 		content = JSONUtil.getValueByName(content, "rows");
+		// there is no goods item under this type
+		if (content.equals("false")) {
+			return null;
+		}
 		return JSONUtil.getObjectInArray(content, new TypeToken<List<Goods>>() {
 		}.getType());
 	}
@@ -234,9 +238,10 @@ public class Goods {
 	 */
 	@Override
 	public String toString() {
-		return "name is " + name + "tagPrice is " + tagPrice + "salePrice is "
-				+ salePrice + "categoryName is " + categoryName
-				+ "brandCnName is " + brandCnName + "brandEnName is "
-				+ brandEnName + "goodsName is " + goodsName;
+		return "name is " + name + "\ntagPrice is " + tagPrice
+				+ "\nsalePrice is " + salePrice + "\ncategoryName is "
+				+ categoryName + "\nbrandCnName is " + brandCnName
+				+ "\nbrandEnName is " + brandEnName + "\ngoodsName is "
+				+ goodsName;
 	}
 }

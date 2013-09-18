@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.SparseIntArray;
 
 import com.yeegol.DIYWear.R;
 import com.yeegol.DIYWear.entity.Model;
@@ -23,9 +24,12 @@ public class DataHolder {
 
 	HashMap<String, Integer> charMapping;
 
+	SparseIntArray layerMapping;
+
 	static Context context;
 
 	private DataHolder() {
+		layerMapping = new SparseIntArray();
 		charMapping = new HashMap<String, Integer>();
 		charMapping.put("xiezi", R.string.main_type_shoes);
 		charMapping.put("weijin", R.string.main_type_shawl);
@@ -50,6 +54,32 @@ public class DataHolder {
 		return charMapping.get(s);
 	}
 
+	public void mapThisToLow(int layer) {
+		layerMapping.clear();
+		for (int i = layer - 1; i > Model.SHOES_LAYER; i--) {
+			if (Model.getInstance().getLayers().get(i) != null) {
+				layerMapping.put(layer, i);
+				layerMapping.put(i, layer);
+				break;
+			}
+		}
+	}
+
+	public void mapThisToHigh(int layer) {
+		layerMapping.clear();
+		for (int i = layer + 1; i < Model.getInstance().getLayers().size(); i++) {
+			if (Model.getInstance().getLayers().get(i) != null) {
+				layerMapping.put(layer, i);
+				layerMapping.put(i, layer);
+				break;
+			}
+		}
+	}
+
+	public int getMappingLayer(int layer) {
+		return layerMapping.get(layer, layer);
+	}
+
 	public static DataHolder getInstance() {
 		if (instance == null) {
 			instance = new DataHolder();
@@ -60,6 +90,10 @@ public class DataHolder {
 	public static void init(Context c) {
 		context = c;
 		getInstance();
+	}
+
+	public void resetLayerMapping() {
+		layerMapping.clear();
 	}
 
 	public Resources getResource() {
