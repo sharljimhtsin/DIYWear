@@ -153,6 +153,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						prepareGoodsInfoWindow();
 					}
 					break;
+				case 8:
+					mPopupWindow.dismiss();
+					break;
 				case 97:
 					mProgressDialog.show();
 					break;
@@ -434,8 +437,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					mCart.remove(mCurrentGoods);
 					// refresh UI
 					drawModel();
-					// disable it to ensure to be click once
-					v.setClickable(false);
+					mHandler.sendMessage(mHandler.obtainMessage(8));
 					break;
 				case R.id.Button_view_goods_info_dress_way_one:
 					DataHolder.getInstance().mapThisToLow(layer);
@@ -492,6 +494,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							// refresh UI
 							drawModel();
 							mHandler.sendMessage(mHandler.obtainMessage(98));
+							mHandler.sendMessage(mHandler.obtainMessage(8));
 						}
 					}).start();
 					break;
@@ -540,7 +543,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(mSurfaceView.getWidth() / 2,
 				mSurfaceView.getHeight() / 2);
-		LogUtil.logDebug(mCurrentGoods.getName(), TAG);
 	}
 
 	private void prepareCartWindow() {
