@@ -4,34 +4,209 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity" >
 
-    <LinearLayout
-        android:id="@+id/LinearLayout_header"
+    <RelativeLayout
+        android:id="@+id/RelativeLayout_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header" >
 
         <ImageButton
             android:id="@+id/Button_showType"
-            android:layout_width="0dip"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight=".2"
+            android:layout_alignParentLeft="true"
             android:background="@drawable/bg_button"
             android:src="@drawable/icon_list" />
 
         <TextView
-            android:layout_width="0dip"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight=".6"
+            android:layout_centerInParent="true"
             android:text="@string/main_user_experience"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
 
         <ImageButton
             android:id="@+id/Button_showFunction"
-            android:layout_width="0dip"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight=".2"
+            android:layout_alignParentRight="true"
             android:background="@drawable/bg_button"
             android:src="@drawable/icon_function" />
-    </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/RelativeLayout_header"
+        android:background="@drawable/bg_main" >
+
+        <com.yeegol.DIYWear.clz.MySurfaceView
+            android:id="@+id/surface_main"
+            android:layout_width="match_parent"
+            android:layout_height="600dip"
+            android:layout_centerInParent="true" />
+
+        <LinearLayout
+            android:id="@+id/LinearLayout_goodsType"
+            android:layout_width="100dip"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/bg_goods_type_scale"
+            android:orientation="vertical"
+            android:visibility="gone" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/LinearLayout_functionArea"
+            android:layout_width="100dip"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/bg_function_scale"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/point" />
+
+                <Button
+                    android:id="@+id/Button_switchToMan"
+                    android:layout_width="50dip"
+                    android:layout_height="50dip"
+                    android:background="@null"
+                    android:text="@string/main_male"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/point" />
+
+                <Button
+                    android:id="@+id/Button_switchToWoman"
+                    android:layout_width="50dip"
+                    android:layout_height="50dip"
+                    android:background="@null"
+                    android:text="@string/main_female"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/point" />
+
+                <Button
+                    android:id="@+id/Button_turnBack"
+                    android:layout_width="50dip"
+                    android:layout_height="50dip"
+                    android:background="@null"
+                    android:text="@string/main_turn"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/point" />
+
+                <Button
+                    android:id="@+id/Button_undo"
+                    android:layout_width="50dip"
+                    android:layout_height="50dip"
+                    android:background="@null"
+                    android:text="@string/main_undo"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/point" />
+
+                <Button
+                    android:id="@+id/Button_save"
+                    android:layout_width="50dip"
+                    android:layout_height="50dip"
+                    android:background="@null"
+                    android:text="@string/main_save"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/point" />
+
+                <Button
+                    android:id="@+id/Button_share"
+                    android:layout_width="50dip"
+                    android:layout_height="50dip"
+                    android:background="@null"
+                    android:text="@string/main_share"
+                    android:textSize="20sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -57,71 +232,5 @@
         android:layout_centerHorizontal="true"
         android:text="@string/popup_goods_list"
         android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/LinearLayout_main"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/LinearLayout_header" >
-
-        <LinearLayout
-            android:id="@+id/LinearLayout_goodsType"
-            android:layout_width="100dip"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_goods_type"
-            android:orientation="vertical"
-            android:visibility="gone" >
-        </LinearLayout>
-
-        <com.yeegol.DIYWear.clz.MySurfaceView
-            android:id="@+id/surface_main"
-            android:layout_width="match_parent"
-            android:layout_height="800dip" />
-
-        <LinearLayout
-            android:id="@+id/LinearLayout_functionArea"
-            android:layout_width="100dip"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_function"
-            android:orientation="vertical"
-            android:visibility="gone" >
-
-            <Button
-                android:id="@+id/Button_switchToMan"
-                android:layout_width="100dip"
-                android:layout_height="50dip"
-                android:text="@string/main_male" />
-
-            <Button
-                android:id="@+id/Button_switchToWoman"
-                android:layout_width="100dip"
-                android:layout_height="50dip"
-                android:text="@string/main_female" />
-
-            <Button
-                android:id="@+id/Button_turnBack"
-                android:layout_width="100dip"
-                android:layout_height="50dip"
-                android:text="@string/main_turn" />
-
-            <Button
-                android:id="@+id/Button_undo"
-                android:layout_width="100dip"
-                android:layout_height="50dip"
-                android:text="@string/main_undo" />
-
-            <Button
-                android:id="@+id/Button_save"
-                android:layout_width="100dip"
-                android:layout_height="50dip"
-                android:text="@string/main_save" />
-
-            <Button
-                android:id="@+id/Button_share"
-                android:layout_width="100dip"
-                android:layout_height="50dip"
-                android:text="@string/main_share" />
-        </LinearLayout>
-    </LinearLayout>
 
 </RelativeLayout>

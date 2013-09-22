@@ -64,7 +64,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	LinearLayout mFunctionLayout;
 
-	LinearLayout mMainLayout;
+	RelativeLayout mMainLayout;
 
 	LinearLayout mListLayout;
 
@@ -179,7 +179,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mSurfaceView = (MySurfaceView) findViewById(R.id.surface_main);
 		mTypeLayout = (LinearLayout) findViewById(R.id.LinearLayout_goodsType);
 		mFunctionLayout = (LinearLayout) findViewById(R.id.LinearLayout_functionArea);
-		mMainLayout = (LinearLayout) findViewById(R.id.LinearLayout_main);
+		mMainLayout = (RelativeLayout) findViewById(R.id.RelativeLayout_main);
 		mListLayout = (LinearLayout) findViewById(R.id.LinearLayout_goodsList);
 		mCartButton = (Button) findViewById(R.id.Button_cart);
 		// set listener
@@ -328,10 +328,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mHandler.sendMessage(mHandler.obtainMessage(2));
 			break;
 		case R.id.Button_save:
-			// TODO
+			// TODO:save
 			break;
 		case R.id.Button_share:
-			// TODO
+			// TODO:share
 			break;
 		case R.id.Button_cart:
 			if (toggleButton(v, false)) {
@@ -637,14 +637,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	private void toggleVisibilty(View v) {
 		if (v.getVisibility() == View.VISIBLE) {
 			v.setVisibility(View.GONE);
-			if (R.id.LinearLayout_functionArea == v.getId()) {
-				mMainLayout.scrollBy(-100, 0); // hard-coded here
-			}
 		} else {
 			v.setVisibility(View.VISIBLE);
-			if (R.id.LinearLayout_functionArea == v.getId()) {
-				mMainLayout.scrollBy(100, 0); // hard-coded here
-			}
 		}
 	}
 
@@ -730,10 +724,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 */
 	private void buildLeftSidebarRecursively(List<Category> category,
 			LinearLayout viewRoot, OnClickListener listener) {
+		// get inflater
+		LayoutInflater inflater = getLayoutInflater();
 		for (Category c : category) {
-			TextView textView = new TextView(mContext);
-			textView.setWidth(100);
-			textView.setHeight(50);
+			LinearLayout itemLayout = (LinearLayout) inflater.inflate(
+					R.layout.item_menu, null);
+			TextView textView = (TextView) itemLayout
+					.findViewById(R.id.TextView_item_menu_name);
 			textView.setTag(R.string.tag_id, c.getTitle().getId()); // category
 																	// id
 			textView.setTag(R.string.tag_dress_map_id, c.getTitle()
@@ -741,17 +738,28 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			textView.setTag(R.string.tag_name, c.getTitle().getName()); // category
 																		// name
 			textView.setText(c.getTitle().getName());
-			textView.setGravity(Gravity.CENTER);
-			viewRoot.addView(textView);
+			viewRoot.addView(itemLayout);
 			// insert the divider
 			View view = new View(mContext);
 			view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
 			view.setBackgroundColor(Color.BLACK);
 			viewRoot.addView(view);
+			// create a sub linearLayout
+			final LinearLayout subLayout = new LinearLayout(mContext);
+			subLayout.setOrientation(LinearLayout.VERTICAL);
+			subLayout.setVisibility(View.GONE);
 			if (c.getChildren() != null) {
-				buildLeftSidebarRecursively(c.getChildren(), viewRoot, listener);
+				viewRoot.addView(subLayout);
+				buildLeftSidebarRecursively(c.getChildren(), subLayout,
+						listener);
 				textView.setTextSize(25);
-				textView.setOnClickListener(null);
+				textView.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						toggleVisibilty(subLayout);
+					}
+				});
 			} else {
 				textView.setTextSize(15);
 				textView.setOnClickListener(listener);
