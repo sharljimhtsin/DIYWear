@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -28,6 +29,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
@@ -242,6 +244,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void run() {
+				Model.getInstance().setBackground(
+						new MyBitmap(BitmapFactory.decodeResource(
+								mContext.getResources(), R.drawable.bg_model),
+								"no need", "no need"));
+
 				String tmp1 = NetUtil.buildURLForBasic(
 						mBrandModel.getPreview(), direcetion, "shadow0.png");
 				Bitmap tmp2 = NetUtil.getImageFromWeb(tmp1,
@@ -580,10 +587,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 		mPopupWindow.setOnDismissListener(this);
 		mPopupWindow.setOutsideTouchable(true);
-		mPopupWindow.setContentView(listView);
+		mPopupWindow.setContentView(listView.getChildCount() > 0 ? listView
+				: inflater.inflate(R.layout.view_empty_cart, null));
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
-		mPopupWindow.update(mSurfaceView.getWidth() / 2,
-				mSurfaceView.getHeight() / 2);
+		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.8),
+				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
 	}
 
 	int i = 0; // number counter for record button press
@@ -657,7 +665,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// clear the canvas
 		canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 		// draw the model
-		Model.getInstance().drawModel(canvas, mContext);
+		Model.getInstance().drawModel(canvas);
 		holder.unlockCanvasAndPost(canvas);
 	}
 
@@ -819,13 +827,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}).start();
 			}
 		};
+		// TODO:replace linearLayout with listView
 		int i = 0;
 		for (final Goods goods : mGoodsList) {
 			final ImageView imageView = new ImageView(mContext);
 			imageView.setOnClickListener(listener);
-			imageView.setLayoutParams(new LayoutParams(100, 100));
 			imageView.setTag(i);// record the position as key for further find
 			imageView.setImageResource(R.drawable.ic_launcher); // default icon
+			imageView.setScaleType(ScaleType.CENTER_CROP);
+			imageView.setLayoutParams(new LayoutParams(100, 100));
 			if (goods.getPreview() != null) {
 				new Thread(new Runnable() {
 
@@ -843,6 +853,31 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mListLayout.addView(imageView);
 			i++;
 		}
+		// add header & footer
+		TextView textView = new TextView(mContext);
+		textView.setText("/\\");
+		textView.setGravity(Gravity.CENTER);
+		textView.setTextSize(20);
+		textView.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+			}
+		});
+		TextView textView2 = new TextView(mContext);
+		textView2.setText("\\/");
+		textView2.setGravity(Gravity.CENTER);
+		textView2.setTextSize(20);
+		textView2.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+			}
+		});
+		mListLayout.addView(textView, 0);
+		mListLayout.addView(textView2, mListLayout.getChildCount());
 		mListLayout.setVisibility(View.VISIBLE);
 		mCartButton.setVisibility(View.GONE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));

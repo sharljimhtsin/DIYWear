@@ -25,10 +25,6 @@ public class MyBitmap {
 
 	String direction;
 
-	public interface onBitmapDone {
-		void done(Bitmap b);
-	}
-
 	/**
 	 * 
 	 */
@@ -40,9 +36,16 @@ public class MyBitmap {
 		this.direction = direction;
 	}
 
-	public void getBitmapWithDirection(String direct, final onBitmapDone done) {
+	/**
+	 * 
+	 * @param direct
+	 * @param done
+	 *            callback,removed
+	 */
+	public Bitmap getBitmapWithDirection(String direct) {
+		Bitmap ret = null;
 		if (url.indexOf(direct) != -1) {
-			done.done(Model.getInstance().getBitmapFromCache(url));
+			ret = Model.getInstance().getBitmapFromCache(url);
 		} else {
 			if (direct.equals(Model.MODEL_DIRECT_BACK)) {
 				url = url.replaceAll(Model.MODEL_DIRECT_FRONT,
@@ -56,9 +59,8 @@ public class MyBitmap {
 
 				@Override
 				public void run() {
-					Bitmap tmp = NetUtil.getImageFromWeb(url,
+					bitmap = NetUtil.getImageFromWeb(url,
 							NetUtil.DOMAIN_FILE_PURE);
-					done.done(tmp);
 				}
 			});
 			// launch it
@@ -66,11 +68,12 @@ public class MyBitmap {
 			try {
 				// block the main thread until this finish
 				thread.join();
+				ret = bitmap; // swap it
 			} catch (InterruptedException e) {
 				LogUtil.logException(e, TAG);
 			}
 		}
-
+		return ret;
 	}
 
 	/**

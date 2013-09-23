@@ -13,16 +13,12 @@ import java.util.regex.Pattern;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.LruCache;
 
 import com.google.gson.reflect.TypeToken;
-import com.yeegol.DIYWear.R;
 import com.yeegol.DIYWear.clz.MyBitmap;
-import com.yeegol.DIYWear.clz.MyBitmap.onBitmapDone;
 import com.yeegol.DIYWear.res.DataHolder;
 import com.yeegol.DIYWear.util.JSONUtil;
 import com.yeegol.DIYWear.util.NetUtil;
@@ -69,6 +65,7 @@ public class Model {
 
 	final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 	final int cacheSize = maxMemory / 8;
+	static final int OFFSET_OF_MODEL_ON_X = 50;
 
 	String currentDirection;
 
@@ -106,6 +103,7 @@ public class Model {
 	/**
 	 * @param json
 	 * @return Integer[] {x,y,width,height}
+	 * @notice use OFFSET_OF_MODEL_ON_X for center of horizontal
 	 */
 	private Integer[] getNodeValueAsListFromJson(String json) {
 		int x = StrUtil.StringToInt(JSONUtil.getValueByName(json, "x"));
@@ -113,7 +111,8 @@ public class Model {
 		int width = StrUtil.StringToInt(JSONUtil.getValueByName(json, "width"));
 		int height = StrUtil.StringToInt(JSONUtil
 				.getValueByName(json, "height"));
-		Integer[] xy = new Integer[] { x, y, width, height };
+		Integer[] xy = new Integer[] { x - OFFSET_OF_MODEL_ON_X, y, width,
+				height };
 		return xy;
 	}
 
@@ -262,8 +261,9 @@ public class Model {
 	 *            obtain from the surface view
 	 * 
 	 * @param context
+	 *            removed,deprecated
 	 */
-	public void drawModel(final Canvas canvas, Context context) {
+	public void drawModel(final Canvas canvas) {
 		int i = 0;
 		for (MyBitmap b : layers) {
 			// skip empty layer
@@ -274,9 +274,7 @@ public class Model {
 			final int j = i;
 			switch (DataHolder.getInstance().getMappingLayer(i)) {
 			case BG_LAYER:
-				canvas.drawBitmap(BitmapFactory.decodeResource(
-						context.getResources(), R.drawable.bg_main), 0f, 0f,
-						null);
+				canvas.drawBitmap(b.getBitmap(), 0f, 0f, null);
 				break;
 			case MODEL_SHADOW_LAYER:
 				canvas.drawBitmap(b.getBitmap(),
@@ -304,76 +302,34 @@ public class Model {
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case SHOES_LAYER:
-				b.getBitmapWithDirection(currentDirection, new onBitmapDone() {
-
-					@Override
-					public void done(Bitmap b) {
-						canvas.drawBitmap(b,
-								layer_pos.get(j + "#" + currentDirection)[0],
-								layer_pos.get(j + "#" + currentDirection)[1],
-								null);
-					}
-				});
+				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+						layer_pos.get(j + "#" + currentDirection)[0],
+						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case SHAWL_LAYER:
-				b.getBitmapWithDirection(currentDirection, new onBitmapDone() {
-
-					@Override
-					public void done(Bitmap b) {
-						canvas.drawBitmap(b,
-								layer_pos.get(j + "#" + currentDirection)[0],
-								layer_pos.get(j + "#" + currentDirection)[1],
-								null);
-					}
-				});
+				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+						layer_pos.get(j + "#" + currentDirection)[0],
+						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case DOWN_CLOTHES_LAYER:
-				b.getBitmapWithDirection(currentDirection, new onBitmapDone() {
-
-					@Override
-					public void done(Bitmap b) {
-						canvas.drawBitmap(b,
-								layer_pos.get(j + "#" + currentDirection)[0],
-								layer_pos.get(j + "#" + currentDirection)[1],
-								null);
-					}
-				});
+				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+						layer_pos.get(j + "#" + currentDirection)[0],
+						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case UPPER_CLOTHES_LAYER:
-				b.getBitmapWithDirection(currentDirection, new onBitmapDone() {
-
-					@Override
-					public void done(Bitmap b) {
-						canvas.drawBitmap(b,
-								layer_pos.get(j + "#" + currentDirection)[0],
-								layer_pos.get(j + "#" + currentDirection)[1],
-								null);
-					}
-				});
+				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+						layer_pos.get(j + "#" + currentDirection)[0],
+						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case COAT_LAYER:
-				b.getBitmapWithDirection(currentDirection, new onBitmapDone() {
-
-					@Override
-					public void done(Bitmap b) {
-						canvas.drawBitmap(b,
-								layer_pos.get(j + "#" + currentDirection)[0],
-								layer_pos.get(j + "#" + currentDirection)[1],
-								null);
-					}
-				});
+				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+						layer_pos.get(j + "#" + currentDirection)[0],
+						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case ACCESSORY_LAYER:
-				b.getBitmapWithDirection(currentDirection, new onBitmapDone() {
-
-					@Override
-					public void done(Bitmap b) {
-						canvas.drawBitmap(b,
-								layer_pos.get(j + "#" + currentDirection)[0],
-								layer_pos.get(j + "#" + currentDirection)[1],
-								null);
-					}
-				});
+				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+						layer_pos.get(j + "#" + currentDirection)[0],
+						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			default:
 				break;

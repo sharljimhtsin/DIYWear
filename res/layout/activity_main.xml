@@ -44,7 +44,7 @@
 
         <com.yeegol.DIYWear.clz.MySurfaceView
             android:id="@+id/surface_main"
-            android:layout_width="match_parent"
+            android:layout_width="400dip"
             android:layout_height="600dip"
             android:layout_centerInParent="true" />
 
@@ -57,6 +57,27 @@
             android:orientation="vertical"
             android:visibility="gone" >
         </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/LinearLayout_functionArea"
+            android:background="@null" >
+
+            <!-- http://stackoverflow.com/questions/6668269/android-resizing-problem-with-linearlayout-and-tiled-background -->
+
+            <LinearLayout
+                android:id="@+id/LinearLayout_goodsList"
+                android:layout_width="100dip"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_goods_list_scale"
+                android:divider="@drawable/line"
+                android:orientation="vertical"
+                android:showDividers="middle"
+                android:visibility="gone" >
+            </LinearLayout>
+        </HorizontalScrollView>
 
         <LinearLayout
             android:id="@+id/LinearLayout_functionArea"
@@ -207,22 +228,6 @@
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
-
-        <!-- http://stackoverflow.com/questions/6668269/android-resizing-problem-with-linearlayout-and-tiled-background -->
-
-        <LinearLayout
-            android:id="@+id/LinearLayout_goodsList"
-            android:layout_width="match_parent"
-            android:layout_height="100dip"
-            android:background="@drawable/bg_goods_list_scale"
-            android:visibility="gone" >
-        </LinearLayout>
-    </HorizontalScrollView>
 
     <Button
         android:id="@+id/Button_cart"

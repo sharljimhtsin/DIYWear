@@ -40,6 +40,7 @@
     <string name="toast_only_one_model_now">只有一个模特</string>
     <string name="toast_no_goods_item_under_the_type">该类别下无商品</string>
     <string name="alert_dial_info_title">商品信息</string>
+    <string name="view_empty_cart_nothing">购物车里面没有任何东西</string>
 
     <!-- system strings -->
     <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>

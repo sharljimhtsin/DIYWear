@@ -32,4 +32,8 @@ public class StrUtil {
 	public static String dobToString(double d) {
 		return String.valueOf(d);
 	}
+
+	public static int dobToInt(double d) {
+		return (int) d;
+	}
 }
