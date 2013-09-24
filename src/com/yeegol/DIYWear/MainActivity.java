@@ -26,16 +26,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MySurfaceView;
 import com.yeegol.DIYWear.entity.Category;
@@ -44,6 +47,7 @@ import com.yeegol.DIYWear.entity.Goods;
 import com.yeegol.DIYWear.entity.Model;
 import com.yeegol.DIYWear.entity.Model.BrandModel;
 import com.yeegol.DIYWear.res.DataHolder;
+import com.yeegol.DIYWear.util.ImgUtil;
 import com.yeegol.DIYWear.util.LogUtil;
 import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.NotificUtil;
@@ -68,7 +72,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	RelativeLayout mMainLayout;
 
-	LinearLayout mListLayout;
+	ListView mListLayout;
 
 	Handler mHandler;
 
@@ -182,7 +186,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mTypeLayout = (LinearLayout) findViewById(R.id.LinearLayout_goodsType);
 		mFunctionLayout = (LinearLayout) findViewById(R.id.LinearLayout_functionArea);
 		mMainLayout = (RelativeLayout) findViewById(R.id.RelativeLayout_main);
-		mListLayout = (LinearLayout) findViewById(R.id.LinearLayout_goodsList);
+		mListLayout = (ListView) findViewById(R.id.ListView_goodsList);
 		mCartButton = (Button) findViewById(R.id.Button_cart);
 		// set listener
 		showTypeButton.setOnClickListener(this);
@@ -245,8 +249,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			@Override
 			public void run() {
 				Model.getInstance().setBackground(
-						new MyBitmap(BitmapFactory.decodeResource(
-								mContext.getResources(), R.drawable.bg_model),
+						new MyBitmap(ImgUtil
+								.scaleBitmapToFullScreen(BitmapFactory
+										.decodeResource(
+												mContext.getResources(),
+												R.drawable.bg_model)),
 								"no need", "no need"));
 
 				String tmp1 = NetUtil.buildURLForBasic(
@@ -796,10 +803,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	/**
 	 * fill the goods list with every item
+	 * 
+	 * @notice change to RightSideBar now
 	 */
 	private void buildBottomBar() {
-		// clear all views first
-		mListLayout.removeAllViews();
 		if (mGoodsList == null) {
 			mHandler.sendMessage(mHandler.obtainMessage(98));
 			NotificUtil
@@ -807,7 +814,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			return;
 		}
 		// listener for each item click
-		OnClickListener listener = new OnClickListener() {
+		final OnClickListener listener = new OnClickListener() {
 
 			@Override
 			public void onClick(final View v) {
@@ -827,58 +834,32 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}).start();
 			}
 		};
-		// TODO:replace linearLayout with listView
-		int i = 0;
-		for (final Goods goods : mGoodsList) {
-			final ImageView imageView = new ImageView(mContext);
-			imageView.setOnClickListener(listener);
-			imageView.setTag(i);// record the position as key for further find
-			imageView.setImageResource(R.drawable.ic_launcher); // default icon
-			imageView.setScaleType(ScaleType.CENTER_CROP);
-			imageView.setLayoutParams(new LayoutParams(100, 100));
-			if (goods.getPreview() != null) {
-				new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						Bitmap bm = NetUtil.getImageFromWeb(
-								NetUtil.buildURLForThumb(goods.getPreview()),
-								NetUtil.DOMAIN_FILE_PURE);
-						Object[] obj = new Object[] { imageView, bm };
-						// notice the UI thread to draw
-						mHandler.sendMessage(mHandler.obtainMessage(6, obj));
-					}
-				}).start();
-			}
-			mListLayout.addView(imageView);
-			i++;
-		}
-		// add header & footer
-		TextView textView = new TextView(mContext);
-		textView.setText("/\\");
-		textView.setGravity(Gravity.CENTER);
-		textView.setTextSize(20);
-		textView.setOnClickListener(new OnClickListener() {
+		// set header & footer
+		LinearLayout parentLayout = (LinearLayout) mListLayout.getParent();
+		parentLayout.getChildAt(0).setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-
+				mListLayout.smoothScrollBy(100, 1000);
 			}
 		});
-		TextView textView2 = new TextView(mContext);
-		textView2.setText("\\/");
-		textView2.setGravity(Gravity.CENTER);
-		textView2.setTextSize(20);
-		textView2.setOnClickListener(new OnClickListener() {
+		parentLayout.getChildAt(2).setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-
+				mListLayout.smoothScrollBy(-100, 1000);
 			}
 		});
-		mListLayout.addView(textView, 0);
-		mListLayout.addView(textView2, mListLayout.getChildCount());
-		mListLayout.setVisibility(View.VISIBLE);
+		mListLayout.setAdapter(new MyAdapter(mContext, mGoodsList, mHandler));
+		mListLayout.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				listener.onClick(arg1);
+			}
+		});
+		parentLayout.setVisibility(View.VISIBLE);
 		mCartButton.setVisibility(View.GONE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));
 	}
@@ -933,10 +914,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			return;
 		}
 		// hide goods list by back key
-		if (mListLayout.getVisibility() == View.GONE) {
+		// get parent container
+		LinearLayout parentLayout = (LinearLayout) mListLayout.getParent();
+		if (parentLayout.getVisibility() == View.GONE) {
 			super.onBackPressed();
 		} else {
-			mListLayout.setVisibility(View.GONE);
+			parentLayout.setVisibility(View.GONE);
 			mCartButton.setVisibility(View.VISIBLE);
 		}
 	}

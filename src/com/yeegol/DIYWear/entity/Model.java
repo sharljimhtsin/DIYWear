@@ -65,7 +65,12 @@ public class Model {
 
 	final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 	final int cacheSize = maxMemory / 8;
+
+	/**
+	 * offset on x,y axis,different on different phone screen
+	 */
 	static final int OFFSET_OF_MODEL_ON_X = 50;
+	static final int OFFSET_OF_MODEL_ON_Y = 90;
 
 	String currentDirection;
 
@@ -111,8 +116,8 @@ public class Model {
 		int width = StrUtil.StringToInt(JSONUtil.getValueByName(json, "width"));
 		int height = StrUtil.StringToInt(JSONUtil
 				.getValueByName(json, "height"));
-		Integer[] xy = new Integer[] { x - OFFSET_OF_MODEL_ON_X, y, width,
-				height };
+		Integer[] xy = new Integer[] { x + OFFSET_OF_MODEL_ON_X,
+				y + OFFSET_OF_MODEL_ON_Y, width, height };
 		return xy;
 	}
 

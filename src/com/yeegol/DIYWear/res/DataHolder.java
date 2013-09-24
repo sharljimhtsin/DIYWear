@@ -44,6 +44,7 @@ public class DataHolder {
 		charMapping.put("T恤", Model.UPPER_CLOTHES_LAYER);
 		charMapping.put("围巾", Model.SHAWL_LAYER);
 		charMapping.put("鞋子", Model.SHOES_LAYER);
+		charMapping.put("单鞋", Model.SHOES_LAYER);
 		charMapping.put("连衣裙", Model.COAT_LAYER);
 		charMapping.put("半身裙", Model.COAT_LAYER);
 	}
