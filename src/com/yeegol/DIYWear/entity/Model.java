@@ -42,6 +42,7 @@ public class Model {
 
 	LinkedList<MyBitmap> layers; // a container for model layers,from inner to
 									// outer
+
 	// all possible layers
 	public static final int BG_LAYER = 0;
 	public static final int MODEL_SHADOW_LAYER = 1;
@@ -69,8 +70,10 @@ public class Model {
 	/**
 	 * offset on x,y axis,different on different phone screen
 	 */
-	static final int OFFSET_OF_MODEL_ON_X = 50;
-	static final int OFFSET_OF_MODEL_ON_Y = 90;
+	interface Offset {
+		static final int OFFSET_OF_MODEL_ON_X = 50;
+		static final int OFFSET_OF_MODEL_ON_Y = 90;
+	}
 
 	String currentDirection;
 
@@ -116,8 +119,8 @@ public class Model {
 		int width = StrUtil.StringToInt(JSONUtil.getValueByName(json, "width"));
 		int height = StrUtil.StringToInt(JSONUtil
 				.getValueByName(json, "height"));
-		Integer[] xy = new Integer[] { x + OFFSET_OF_MODEL_ON_X,
-				y + OFFSET_OF_MODEL_ON_Y, width, height };
+		Integer[] xy = new Integer[] { x + Offset.OFFSET_OF_MODEL_ON_X,
+				y + Offset.OFFSET_OF_MODEL_ON_Y, width, height };
 		return xy;
 	}
 

@@ -16,6 +16,9 @@ import com.yeegol.DIYWear.res.DataHolder;
  * 
  */
 public class NotificUtil {
+
+	private static final String TAG = NotificUtil.class.getName();
+
 	public static void showShortToast(String msg) {
 		Toast.makeText(DataHolder.getInstance().getContext(), msg,
 				Toast.LENGTH_SHORT).show();

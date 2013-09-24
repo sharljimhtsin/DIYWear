@@ -52,5 +52,6 @@
     <string name="tag_id">0</string>
     <string name="tag_name">1</string>
     <string name="tag_dress_map_id">2</string>
+    <string name="tag_brands_id">3</string>
 
 </resources>

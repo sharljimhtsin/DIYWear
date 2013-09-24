@@ -41,6 +41,7 @@ import android.widget.TextView;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MySurfaceView;
+import com.yeegol.DIYWear.entity.Brand;
 import com.yeegol.DIYWear.entity.Category;
 import com.yeegol.DIYWear.entity.Collocation;
 import com.yeegol.DIYWear.entity.Goods;
@@ -52,6 +53,7 @@ import com.yeegol.DIYWear.util.LogUtil;
 import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.NotificUtil;
 import com.yeegol.DIYWear.util.StrUtil;
+import com.yeegol.DIYWear.util.ThreadUtil;
 
 /**
  * main window for display,modify the model's looking
@@ -329,23 +331,29 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			break;
 		case R.id.Button_switchToMan:
 			toggleSex(1);
+			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_switchToWoman:
 			toggleSex(2);
+			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_turnBack:
 			toggleDirection();
 			mHandler.sendMessage(mHandler.obtainMessage(2));
+			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_undo:
 			reset();
 			mHandler.sendMessage(mHandler.obtainMessage(2));
+			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_save:
 			// TODO:save
+			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_share:
 			// TODO:share
+			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_cart:
 			if (toggleButton(v, false)) {
@@ -381,6 +389,22 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			break;
 		default:
 			break;
+		}
+	}
+
+	/**
+	 * change button's background while clicked
+	 * 
+	 * @param id
+	 */
+	private void toggleFunctionBtn(int id) {
+		for (int i = 0; i < mFunctionLayout.getChildCount(); i++) {
+			Button b = (Button) mFunctionLayout.getChildAt(i);
+			if (b.getId() == id) {
+				b.setBackgroundResource(R.drawable.bg_btn_bottom);
+			} else {
+				b.setBackground(null);
+			}
 		}
 	}
 
@@ -704,6 +728,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			@Override
 			public void onClick(View v) {
 				int categoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
+				int brandIds = StrUtil.ObjToInt(v
+						.getTag(R.string.tag_brands_id));
 				int dressDepthId = StrUtil.ObjToInt(v
 						.getTag(R.string.tag_dress_map_id));
 				// TODO: use dress depth id further
@@ -711,7 +737,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						.getTag(R.string.tag_name));
 				mCurrentLayer = DataHolder.getInstance().getMappingLayerByName(
 						categoryName);
-				prepareBottomBar(categoryId, mBrandModel.getGender(),
+				prepareBottomBar(categoryId, brandIds, mBrandModel.getGender(),
 						mBrandModel.getAgeGroup());
 			}
 		};
@@ -746,12 +772,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					R.layout.item_menu, null);
 			TextView textView = (TextView) itemLayout
 					.findViewById(R.id.TextView_item_menu_name);
-			textView.setTag(R.string.tag_id, c.getTitle().getId()); // category
-																	// id
-			textView.setTag(R.string.tag_dress_map_id, c.getTitle()
-					.getDressMapId()); // dress-depth id
-			textView.setTag(R.string.tag_name, c.getTitle().getName()); // category
-																		// name
 			textView.setText(c.getTitle().getName());
 			viewRoot.addView(itemLayout);
 			// insert the divider
@@ -763,39 +783,98 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			final LinearLayout subLayout = new LinearLayout(mContext);
 			subLayout.setOrientation(LinearLayout.VERTICAL);
 			subLayout.setVisibility(View.GONE);
+			viewRoot.addView(subLayout);
+			textView.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					toggleVisibilty(subLayout);
+				}
+			});
 			if (c.getChildren() != null) {
-				viewRoot.addView(subLayout);
+				textView.setTextSize(25);
 				buildLeftSidebarRecursively(c.getChildren(), subLayout,
 						listener);
-				textView.setTextSize(25);
-				textView.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						toggleVisibilty(subLayout);
-					}
-				});
 			} else {
 				textView.setTextSize(15);
-				textView.setOnClickListener(listener);
+				appendBrandTypeToCategory(c, subLayout, listener);
 			}
 		}
 	}
 
 	/**
-	 * get goods list under specify category id from web
+	 * append brand type under end-category by sub-query
+	 * 
+	 * @param category
+	 *            ended-category
+	 * @param viewRoot
+	 *            viewGroup container
+	 * @param listener
+	 *            trigger
+	 */
+	private void appendBrandTypeToCategory(final Category category,
+			final LinearLayout viewRoot, final OnClickListener listener) {
+		// get inflater
+		LayoutInflater inflater = getLayoutInflater();
+		final LinearLayout itemLayout = (LinearLayout) inflater.inflate(
+				R.layout.item_menu, null);
+		final Handler handler = new Handler(new Callback() {
+
+			@Override
+			public boolean handleMessage(Message arg0) {
+				@SuppressWarnings("unchecked")
+				List<Brand> list = (List<Brand>) arg0.obj;
+				// avoid NULL
+				if (list == null) {
+					return false;
+				}
+				for (Brand brand : list) {
+					TextView textView = (TextView) itemLayout
+							.findViewById(R.id.TextView_item_menu_name);
+					textView.setText(brand.getCnName());
+					textView.setTextSize(10);
+					textView.setTag(R.string.tag_id, category.getTitle()
+							.getId()); // categoryId
+					textView.setTag(R.string.tag_dress_map_id, category
+							.getTitle().getDressMapId()); // dress-depth id
+					textView.setTag(R.string.tag_name, category.getTitle()
+							.getName()); // category name
+					textView.setTag(R.string.tag_brands_id, brand.getId()); // brandId
+					textView.setOnClickListener(listener);
+					viewRoot.addView(textView);
+				}
+				return true;
+			}
+		});
+		// get brand list
+		ThreadUtil.doInForeground(new Runnable() {
+
+			@Override
+			public void run() {
+				List<Brand> list = Brand.doBrandgetList(category.getTitle()
+						.getId(), "", 1, 20);
+				handler.sendMessage(handler.obtainMessage(0, list));
+			}
+		});
+	}
+
+	/**
+	 * get goods list under specify category id & more conditions from web
 	 * 
 	 * @param categoryId
+	 * @param brandIds
+	 * @param gender
+	 * @param ageGroup
 	 */
-	private void prepareBottomBar(final int categoryId, final int gender,
-			final int ageGroup) {
+	private void prepareBottomBar(final int categoryId, final int brandIds,
+			final int gender, final int ageGroup) {
 		mHandler.sendMessage(mHandler.obtainMessage(97));
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				mGoodsList = Goods.doGoodsgetList(1, 20, categoryId, 0, gender,
-						ageGroup, null, 0, 0, null);
+				mGoodsList = Goods.doGoodsgetList(1, 20, categoryId, brandIds,
+						gender, ageGroup, null, 0, 0, null);
 				mHandler.sendMessage(mHandler.obtainMessage(5));
 			}
 		}).start();

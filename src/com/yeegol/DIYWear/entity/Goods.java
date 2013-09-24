@@ -52,6 +52,9 @@ public class Goods {
 		NameValuePair categoryIdd = new BasicNameValuePair("categoryId",
 				StrUtil.intToString(categoryId));
 		pairs.add(categoryIdd);
+		NameValuePair brandIdss = new BasicNameValuePair("brandIds",
+				StrUtil.intToString(brandIds));
+		pairs.add(brandIdss);
 		NameValuePair genderr = new BasicNameValuePair("gender",
 				StrUtil.intToString(gender));
 		pairs.add(genderr);

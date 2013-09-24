@@ -14,6 +14,8 @@ import android.graphics.Bitmap;
  */
 public class ImgUtil {
 
+	private static final String TAG = ImgUtil.class.getName();
+
 	/**
 	 * resize image
 	 * 

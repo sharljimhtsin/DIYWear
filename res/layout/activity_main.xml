@@ -96,9 +96,9 @@
         <LinearLayout
             android:id="@+id/LinearLayout_functionArea"
             android:layout_width="match_parent"
-            android:layout_height="100dip"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/bg_function_scale"
+            android:background="@drawable/bg_bottom"
             android:orientation="horizontal"
             android:visibility="gone"
             android:weightSum="6" >
