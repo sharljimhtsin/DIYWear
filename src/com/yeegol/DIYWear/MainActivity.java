@@ -728,15 +728,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			@Override
 			public void onClick(View v) {
 				int categoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
-				int brandIds = StrUtil.ObjToInt(v
+				String brandIds = StrUtil.objToString(v
 						.getTag(R.string.tag_brands_id));
-				int dressDepthId = StrUtil.ObjToInt(v
-						.getTag(R.string.tag_dress_map_id));
-				// TODO: use dress depth id further
-				String categoryName = StrUtil.objToString(v
-						.getTag(R.string.tag_name));
-				mCurrentLayer = DataHolder.getInstance().getMappingLayerByName(
-						categoryName);
 				prepareBottomBar(categoryId, brandIds, mBrandModel.getGender(),
 						mBrandModel.getAgeGroup());
 			}
@@ -749,6 +742,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			treeTop = mCategoryList.get(1);
 		}
 		// build the bar
+		addBrandTypeWithCategory(mTypeLayout, listener);
 		buildLeftSidebarRecursively(treeTop.getChildren(), mTypeLayout,
 				listener);
 	}
@@ -777,33 +771,85 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			// insert the divider
 			View view = new View(mContext);
 			view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
-			view.setBackgroundColor(Color.BLACK);
+			view.setBackgroundColor(Color.GRAY);
 			viewRoot.addView(view);
-			// create a sub linearLayout
-			final LinearLayout subLayout = new LinearLayout(mContext);
-			subLayout.setOrientation(LinearLayout.VERTICAL);
-			subLayout.setVisibility(View.GONE);
-			viewRoot.addView(subLayout);
-			textView.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					toggleVisibilty(subLayout);
-				}
-			});
 			if (c.getChildren() != null) {
+				// create a sub linearLayout
+				final LinearLayout subLayout = new LinearLayout(mContext);
+				subLayout.setOrientation(LinearLayout.VERTICAL);
+				subLayout.setVisibility(View.GONE);
+				viewRoot.addView(subLayout);
 				textView.setTextSize(25);
+				textView.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						toggleVisibilty(subLayout);
+					}
+				});
 				buildLeftSidebarRecursively(c.getChildren(), subLayout,
 						listener);
 			} else {
+				// bind data
+				textView.setTag(R.string.tag_id, c.getTitle().getId()); // categoryId
+				textView.setTag(R.string.tag_brands_id, "-1"); // not use now
 				textView.setTextSize(15);
-				appendBrandTypeToCategory(c, subLayout, listener);
+				textView.setOnClickListener(listener);
 			}
 		}
 	}
 
+	private void addBrandTypeWithCategory(final LinearLayout viewRoot,
+			final OnClickListener listener) {
+		// get inflater
+		final LayoutInflater inflater = getLayoutInflater();
+		final Handler handler = new Handler(new Callback() {
+
+			@Override
+			public boolean handleMessage(Message arg0) {
+				@SuppressWarnings("unchecked")
+				List<Brand> list = (List<Brand>) arg0.obj;
+				// avoid NULL
+				if (list == null) {
+					return false;
+				}
+				for (Brand brand : list) {
+					LinearLayout itemLayout = (LinearLayout) inflater.inflate(
+							R.layout.item_menu, null);
+					TextView textView = (TextView) itemLayout
+							.findViewById(R.id.TextView_item_menu_name);
+					// bind data
+					textView.setTag(R.string.tag_id, -1);
+					textView.setTag(R.string.tag_brands_id, brand.getId());
+					textView.setText(brand.getCnName());
+					textView.setTextSize(25);
+					textView.setOnClickListener(listener);
+					viewRoot.addView(itemLayout);
+					// insert the divider
+					View view = new View(mContext);
+					view.setLayoutParams(new LayoutParams(
+							LayoutParams.MATCH_PARENT, 1));
+					view.setBackgroundColor(Color.GRAY);
+					viewRoot.addView(view);
+				}
+				return true;
+			}
+		});
+		// get brand list
+		ThreadUtil.doInForeground(new Runnable() {
+
+			@Override
+			public void run() {
+				List<Brand> list = Brand.doBrandgetList(-1, "", 1, 20);
+				handler.sendMessage(handler.obtainMessage(0, list));
+			}
+		});
+	}
+
 	/**
 	 * append brand type under end-category by sub-query
+	 * 
+	 * @deprecated no need
 	 * 
 	 * @param category
 	 *            ended-category
@@ -811,7 +857,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 *            viewGroup container
 	 * @param listener
 	 *            trigger
+	 * 
 	 */
+	@SuppressWarnings("unused")
 	private void appendBrandTypeToCategory(final Category category,
 			final LinearLayout viewRoot, final OnClickListener listener) {
 		// get inflater
@@ -835,10 +883,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					textView.setTextSize(10);
 					textView.setTag(R.string.tag_id, category.getTitle()
 							.getId()); // categoryId
-					textView.setTag(R.string.tag_dress_map_id, category
-							.getTitle().getDressMapId()); // dress-depth id
-					textView.setTag(R.string.tag_name, category.getTitle()
-							.getName()); // category name
 					textView.setTag(R.string.tag_brands_id, brand.getId()); // brandId
 					textView.setOnClickListener(listener);
 					viewRoot.addView(textView);
@@ -866,7 +910,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * @param gender
 	 * @param ageGroup
 	 */
-	private void prepareBottomBar(final int categoryId, final int brandIds,
+	private void prepareBottomBar(final int categoryId, final String brandIds,
 			final int gender, final int ageGroup) {
 		mHandler.sendMessage(mHandler.obtainMessage(97));
 		new Thread(new Runnable() {
@@ -905,6 +949,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						// get the goods object
 						Goods goods = mGoodsList.get(StrUtil.ObjToInt(v
 								.getTag()));
+						// distinct its layer
+						mCurrentLayer = DataHolder.getInstance()
+								.getMappingLayerByName(goods.getCategoryName());
 						setGoods(goods, mCurrentDirect, mCurrentLayer);
 						// notice UI thread to refresh
 						mHandler.sendMessage(mHandler.obtainMessage(3));
