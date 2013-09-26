@@ -36,4 +36,8 @@ public class StrUtil {
 	public static int dobToInt(double d) {
 		return (int) d;
 	}
+
+	public static String charToString(CharSequence c) {
+		return c.toString();
+	}
 }

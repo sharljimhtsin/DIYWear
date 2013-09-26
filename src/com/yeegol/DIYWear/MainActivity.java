@@ -42,6 +42,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.umeng.socialize.controller.RequestType;
+import com.umeng.socialize.controller.UMServiceFactory;
+import com.umeng.socialize.controller.UMSocialService;
+import com.umeng.socialize.media.UMImage;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MySurfaceView;
@@ -113,6 +117,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	Bitmap mBitmap;
 
+	UMSocialService mSocialService;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -127,6 +133,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mCurrentDirect = Model.MODEL_DIRECT_FRONT;
 		mTempCart = new SparseArray<Goods>();
 		mCart = new ArrayList<Goods>();
+		mSocialService = UMServiceFactory.getUMSocialService(TAG,
+				RequestType.SOCIAL);
 		DataHolder.init(mContext);
 		// sync with Model class
 		Model.getInstance().setCurrentDirection(mCurrentDirect);
@@ -376,7 +384,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_share:
-			// TODO:share
+			mSocialService.setShareContent(StrUtil
+					.charToString(getText(R.string.umeng_share_content)));
+			mSocialService.setShareImage(new UMImage(mContext, mBitmap));
+			mSocialService.openShare(this, false);
 			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_cart:

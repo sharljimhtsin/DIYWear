@@ -43,6 +43,7 @@
     <string name="view_empty_cart_nothing">购物车里面没有任何东西</string>
     <string name="main_goods_list_brand">品牌</string>
     <string name="toast_image_saved_to_local_successlly">图片已成功保存到本地，</string>
+    <string name="umeng_share_content">我喜爱的模特搭配，分享一下</string>
 
     <!-- system strings -->
     <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>
@@ -55,5 +56,6 @@
     <string name="tag_name">1</string>
     <string name="tag_dress_map_id">2</string>
     <string name="tag_brands_id">3</string>
+    <string name="umeng_key">5243a95256240bd6440573e6</string>
 
 </resources>
