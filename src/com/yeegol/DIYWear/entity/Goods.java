@@ -44,7 +44,7 @@ public class Goods {
 	 * @return
 	 */
 	public static List<Goods> doGoodsgetList(int page, int size,
-			int categoryId, String brandIds, int gender, int ageGroup,
+			int categoryId, String brandId, int gender, int ageGroup,
 			String name, int priceMin, int priceMax, String attribute) {
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		NameValuePair method = new BasicNameValuePair("method", "Goods.getList");
@@ -54,9 +54,8 @@ public class Goods {
 					StrUtil.intToString(categoryId));
 			pairs.add(categoryIdd);
 		}
-		if (brandIds.equals("-1")) {
-			NameValuePair brandIdss = new BasicNameValuePair("brandIds",
-					brandIds);
+		if (brandId.equals("-1")) {
+			NameValuePair brandIdss = new BasicNameValuePair("brandId", brandId);
 			pairs.add(brandIdss);
 		}
 		NameValuePair genderr = new BasicNameValuePair("gender",

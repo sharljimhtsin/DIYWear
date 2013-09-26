@@ -3,13 +3,16 @@
  */
 package com.yeegol.DIYWear.util;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 
@@ -36,6 +39,15 @@ public class FSUtil {
 			LogUtil.logException(e, TAG);
 		}
 		return writer.toString();
+	}
+
+	public static boolean writeBitmapToFile(Context c, Bitmap image,
+			String fileName) throws IOException {
+		// use file in internal storage
+		FileOutputStream fos = c.openFileOutput(fileName, Context.MODE_PRIVATE);
+		boolean success = image.compress(CompressFormat.JPEG, 80, fos);
+		fos.close();
+		return success;
 	}
 
 	public static Bitmap streamToBitmap(InputStream is) {

@@ -14,7 +14,9 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.util.LruCache;
 
 import com.google.gson.reflect.TypeToken;
@@ -270,8 +272,13 @@ public class Model {
 	 * 
 	 * @param context
 	 *            removed,deprecated
+	 * 
+	 * @return final bitmap,for export further
 	 */
-	public void drawModel(final Canvas canvas) {
+	public Bitmap drawModel(Canvas canvas) {
+		Bitmap baseBitmap = Bitmap.createBitmap(canvas.getWidth(),
+				canvas.getHeight(), Config.ARGB_8888);
+		Canvas baseCanvas = new Canvas(baseBitmap);
 		int i = 0;
 		for (MyBitmap b : layers) {
 			// skip empty layer
@@ -282,60 +289,66 @@ public class Model {
 			final int j = i;
 			switch (DataHolder.getInstance().getMappingLayer(i)) {
 			case BG_LAYER:
-				canvas.drawBitmap(b.getBitmap(), 0f, 0f, null);
+				baseCanvas.drawBitmap(b.getBitmap(), 0f, 0f, null);
 				break;
 			case MODEL_SHADOW_LAYER:
-				canvas.drawBitmap(b.getBitmap(),
+				baseCanvas.drawBitmap(b.getBitmap(),
 						layer_pos.get(String.valueOf(j))[0],
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_BODY_LAYER:
-				canvas.drawBitmap(b.getBitmap(),
+				baseCanvas.drawBitmap(b.getBitmap(),
 						layer_pos.get(String.valueOf(j))[0],
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_FACE_LAYER:
-				canvas.drawBitmap(b.getBitmap(),
+				baseCanvas.drawBitmap(b.getBitmap(),
 						layer_pos.get(String.valueOf(j))[0],
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_HAIR_LAYER:
-				canvas.drawBitmap(b.getBitmap(),
+				baseCanvas.drawBitmap(b.getBitmap(),
 						layer_pos.get(String.valueOf(j))[0],
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_UNDERWEAR_LAYER:
-				canvas.drawBitmap(b.getBitmap(),
+				baseCanvas.drawBitmap(b.getBitmap(),
 						layer_pos.get(String.valueOf(j))[0],
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case SHOES_LAYER:
-				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+				baseCanvas.drawBitmap(
+						b.getBitmapWithDirection(currentDirection),
 						layer_pos.get(j + "#" + currentDirection)[0],
 						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case SHAWL_LAYER:
-				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+				baseCanvas.drawBitmap(
+						b.getBitmapWithDirection(currentDirection),
 						layer_pos.get(j + "#" + currentDirection)[0],
 						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case DOWN_CLOTHES_LAYER:
-				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+				baseCanvas.drawBitmap(
+						b.getBitmapWithDirection(currentDirection),
 						layer_pos.get(j + "#" + currentDirection)[0],
 						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case UPPER_CLOTHES_LAYER:
-				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+				baseCanvas.drawBitmap(
+						b.getBitmapWithDirection(currentDirection),
 						layer_pos.get(j + "#" + currentDirection)[0],
 						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case COAT_LAYER:
-				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+				baseCanvas.drawBitmap(
+						b.getBitmapWithDirection(currentDirection),
 						layer_pos.get(j + "#" + currentDirection)[0],
 						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
 			case ACCESSORY_LAYER:
-				canvas.drawBitmap(b.getBitmapWithDirection(currentDirection),
+				baseCanvas.drawBitmap(
+						b.getBitmapWithDirection(currentDirection),
 						layer_pos.get(j + "#" + currentDirection)[0],
 						layer_pos.get(j + "#" + currentDirection)[1], null);
 				break;
@@ -344,6 +357,8 @@ public class Model {
 			}
 			i++;
 		}
+		canvas.drawBitmap(baseBitmap, new Matrix(), null);
+		return baseBitmap;
 	}
 
 	public static List<BrandModel> doBrandModelgetList() {

@@ -1,5 +1,6 @@
 package com.yeegol.DIYWear;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,10 +19,12 @@ import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.util.SparseArray;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -36,6 +39,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.yeegol.DIYWear.clz.MyAdapter;
@@ -48,6 +52,7 @@ import com.yeegol.DIYWear.entity.Goods;
 import com.yeegol.DIYWear.entity.Model;
 import com.yeegol.DIYWear.entity.Model.BrandModel;
 import com.yeegol.DIYWear.res.DataHolder;
+import com.yeegol.DIYWear.util.FSUtil;
 import com.yeegol.DIYWear.util.ImgUtil;
 import com.yeegol.DIYWear.util.LogUtil;
 import com.yeegol.DIYWear.util.NetUtil;
@@ -62,7 +67,7 @@ import com.yeegol.DIYWear.util.ThreadUtil;
  * 
  */
 public class MainActivity extends Activity implements SurfaceHolder.Callback,
-		OnClickListener, OnDismissListener, OnTouchListener {
+		OnClickListener, OnDismissListener, OnTouchListener, OnGestureListener {
 
 	private static final String TAG = MainActivity.class.getName();
 
@@ -103,6 +108,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	PopupWindow mPopupWindow;
 
 	List<Collocation> mColList;
+
+	ScrollView mTypeContainer;
+
+	Bitmap mBitmap;
 
 	/*
 	 * (non-Javadoc)
@@ -164,6 +173,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				case 8:
 					mPopupWindow.dismiss();
 					break;
+				case 9:
+					toggleVisibilty(mTypeContainer, true);
+					break;
 				case 97:
 					mProgressDialog.show();
 					break;
@@ -190,12 +202,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mMainLayout = (RelativeLayout) findViewById(R.id.RelativeLayout_main);
 		mListLayout = (ListView) findViewById(R.id.ListView_goodsList);
 		mCartButton = (Button) findViewById(R.id.Button_cart);
+		mTypeContainer = (ScrollView) findViewById(R.id.ScrollView_goodsType);
 		// set listener
 		showTypeButton.setOnClickListener(this);
 		showFunctionButton.setOnClickListener(this);
 		mCartButton.setOnClickListener(this);
 		mSurfaceView.getHolder().addCallback(this);
 		mSurfaceView.setOnTouchListener(this);
+		mTypeContainer.setOnTouchListener(this);
 		// trigger
 		mHandler.sendMessage(mHandler.obtainMessage(0));
 	}
@@ -324,7 +338,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.Button_showType:
-			toggleVisibilty(mTypeLayout);
+			toggleVisibilty(mTypeContainer);
 			break;
 		case R.id.Button_showFunction:
 			toggleVisibilty(mFunctionLayout);
@@ -348,7 +362,17 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_save:
-			// TODO:save
+			try {
+				String fileName = "image.jpg";
+				if (FSUtil.writeBitmapToFile(mContext, mBitmap, fileName)) {
+					NotificUtil
+							.showShortToast(getText(R.string.toast_image_saved_to_local_successlly)
+									+ getFileStreamPath(fileName)
+											.getAbsolutePath());
+				}
+			} catch (IOException e) {
+				LogUtil.logException(e, TAG);
+			}
 			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_share:
@@ -682,6 +706,18 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
+	 * function used to auto-hide left side-bar
+	 * 
+	 * @param v
+	 * @param skipIfShown
+	 */
+	private synchronized void toggleVisibilty(View v, boolean skipIfShown) {
+		if (skipIfShown && v.getVisibility() == View.VISIBLE) {
+			toggleVisibilty(v);
+		}
+	}
+
+	/**
 	 * should not call directly
 	 * 
 	 * @author sharl
@@ -696,7 +732,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// clear the canvas
 		canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 		// draw the model
-		Model.getInstance().drawModel(canvas);
+		mBitmap = Model.getInstance().drawModel(canvas);
 		holder.unlockCanvasAndPost(canvas);
 	}
 
@@ -771,7 +807,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			// insert the divider
 			View view = new View(mContext);
 			view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
-			view.setBackgroundColor(Color.GRAY);
+			view.setBackgroundColor(Color.parseColor("#d1d1d1"));
 			viewRoot.addView(view);
 			if (c.getChildren() != null) {
 				// create a sub linearLayout
@@ -799,10 +835,33 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 	}
 
-	private void addBrandTypeWithCategory(final LinearLayout viewRoot,
+	private void addBrandTypeWithCategory(LinearLayout viewRoot,
 			final OnClickListener listener) {
 		// get inflater
 		final LayoutInflater inflater = getLayoutInflater();
+		final LinearLayout subLayout = new LinearLayout(mContext);
+		subLayout.setOrientation(LinearLayout.VERTICAL);
+		subLayout.setVisibility(View.GONE);
+		LinearLayout itemLayout = (LinearLayout) inflater.inflate(
+				R.layout.item_menu, null);
+		TextView textView = (TextView) itemLayout
+				.findViewById(R.id.TextView_item_menu_name);
+		textView.setText(R.string.main_goods_list_brand);
+		textView.setTextSize(25);
+		textView.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				toggleVisibilty(subLayout);
+			}
+		});
+		viewRoot.addView(itemLayout);
+		// insert the divider
+		View view = new View(mContext);
+		view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
+		view.setBackgroundColor(Color.parseColor("#d1d1d1"));
+		viewRoot.addView(view);
+		viewRoot.addView(subLayout);
 		final Handler handler = new Handler(new Callback() {
 
 			@Override
@@ -822,15 +881,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					textView.setTag(R.string.tag_id, -1);
 					textView.setTag(R.string.tag_brands_id, brand.getId());
 					textView.setText(brand.getCnName());
-					textView.setTextSize(25);
+					textView.setTextSize(15);
 					textView.setOnClickListener(listener);
-					viewRoot.addView(itemLayout);
+					subLayout.addView(itemLayout);
 					// insert the divider
 					View view = new View(mContext);
 					view.setLayoutParams(new LayoutParams(
 							LayoutParams.MATCH_PARENT, 1));
-					view.setBackgroundColor(Color.GRAY);
-					viewRoot.addView(view);
+					view.setBackgroundColor(Color.parseColor("#d1d1d1"));
+					subLayout.addView(view);
 				}
 				return true;
 			}
@@ -960,22 +1019,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}).start();
 			}
 		};
-		// set header & footer
-		LinearLayout parentLayout = (LinearLayout) mListLayout.getParent();
-		parentLayout.getChildAt(0).setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				mListLayout.smoothScrollBy(100, 1000);
-			}
-		});
-		parentLayout.getChildAt(2).setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				mListLayout.smoothScrollBy(-100, 1000);
-			}
-		});
 		mListLayout.setAdapter(new MyAdapter(mContext, mGoodsList, mHandler));
 		mListLayout.setOnItemClickListener(new OnItemClickListener() {
 
@@ -985,7 +1028,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				listener.onClick(arg1);
 			}
 		});
-		parentLayout.setVisibility(View.VISIBLE);
+		mListLayout.setVisibility(View.VISIBLE);
 		mCartButton.setVisibility(View.GONE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));
 	}
@@ -1040,12 +1083,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			return;
 		}
 		// hide goods list by back key
-		// get parent container
-		LinearLayout parentLayout = (LinearLayout) mListLayout.getParent();
-		if (parentLayout.getVisibility() == View.GONE) {
+		if (mListLayout.getVisibility() == View.GONE) {
 			super.onBackPressed();
 		} else {
-			parentLayout.setVisibility(View.GONE);
+			mListLayout.setVisibility(View.GONE);
 			mCartButton.setVisibility(View.VISIBLE);
 		}
 	}
@@ -1099,9 +1140,32 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	int layer = -1; // identifier of layer finger touch on surfaceView
+	VelocityTracker tracker;
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		if (v.getId() == R.id.ScrollView_goodsType) {
+			if (tracker == null) {
+				tracker = VelocityTracker.obtain();
+			}
+			tracker.addMovement(event);
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				tracker.computeCurrentVelocity(1000);
+				if (tracker.getXVelocity() < -3000) {
+					toggleVisibilty(v);
+					tracker.recycle();
+				} else {
+					// reset the timer
+					if (mHandler.hasMessages(9)) {
+						mHandler.removeMessages(9);
+					}
+					mHandler.sendMessageDelayed(mHandler.obtainMessage(9),
+							10000);
+				}
+			}
+			return false;
+		}
+		// while on main screen
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			// check which layer first
@@ -1157,5 +1221,35 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				NotificUtil.showShortToast(R.string.toast_only_one_model_now);
 			}
 		}
+	}
+
+	@Override
+	public boolean onDown(MotionEvent e) {
+		return false;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent e) {
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		return false;
+	}
+
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+			float distanceY) {
+		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
+		return false;
 	}
 }

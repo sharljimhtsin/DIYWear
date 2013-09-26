@@ -39,6 +39,7 @@ public class DataHolder {
 		charMapping.put("fuzhuang", R.string.main_type_wears);
 		charMapping.put("裤子", Model.DOWN_CLOTHES_LAYER);
 		charMapping.put("外套", Model.COAT_LAYER);
+		charMapping.put("卫衣", Model.COAT_LAYER);
 		charMapping.put("针织衫", Model.UPPER_CLOTHES_LAYER);
 		charMapping.put("衬衫", Model.UPPER_CLOTHES_LAYER);
 		charMapping.put("T恤", Model.UPPER_CLOTHES_LAYER);
