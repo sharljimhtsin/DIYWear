@@ -29,8 +29,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -71,7 +74,8 @@ import com.yeegol.DIYWear.util.ThreadUtil;
  * 
  */
 public class MainActivity extends Activity implements SurfaceHolder.Callback,
-		OnClickListener, OnDismissListener, OnTouchListener, OnGestureListener {
+		OnClickListener, OnDismissListener, OnTouchListener, OnGestureListener,
+		OnScrollListener {
 
 	private static final String TAG = MainActivity.class.getName();
 
@@ -118,6 +122,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	Bitmap mBitmap;
 
 	UMSocialService mSocialService;
+
+	int mCategoryId;
+
+	String mBrandIds;
 
 	/*
 	 * (non-Javadoc)
@@ -183,6 +191,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					break;
 				case 9:
 					toggleVisibilty(mTypeContainer, true);
+					break;
+				case 10:
+					((BaseAdapter) mListLayout.getAdapter())
+							.notifyDataSetChanged();
+					underWorking = false;
 					break;
 				case 97:
 					mProgressDialog.show();
@@ -765,6 +778,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}).start();
 	}
 
+	static final int PAGE = 1;
+	static final int OFFSET = 20;
+
 	/**
 	 * fill the category bar with data from web
 	 */
@@ -774,11 +790,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void onClick(View v) {
-				int categoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
-				String brandIds = StrUtil.objToString(v
+				mCategoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
+				mBrandIds = StrUtil.objToString(v
 						.getTag(R.string.tag_brands_id));
-				prepareBottomBar(categoryId, brandIds, mBrandModel.getGender(),
-						mBrandModel.getAgeGroup());
+				prepareBottomBar(PAGE, OFFSET, mCategoryId, mBrandIds,
+						mBrandModel.getGender(), mBrandModel.getAgeGroup(),
+						true);
 			}
 		};
 		// pick the top of the tree
@@ -975,21 +992,35 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	/**
 	 * get goods list under specify category id & more conditions from web
 	 * 
+	 * @param page
+	 * @param size
 	 * @param categoryId
 	 * @param brandIds
 	 * @param gender
 	 * @param ageGroup
+	 * @param isNew
+	 *            reset or append
 	 */
-	private void prepareBottomBar(final int categoryId, final String brandIds,
-			final int gender, final int ageGroup) {
-		mHandler.sendMessage(mHandler.obtainMessage(97));
+	private void prepareBottomBar(final int page, final int size,
+			final int categoryId, final String brandIds, final int gender,
+			final int ageGroup, final boolean isNew) {
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				mGoodsList = Goods.doGoodsgetList(1, 20, categoryId, brandIds,
-						gender, ageGroup, null, 0, 0, null);
-				mHandler.sendMessage(mHandler.obtainMessage(5));
+				if (isNew) {
+					mHandler.sendMessage(mHandler.obtainMessage(97));
+					mGoodsList = Goods.doGoodsgetList(page, size, categoryId,
+							brandIds, gender, ageGroup, null, 0, 0, null);
+					mHandler.sendMessage(mHandler.obtainMessage(5));
+				} else {
+					List<Goods> tmpList = Goods.doGoodsgetList(page, size,
+							categoryId, brandIds, gender, ageGroup, null, 0, 0,
+							null);
+					mGoodsList.addAll(tmpList);
+					// notify the listView to refresh
+					mHandler.sendMessage(mHandler.obtainMessage(10));
+				}
 			}
 		}).start();
 	}
@@ -1016,12 +1047,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 					@Override
 					public void run() {
-						// get the goods object
+						// get the goods object from array
 						Goods goods = mGoodsList.get(StrUtil.ObjToInt(v
 								.getTag()));
+						// get whole goods from web
+						goods = Goods.doGoodsgetInfo(goods.getId());
 						// distinct its layer
 						mCurrentLayer = DataHolder.getInstance()
 								.getMappingLayerByName(goods.getCategoryName());
+						// deploy this goods
 						setGoods(goods, mCurrentDirect, mCurrentLayer);
 						// notice UI thread to refresh
 						mHandler.sendMessage(mHandler.obtainMessage(3));
@@ -1040,6 +1074,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			}
 		});
 		mListLayout.setVisibility(View.VISIBLE);
+		mListLayout.setOnScrollListener(this);
 		mCartButton.setVisibility(View.GONE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));
 	}
@@ -1262,5 +1297,34 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
 		return false;
+	}
+
+	private int getNextPage() {
+		if (mListLayout.getAdapter().getCount() % OFFSET == 0) {
+			return mListLayout.getAdapter().getCount() / OFFSET + 1;
+		} else {
+			return -1;
+		}
+	}
+
+	int scrollState;
+	boolean underWorking;
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		this.scrollState = scrollState;
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (firstVisibleItem + visibleItemCount == totalItemCount
+				&& scrollState == OnScrollListener.SCROLL_STATE_IDLE
+				&& !underWorking) {
+			underWorking = true;
+			prepareBottomBar(getNextPage(), OFFSET, mCategoryId, mBrandIds,
+					mBrandModel.getGender(), mBrandModel.getAgeGroup(), false);
+			LogUtil.logDebug("hit bottom", TAG);
+		}
 	}
 }

@@ -38,10 +38,22 @@ public class Goods {
 	String url;
 
 	/**
-	 * http://api.ihomebay.com/?key=d3c111daa7f83ab4b6930e2e45113dd4&method=
-	 * Goods.getList&page=1&size=20&id=13
+	 * query goods list from web
 	 * 
-	 * @return
+	 * @detail 
+	 *         http://api.ihomebay.com/?key=d3c111daa7f83ab4b6930e2e45113dd4&method
+	 *         = Goods.getList&page=1&size=20&id=13
+	 * @param page
+	 * @param size
+	 * @param categoryId
+	 * @param brandId
+	 * @param gender
+	 * @param ageGroup
+	 * @param name
+	 * @param priceMin
+	 * @param priceMax
+	 * @param attribute
+	 * @return goods list
 	 */
 	public static List<Goods> doGoodsgetList(int page, int size,
 			int categoryId, String brandId, int gender, int ageGroup,
@@ -49,12 +61,18 @@ public class Goods {
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		NameValuePair method = new BasicNameValuePair("method", "Goods.getList");
 		pairs.add(method);
+		NameValuePair pagee = new BasicNameValuePair("page",
+				StrUtil.intToString(page));
+		pairs.add(pagee);
+		NameValuePair sizee = new BasicNameValuePair("size",
+				StrUtil.intToString(size));
+		pairs.add(sizee);
 		if (categoryId != -1) {
 			NameValuePair categoryIdd = new BasicNameValuePair("categoryId",
 					StrUtil.intToString(categoryId));
 			pairs.add(categoryIdd);
 		}
-		if (brandId.equals("-1")) {
+		if (!brandId.equals("-1")) {
 			NameValuePair brandIdss = new BasicNameValuePair("brandId", brandId);
 			pairs.add(brandIdss);
 		}
@@ -76,6 +94,12 @@ public class Goods {
 		}.getType());
 	}
 
+	/**
+	 * query a whole goods by id
+	 * 
+	 * @param id
+	 * @return single goods entity
+	 */
 	public static Goods doGoodsgetInfo(int id) {
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		NameValuePair method = new BasicNameValuePair("method", "Goods.getInfo");
