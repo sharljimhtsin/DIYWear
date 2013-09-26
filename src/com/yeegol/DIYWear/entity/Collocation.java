@@ -24,7 +24,7 @@ public class Collocation {
 	int id;
 	String name;
 	String username;
-	String preview;
+	String photo;
 
 	public static List<Collocation> doCollocationgetList(int brandId,
 			int goodsId, int gender, String season, String ageGroup, int page,
@@ -288,7 +288,7 @@ public class Collocation {
 	 * @return the preview
 	 */
 	public String getPreview() {
-		return preview;
+		return photo;
 	}
 
 	/**
@@ -296,7 +296,22 @@ public class Collocation {
 	 *            the preview to set
 	 */
 	public void setPreview(String preview) {
-		this.preview = preview;
+		this.photo = preview;
+	}
+
+	/**
+	 * @return the photo
+	 */
+	public String getPhoto() {
+		return photo;
+	}
+
+	/**
+	 * @param photo
+	 *            the photo to set
+	 */
+	public void setPhoto(String photo) {
+		this.photo = photo;
 	}
 
 }

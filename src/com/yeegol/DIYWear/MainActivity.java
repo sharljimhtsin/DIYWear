@@ -51,6 +51,7 @@ import com.umeng.socialize.controller.UMSocialService;
 import com.umeng.socialize.media.UMImage;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
+import com.yeegol.DIYWear.clz.MyImageView;
 import com.yeegol.DIYWear.clz.MySurfaceView;
 import com.yeegol.DIYWear.entity.Brand;
 import com.yeegol.DIYWear.entity.Category;
@@ -479,7 +480,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				.findViewById(R.id.Button_view_goods_info_previous);
 		Button nextButton = (Button) layout
 				.findViewById(R.id.Button_view_goods_info_next);
-		final ImageView previewImageView = (ImageView) layout
+		final MyImageView previewImageView = (MyImageView) layout
 				.findViewById(R.id.ImageView_view_goods_info_preview);
 		// handler
 		final Handler handler = new Handler(new Callback() {
@@ -544,13 +545,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						return;
 					}
 					// bind the object
-					previewImageView.setTag(mColList.get(index - 1));
+					Collocation c = mColList.get(index - 1);
+					previewImageView.setTag(c);
 					// set image
-					new Thread(new Runnable() {
-						public void run() {
-							previewImageView.setImageBitmap(null);
-						}
-					}).start();
+					previewImageView.setURL(NetUtil.DOMAIN_FILE
+							+ c.getPreview());
 					break;
 				case R.id.ImageView_view_goods_info_preview:
 					if (index == -1) {
@@ -590,13 +589,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						return;
 					}
 					// bind object
-					previewImageView.setTag(mColList.get(index + 1));
+					Collocation c1 = mColList.get(index + 1);
+					previewImageView.setTag(c1);
 					// set image
-					new Thread(new Runnable() {
-						public void run() {
-							previewImageView.setImageBitmap(null);
-						}
-					}).start();
+					previewImageView.setURL(NetUtil.DOMAIN_FILE
+							+ c1.getPreview());
 					break;
 				default:
 					break;
@@ -622,13 +619,17 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		previousButton.setOnClickListener(listener);
 		nextButton.setOnClickListener(listener);
 		previewImageView.setOnClickListener(listener);
+		if (mColList != null) {
+			Collocation c = mColList.get(0);
+			previewImageView.setURL(NetUtil.DOMAIN_FILE + c.getPreview());
+		}
 		// attach view to popupWindow & show
 		mPopupWindow.setOnDismissListener(null);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(layout);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
-		mPopupWindow.update(mSurfaceView.getWidth() / 2,
-				mSurfaceView.getHeight() / 2);
+		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.5),
+				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.55));
 	}
 
 	private void prepareCartWindow() {
@@ -1050,8 +1051,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						// get the goods object from array
 						Goods goods = mGoodsList.get(StrUtil.ObjToInt(v
 								.getTag()));
+						// pick up goods's id & name
+						int id = goods.getId();
+						String name = goods.getName();
 						// get whole goods from web
 						goods = Goods.doGoodsgetInfo(goods.getId());
+						// set id & name
+						goods.setId(id);
+						goods.setName(name);
 						// distinct its layer
 						mCurrentLayer = DataHolder.getInstance()
 								.getMappingLayerByName(goods.getCategoryName());
