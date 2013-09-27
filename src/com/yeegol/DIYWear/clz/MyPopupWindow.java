@@ -9,10 +9,14 @@ import android.view.View;
 import android.widget.PopupWindow;
 
 /**
+ * a customize class base on {@link PopupWindow}
+ * 
  * @author sharl
  * 
  */
 public class MyPopupWindow extends PopupWindow {
+
+	private static final String TAG = MyPopupWindow.class.getName();
 
 	MyOnDismissListener listener;
 

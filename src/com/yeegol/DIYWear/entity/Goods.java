@@ -15,6 +15,8 @@ import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.StrUtil;
 
 /**
+ * Goods entity class mapping API
+ * 
  * @author sharl
  * @detail "id":"7441","name":
  *         "\u7537\u6b3e\u767d\u8272\u65f6\u5c1a\u7b80\u7ea6\u4f11\u95f2\u978b"
@@ -26,6 +28,9 @@ import com.yeegol.DIYWear.util.StrUtil;
  *         "6\/goods\/7519\/","tagPrice":"100.00","salePrice":"2000.00","url":""
  */
 public class Goods {
+
+	private static final String TAG = Goods.class.getName();
+
 	int id;
 	String name;
 	String preview;

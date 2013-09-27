@@ -20,6 +20,8 @@ import com.yeegol.DIYWear.entity.Model;
  */
 public class DataHolder {
 
+	private static final String TAG = DataHolder.class.getName();
+
 	static DataHolder instance;
 
 	HashMap<String, Integer> charMapping; // workaround for layer-mapping

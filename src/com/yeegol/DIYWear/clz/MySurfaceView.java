@@ -8,12 +8,15 @@ import android.util.AttributeSet;
 import android.view.SurfaceView;
 
 /**
- * customize SurfaceView class which can catch the touch event
+ * customize SurfaceView class base on {@link SurfaceView} which can catch the
+ * touch event
  * 
  * @author sharl
  * 
  */
 public class MySurfaceView extends SurfaceView {
+
+	private static final String TAG = MySurfaceView.class.getName();
 
 	public MySurfaceView(Context context) {
 		super(context);

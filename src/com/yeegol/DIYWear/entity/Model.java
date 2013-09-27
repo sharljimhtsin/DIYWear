@@ -34,6 +34,8 @@ import com.yeegol.DIYWear.util.StrUtil;
  */
 public class Model {
 
+	private static final String TAG = Model.class.getName();
+
 	static Model instance;
 
 	List<BrandModel> models;
@@ -374,6 +376,8 @@ public class Model {
 	}
 
 	/**
+	 * BrandModel entity class mapping API
+	 * 
 	 * @author sharl
 	 * 
 	 * @detail "id":"9","name":"nv","gender":"2","ageGroup":"2","preview":

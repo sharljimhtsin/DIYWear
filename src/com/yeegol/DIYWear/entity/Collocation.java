@@ -15,11 +15,15 @@ import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.StrUtil;
 
 /**
+ * Collocation entity class mapping API
+ * 
  * @author sharl
  * @detail 
  *         {"id":"1","name":"OL\u98ce\u683c","username":"pureadmin","preview":""}
  */
 public class Collocation {
+
+	private static final String TAG = Collocation.class.getName();
 
 	int id;
 	String name;

@@ -16,12 +16,14 @@ import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.ThreadUtil;
 
 /**
- * ImageView with web attribute
+ * ImageView with web attribute,base on {@link ImageView}
  * 
  * @author sharl
  * 
  */
 public class MyImageView extends ImageView {
+
+	private static final String TAG = MyImageView.class.getName();
 
 	private static final String KEY = "bitmap";
 

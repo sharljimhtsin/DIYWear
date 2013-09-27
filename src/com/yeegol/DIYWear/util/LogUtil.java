@@ -6,6 +6,8 @@ package com.yeegol.DIYWear.util;
 import android.util.Log;
 
 /**
+ * utils class for logging
+ * 
  * @author sharl
  * 
  */

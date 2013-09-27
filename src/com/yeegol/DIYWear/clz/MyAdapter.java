@@ -20,10 +20,14 @@ import com.yeegol.DIYWear.entity.Goods;
 import com.yeegol.DIYWear.util.NetUtil;
 
 /**
+ * customize class base on {@link BaseAdapter} for ListView
+ * 
  * @author sharl
  * 
  */
 public class MyAdapter extends BaseAdapter {
+
+	private static final String TAG = MyAdapter.class.getName();
 
 	Context context;
 

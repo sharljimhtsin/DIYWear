@@ -15,11 +15,16 @@ import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.StrUtil;
 
 /**
+ * Brand entity class mapping API
+ * 
  * @author sharl
  * @detail {"id":"2","cnName":"\u963f\u6851\u5a1c","enName":"Azona","logo":
  *         "7\/brand\/2\/logo.jpg"}
  */
 public class Brand {
+
+	private static final String TAG = Brand.class.getName();
+
 	int id;
 	String cnName;
 	String enName;

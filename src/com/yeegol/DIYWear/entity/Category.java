@@ -14,12 +14,17 @@ import com.yeegol.DIYWear.util.JSONUtil;
 import com.yeegol.DIYWear.util.NetUtil;
 
 /**
+ * Category entity class mapping API
+ * 
  * @author sharl
  * @detail "title":{"id":"11","dressMapId":"0","name":"xiezi","parentId":"0"},
  *         "children":false
  * 
  */
 public class Category {
+
+	private static final String TAG = Category.class.getName();
+
 	Model title;
 	List<Category> children;
 

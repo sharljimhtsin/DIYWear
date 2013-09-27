@@ -12,10 +12,15 @@ import org.apache.http.message.BasicNameValuePair;
 import com.yeegol.DIYWear.util.NetUtil;
 
 /**
+ * Background entity class mapping API
+ * 
  * @author sharl
  * 
  */
 public class Background {
+
+	private static final String TAG = Background.class.getName();
+
 	public static String doBackgroundgetList(int page, int size) {
 		List<NameValuePair> pair = new ArrayList<NameValuePair>();
 		NameValuePair method = new BasicNameValuePair("method",

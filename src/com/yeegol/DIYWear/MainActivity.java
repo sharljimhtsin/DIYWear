@@ -245,7 +245,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
-	 * get model list from web
+	 * get model list from web,run once
 	 */
 	private void prepareModelList() {
 		new Thread(new Runnable() {
@@ -270,7 +270,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
-	 * check the model's quality
+	 * check the model's quality,and order user to choice one
 	 */
 	private void pickUpIfNeed(boolean isStart) {
 		final List<BrandModel> list = Model.getInstance().getModels();
@@ -485,6 +485,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 	}
 
+	/**
+	 * create & pop-up the goods information window
+	 */
 	private void prepareGoodsInfoWindow() {
 		mPopupWindow = new MyPopupWindow(mContext);
 		// get layout inflater
@@ -661,6 +664,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
+	 * remove goods from cart & refresh the model
+	 * 
 	 * @param layer
 	 *            key of the layer
 	 */
@@ -710,6 +715,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		removeButton.setOnClickListener(this);
 	}
 
+	/**
+	 * create & pop-up the cart windows
+	 */
 	private void prepareCartWindow() {
 		mPopupWindow = new MyPopupWindow(mContext);
 		LinearLayout listView = new LinearLayout(mContext);
@@ -780,6 +788,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		Model.getInstance().setCurrentDirection(mCurrentDirect);
 	}
 
+	/**
+	 * hide or show the view
+	 * 
+	 * @param v
+	 *            view
+	 */
 	private void toggleVisibilty(View v) {
 		if (v.getVisibility() == View.VISIBLE) {
 			v.setVisibility(View.GONE);
@@ -801,7 +815,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
-	 * should not call directly
+	 * function to (re)-draw the model area,should not call directly
 	 * 
 	 * @author sharl
 	 */
@@ -924,6 +938,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 	}
 
+	/**
+	 * insert brand item to left side-bar
+	 * 
+	 * @param viewRoot
+	 *            parent view
+	 * @param listener
+	 *            trigger
+	 */
 	private void addBrandTypeWithCategory(LinearLayout viewRoot,
 			final OnClickListener listener) {
 		// get inflater
@@ -1149,6 +1171,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mHandler.sendMessage(mHandler.obtainMessage(98));
 	}
 
+	/**
+	 * add & deploy this goods
+	 * 
+	 * @param goods
+	 * @param direct
+	 * @param layer
+	 */
 	private void setGoods(Goods goods, String direct, int layer) {
 		// add to temporary cart,not final
 		mTempCart.put(layer, goods);
@@ -1360,6 +1389,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		return false;
 	}
 
+	/**
+	 * calculate the right page number for current ListView
+	 * 
+	 * @return the page to query
+	 */
 	private int getNextPage() {
 		if (mListLayout.getAdapter().getCount() % OFFSET == 0) {
 			return mListLayout.getAdapter().getCount() / OFFSET + 1;
