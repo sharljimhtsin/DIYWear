@@ -84,26 +84,16 @@
             android:background="@drawable/bg_bottom"
             android:orientation="horizontal"
             android:visibility="visible"
-            android:weightSum="6" >
+            android:weightSum="5" >
 
             <Button
-                android:id="@+id/Button_switchToMan"
+                android:id="@+id/Button_switchModel"
                 android:layout_width="0dip"
                 android:layout_height="50dip"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:background="@null"
-                android:text="@string/main_male"
-                android:textSize="20sp" />
-
-            <Button
-                android:id="@+id/Button_switchToWoman"
-                android:layout_width="0dip"
-                android:layout_height="50dip"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:background="@null"
-                android:text="@string/main_female"
+                android:text="@string/main_swith_model"
                 android:textSize="20sp" />
 
             <Button

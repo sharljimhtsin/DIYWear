@@ -7,8 +7,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -155,14 +157,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				case 0:
 					mHandler.sendMessage(mHandler.obtainMessage(97));
 					prepareModelList();
-					prepareLeftSidebar();
 					prepareRightSidebar();
 					break;
 				case 1:
-					pickUpIfNeed();
+					pickUpIfNeed(true);
 					break;
 				case 2:
 					mHandler.sendMessage(mHandler.obtainMessage(97));
+					prepareLeftSidebar();
 					prepareLayer(mCurrentDirect);
 					break;
 				case 3:
@@ -264,15 +266,32 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	/**
 	 * check the model's quality
 	 */
-	private void pickUpIfNeed() {
-		List<BrandModel> list = Model.getInstance().getModels();
-		if (list != null && list.size() > 1) {
-			// TODO: popup a dialogue here
-			mBrandModel = list.get(1);
+	private void pickUpIfNeed(boolean isStart) {
+		final List<BrandModel> list = Model.getInstance().getModels();
+		if (list != null && list.size() > 1 && !isStart) {
+			// convert
+			CharSequence[] cs = new CharSequence[list.size()];
+			for (int i = 0; i < cs.length; i++) {
+				cs[i] = list.get(i).getName();
+			}
+			// create a pick dialogue
+			AlertDialog dialog = new AlertDialog.Builder(mContext)
+					.setTitle("pick model")
+					.setItems(cs, new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							reset();
+							toggleVisibilty(mListLayout);
+							mBrandModel = list.get(which);
+							mHandler.sendMessage(mHandler.obtainMessage(2));
+						}
+					}).create();
+			dialog.show();
 		} else {
 			mBrandModel = list.get(0);
+			mHandler.sendMessage(mHandler.obtainMessage(2));
 		}
-		mHandler.sendMessage(mHandler.obtainMessage(2));
 	}
 
 	/**
@@ -365,12 +384,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		case R.id.Button_showFunction:
 			toggleVisibilty(mFunctionLayout);
 			break;
-		case R.id.Button_switchToMan:
-			toggleSex(1);
-			toggleFunctionBtn(v.getId());
-			break;
-		case R.id.Button_switchToWoman:
-			toggleSex(2);
+		case R.id.Button_switchModel:
+			toggleSex();
 			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_turnBack:
@@ -622,6 +637,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		if (mColList != null) {
 			Collocation c = mColList.get(0);
 			previewImageView.setURL(NetUtil.DOMAIN_FILE + c.getPreview());
+		} else {
+			// hide if no recommend
+			toggleVisibilty((View) previewImageView.getParent());
 		}
 		// attach view to popupWindow & show
 		mPopupWindow.setOnDismissListener(null);
@@ -806,6 +824,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		} else {
 			treeTop = mCategoryList.get(1);
 		}
+		// clear first
+		mTypeLayout.removeAllViews();
 		// build the bar
 		addBrandTypeWithCategory(mTypeLayout, listener);
 		buildLeftSidebarRecursively(treeTop.getChildren(), mTypeLayout,
@@ -928,7 +948,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void run() {
-				List<Brand> list = Brand.doBrandgetList(-1, "", 1, 20);
+				List<Brand> list = Brand.doBrandgetList(-1, "",
+						mBrandModel.getGender(), mBrandModel.getAgeGroup(), 1,
+						20);
 				handler.sendMessage(handler.obtainMessage(0, list));
 			}
 		});
@@ -984,7 +1006,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			@Override
 			public void run() {
 				List<Brand> list = Brand.doBrandgetList(category.getTitle()
-						.getId(), "", 1, 20);
+						.getId(), "", mBrandModel.getGender(), mBrandModel
+						.getAgeGroup(), 1, 20);
 				handler.sendMessage(handler.obtainMessage(0, list));
 			}
 		});
@@ -1108,15 +1131,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 */
 	private void prepareRightSidebar() {
 		// get controls
-		Button switchToManButton = (Button) findViewById(R.id.Button_switchToMan);
-		Button switchToWomenButton = (Button) findViewById(R.id.Button_switchToWoman);
+		Button switchModelButton = (Button) findViewById(R.id.Button_switchModel);
 		Button turnBackButton = (Button) findViewById(R.id.Button_turnBack);
 		Button undoButton = (Button) findViewById(R.id.Button_undo);
 		Button saveButton = (Button) findViewById(R.id.Button_save);
 		Button shareButton = (Button) findViewById(R.id.Button_share);
 		// register event
-		switchToManButton.setOnClickListener(this);
-		switchToWomenButton.setOnClickListener(this);
+		switchModelButton.setOnClickListener(this);
 		turnBackButton.setOnClickListener(this);
 		undoButton.setOnClickListener(this);
 		saveButton.setOnClickListener(this);
@@ -1264,15 +1285,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * switch model's gender
 	 * 
 	 * @param gender
-	 *            target sex,1 for male,2 for female
+	 *            target sex,1 for male,2 for female,omit
 	 */
-	private void toggleSex(int gender) {
-		if (mBrandModel.getGender() == gender) {
-			NotificUtil.showShortToast(R.string.toast_no_need_to_switch);
+	private void toggleSex() {
+		if (Model.getInstance().getModels().size() == 1) {
+			NotificUtil.showShortToast(R.string.toast_only_one_model_now);
 		} else {
-			if (Model.getInstance().getModels().size() == 1) {
-				NotificUtil.showShortToast(R.string.toast_only_one_model_now);
-			}
+			pickUpIfNeed(false);
 		}
 	}
 

@@ -6,8 +6,7 @@
     <string name="main_user_experience">用户体验</string>
     <string name="main_goods_list">商品列表</string>
     <string name="main_function_list">功能列表</string>
-    <string name="main_male">男士</string>
-    <string name="main_female">女士</string>
+    <string name="main_swith_model">模特</string>
     <string name="main_turn">转身</string>
     <string name="main_undo">撤除</string>
     <string name="main_save">保存</string>

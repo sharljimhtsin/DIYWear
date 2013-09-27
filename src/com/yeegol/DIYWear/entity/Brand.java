@@ -28,18 +28,26 @@ public class Brand {
 	/**
 	 * @param categoryId
 	 * @param name
+	 * @param gender
+	 * @param ageGroup
 	 * @param page
 	 * @param size
 	 * @return brand in array
 	 */
 	public static List<Brand> doBrandgetList(int categoryId, String name,
-			int page, int size) {
+			int gender, int ageGroup, int page, int size) {
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		NameValuePair method = new BasicNameValuePair("method", "Brand.getList");
 		pairs.add(method);
 		NameValuePair categoryIdd = new BasicNameValuePair("categoryId",
 				StrUtil.intToString(categoryId));
 		pairs.add(categoryIdd);
+		NameValuePair genderr = new BasicNameValuePair("gender",
+				StrUtil.intToString(gender));
+		pairs.add(genderr);
+		NameValuePair ageGroupp = new BasicNameValuePair("ageGroup",
+				StrUtil.intToString(ageGroup));
+		pairs.add(ageGroupp);
 		// TODO: more condition
 		String content = NetUtil.getTextFromWeb(NetUtil.buildURL(pairs),
 				NetUtil.DOMAIN_API_PURE);
