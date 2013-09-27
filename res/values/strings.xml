@@ -55,6 +55,7 @@
     <string name="tag_name">1</string>
     <string name="tag_dress_map_id">2</string>
     <string name="tag_brands_id">3</string>
+    <string name="tag_from_cart_window">3</string>
     <string name="umeng_key">5243a95256240bd6440573e6</string>
 
 </resources>

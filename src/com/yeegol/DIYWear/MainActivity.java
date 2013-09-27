@@ -41,8 +41,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
-import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -54,6 +52,8 @@ import com.umeng.socialize.media.UMImage;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MyImageView;
+import com.yeegol.DIYWear.clz.MyOnDismissListener;
+import com.yeegol.DIYWear.clz.MyPopupWindow;
 import com.yeegol.DIYWear.clz.MySurfaceView;
 import com.yeegol.DIYWear.entity.Brand;
 import com.yeegol.DIYWear.entity.Category;
@@ -77,8 +77,8 @@ import com.yeegol.DIYWear.util.ThreadUtil;
  * 
  */
 public class MainActivity extends Activity implements SurfaceHolder.Callback,
-		OnClickListener, OnDismissListener, OnTouchListener, OnGestureListener,
-		OnScrollListener {
+		OnClickListener, MyOnDismissListener, OnTouchListener,
+		OnGestureListener, OnScrollListener {
 
 	private static final String TAG = MainActivity.class.getName();
 
@@ -116,7 +116,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	Button mCartButton;
 
-	PopupWindow mPopupWindow;
+	MyPopupWindow mPopupWindow;
 
 	List<Collocation> mColList;
 
@@ -190,7 +190,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					}
 					break;
 				case 8:
-					mPopupWindow.dismiss();
+					if (mPopupWindow != null) {
+						if (mPopupWindow.getListener() == null) {
+							mPopupWindow.dismiss(false);
+						} else {
+							mPopupWindow.dismiss(true);
+						}
+					}
 					break;
 				case 9:
 					toggleVisibilty(mTypeContainer, true);
@@ -385,6 +391,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			toggleVisibilty(mFunctionLayout);
 			break;
 		case R.id.Button_switchModel:
+			mHandler.sendMessage(mHandler.obtainMessage(8));
 			toggleSex();
 			toggleFunctionBtn(v.getId());
 			break;
@@ -396,6 +403,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		case R.id.Button_undo:
 			reset();
 			mHandler.sendMessage(mHandler.obtainMessage(2));
+			mHandler.sendMessage(mHandler.obtainMessage(8));
 			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_save:
@@ -444,12 +452,17 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			}
 			break;
 		case R.id.Button_item_cart_remove:
-			mTempCart.removeAt(StrUtil.ObjToInt(v.getTag()));
+			int index = StrUtil.ObjToInt(v.getTag());
+			// get its layer
+			int layer = mTempCart.keyAt(index);
+			removeGoodsFromCartAndRefreshUI(layer);
 			NotificUtil
 					.showShortToast(R.string.toast_remove_from_list_successlly);
-			// refresh current cart window
-			mPopupWindow.dismiss(); // close old one
-			prepareCartWindow(); // generate new one
+			mPopupWindow.dismiss(false); // close old one
+			if ("1".equals(v.getTag(R.string.tag_from_cart_window))) {
+				// refresh current cart window
+				prepareCartWindow(); // generate new one
+			}
 			break;
 		default:
 			break;
@@ -473,7 +486,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	private void prepareGoodsInfoWindow() {
-		mPopupWindow = new PopupWindow(mContext);
+		mPopupWindow = new MyPopupWindow(mContext);
 		// get layout inflater
 		LayoutInflater inflater = LayoutInflater.from(mContext);
 		LinearLayout layout = (LinearLayout) inflater.inflate(
@@ -533,12 +546,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						.indexOfValue(mCurrentGoods));
 				switch (v.getId()) {
 				case R.id.Button_view_goods_info_remove:
-					// remove the layer & data related
-					Model.getInstance().setLayer(layer, null);
-					mTempCart.remove(layer);
-					mCart.remove(mCurrentGoods);
-					// refresh UI
-					drawModel();
+					removeGoodsFromCartAndRefreshUI(layer);
 					mHandler.sendMessage(mHandler.obtainMessage(8));
 					break;
 				case R.id.Button_view_goods_info_dress_way_one:
@@ -616,6 +624,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			}
 		};
 		// set value
+		createCartItem(layout, mCurrentGoods,
+				mTempCart.indexOfValue(mCurrentGoods), false);
 		nameTextView.setText(mCurrentGoods.getName());
 		new Thread(new Runnable() {
 
@@ -642,7 +652,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			toggleVisibilty((View) previewImageView.getParent());
 		}
 		// attach view to popupWindow & show
-		mPopupWindow.setOnDismissListener(null);
+		mPopupWindow.setListener(null);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(layout);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -650,8 +660,58 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.55));
 	}
 
+	/**
+	 * @param layer
+	 *            key of the layer
+	 */
+	private void removeGoodsFromCartAndRefreshUI(int layer) {
+		// remove the layer & data related
+		Model.getInstance().setLayer(layer, null);
+		mTempCart.remove(layer);
+		mCart.remove(mCurrentGoods);
+		// refresh UI
+		drawModel();
+	}
+
+	/**
+	 * @param layout
+	 *            parent view
+	 * @param g
+	 *            the goods
+	 * @param i
+	 *            index of goods in temporarily cart
+	 */
+	private void createCartItem(View layout, Goods g, int i,
+			boolean fromCartWindow) {
+		// get controls
+		ImageView iconImageView = (ImageView) layout
+				.findViewById(R.id.ImageView_item_cart_icon);
+		TextView nameTextView = (TextView) layout
+				.findViewById(R.id.TextView_item_cart_name);
+		TextView priceTextView = (TextView) layout
+				.findViewById(R.id.TextView_item_cart_price);
+		Button addButton = (Button) layout
+				.findViewById(R.id.Button_item_cart_add);
+		Button removeButton = (Button) layout
+				.findViewById(R.id.Button_item_cart_remove);
+		// set value
+		iconImageView.setImageBitmap(Model.getInstance().getBitmapFromCache(
+				NetUtil.buildURLForThumb(g.getPreview())));
+		nameTextView.setText(g.getName());
+		priceTextView.setText(StrUtil.dobToString(g.getSalePrice()));
+		addButton.setTag(i);
+		addButton.setOnClickListener(this);
+		removeButton.setTag(i);
+		if (fromCartWindow) {
+			removeButton.setTag(R.string.tag_from_cart_window, "1");
+		} else {
+			removeButton.setTag(R.string.tag_from_cart_window, "0");
+		}
+		removeButton.setOnClickListener(this);
+	}
+
 	private void prepareCartWindow() {
-		mPopupWindow = new PopupWindow(mContext);
+		mPopupWindow = new MyPopupWindow(mContext);
 		LinearLayout listView = new LinearLayout(mContext);
 		listView.setOrientation(LinearLayout.VERTICAL);
 		// get layout inflater
@@ -660,30 +720,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			Goods g = mTempCart.valueAt(i);
 			RelativeLayout layout = (RelativeLayout) inflater.inflate(
 					R.layout.item_cart, null);
-			// get controls
-			ImageView iconImageView = (ImageView) layout
-					.findViewById(R.id.ImageView_item_cart_icon);
-			TextView nameTextView = (TextView) layout
-					.findViewById(R.id.TextView_item_cart_name);
-			TextView priceTextView = (TextView) layout
-					.findViewById(R.id.TextView_item_cart_price);
-			Button addButton = (Button) layout
-					.findViewById(R.id.Button_item_cart_add);
-			Button removeButton = (Button) layout
-					.findViewById(R.id.Button_item_cart_remove);
-			// set value
-			iconImageView.setImageBitmap(Model.getInstance()
-					.getBitmapFromCache(
-							NetUtil.buildURLForThumb(g.getPreview())));
-			nameTextView.setText(g.getName());
-			priceTextView.setText(StrUtil.dobToString(g.getSalePrice()));
-			addButton.setTag(i);
-			addButton.setOnClickListener(this);
-			removeButton.setTag(i);
-			removeButton.setOnClickListener(this);
+			createCartItem(layout, g, i, true);
 			listView.addView(layout);
 		}
-		mPopupWindow.setOnDismissListener(this);
+		mPopupWindow.setListener(this);
 		mPopupWindow.setOutsideTouchable(true);
 		mPopupWindow.setContentView(listView.getChildCount() > 0 ? listView
 				: inflater.inflate(R.layout.view_empty_cart, null));
@@ -1153,21 +1193,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	public void onBackPressed() {
 		// close pop-up window by back key
 		if (mPopupWindow != null && mPopupWindow.isShowing()) {
-			mPopupWindow.dismiss();
+			mPopupWindow.dismiss(true);
 			return;
 		}
 		// hide goods list by back key
 		if (mListLayout.getVisibility() == View.GONE) {
-			super.onBackPressed();
+			System.exit(0);
 		} else {
 			mListLayout.setVisibility(View.GONE);
 			mCartButton.setVisibility(View.VISIBLE);
 		}
-	}
-
-	@Override
-	public void onDismiss() {
-		toggleButton(mCartButton, true);
 	}
 
 	/**
@@ -1352,5 +1387,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					mBrandModel.getGender(), mBrandModel.getAgeGroup(), false);
 			LogUtil.logDebug("hit bottom", TAG);
 		}
+	}
+
+	@Override
+	public void onDismiss(boolean needRefresh) {
+		toggleButton(mCartButton, needRefresh);
+	}
+
+	@Override
+	public void onDismiss() {
+		// do nothing
 	}
 }
