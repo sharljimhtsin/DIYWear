@@ -15,7 +15,7 @@
     <string name="popup_all_to_cart">全部放入购物车</string>
     <string name="popup_price">价格</string>
     <string name="popup_cart">购物车</string>
-    <string name="popup_remove">删除</string>
+    <string name="popup_remove">移除</string>
     <string name="progress_dialog_title">请等待</string>
     <string name="progress_dialog_content">载入中……</string>
     <string name="toast_add_to_cart_successlly">已加入购物车</string>
@@ -43,6 +43,13 @@
     <string name="main_goods_list_brand">品牌</string>
     <string name="toast_image_saved_to_local_successlly">图片已成功保存到本地，</string>
     <string name="umeng_share_content">我喜爱的模特搭配，分享一下</string>
+    <string name="alert_dial_undo_title">确认撤销？</string>
+    <string name="alert_dial_undo_message">这将会去除模特身上的所有衣服</string>
+    <string name="alert_dial_undo_yes_btn">是</string>
+    <string name="alert_dial_undo_no_btn">否</string>
+    <string name="alert_dial_pick_model_title">选择模特</string>
+    <string name="alert_dial_save_to_local_title">确认保存？</string>
+    <string name="alert_dial_save_to_local_message">这将会保存模特试衣图到本地</string>
 
     <!-- system strings -->
     <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>

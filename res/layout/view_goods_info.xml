@@ -12,14 +12,6 @@
         layout="@layout/item_cart" />
 
     <TextView
-        android:id="@+id/TextView_view_goods_info_name"
-        android:layout_width="200dip"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textColor="@android:color/black"
-        android:textSize="20sp" />
-
-    <TextView
         android:id="@+id/TextView_view_goods_info_dress_way_label"
         android:layout_width="200dip"
         android:layout_height="wrap_content"
@@ -52,7 +44,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="gone" >
 
         <Button
             android:id="@+id/Button_view_goods_info_detail"
@@ -67,40 +60,47 @@
             android:text="@string/view_goods_info_remove" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/TextView_view_goods_info_recommend"
-        android:layout_width="200dip"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/view_goods_info_recommend"
-        android:textColor="@android:color/black"
-        android:textSize="20sp" />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/Button_view_goods_info_previous"
-            android:layout_width="50dip"
-            android:layout_height="50dip"
-            android:layout_gravity="center_vertical"
-            android:text="@string/view_goods_info_previous" />
+        <TextView
+            android:id="@+id/TextView_view_goods_info_recommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/view_goods_info_recommend"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
 
-        <com.yeegol.DIYWear.clz.MyImageView
-            android:id="@+id/ImageView_view_goods_info_preview"
-            android:layout_width="200dip"
-            android:layout_height="200dip"
-            android:layout_gravity="center_vertical" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/Button_view_goods_info_next"
-            android:layout_width="50dip"
-            android:layout_height="50dip"
-            android:layout_gravity="center_vertical"
-            android:text="@string/view_goods_info_next" />
+            <Button
+                android:id="@+id/Button_view_goods_info_previous"
+                android:layout_width="50dip"
+                android:layout_height="50dip"
+                android:layout_gravity="center_vertical"
+                android:text="@string/view_goods_info_previous" />
+
+            <com.yeegol.DIYWear.clz.MyImageView
+                android:id="@+id/ImageView_view_goods_info_preview"
+                android:layout_width="200dip"
+                android:layout_height="200dip"
+                android:layout_gravity="center_vertical" />
+
+            <Button
+                android:id="@+id/Button_view_goods_info_next"
+                android:layout_width="50dip"
+                android:layout_height="50dip"
+                android:layout_gravity="center_vertical"
+                android:text="@string/view_goods_info_next" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

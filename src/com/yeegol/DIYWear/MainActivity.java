@@ -191,10 +191,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					break;
 				case 8:
 					if (mPopupWindow != null) {
-						if (mPopupWindow.getListener() == null) {
-							mPopupWindow.dismiss(false);
-						} else {
+						if (mPopupWindow.isTag()) {
 							mPopupWindow.dismiss(true);
+						} else {
+							mPopupWindow.dismiss(false);
 						}
 					}
 					break;
@@ -205,6 +205,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					((BaseAdapter) mListLayout.getAdapter())
 							.notifyDataSetChanged();
 					underWorking = false;
+					break;
+				case 11:
+					NotificUtil.showShortToast("networking error");
 					break;
 				case 97:
 					mProgressDialog.show();
@@ -237,6 +240,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		showTypeButton.setOnClickListener(this);
 		showFunctionButton.setOnClickListener(this);
 		mCartButton.setOnClickListener(this);
+		mCartButton.setOnTouchListener(this);
 		mSurfaceView.getHolder().addCallback(this);
 		mSurfaceView.setOnTouchListener(this);
 		mTypeContainer.setOnTouchListener(this);
@@ -282,7 +286,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			}
 			// create a pick dialogue
 			AlertDialog dialog = new AlertDialog.Builder(mContext)
-					.setTitle("pick model")
+					.setTitle(R.string.alert_dial_pick_model_title)
 					.setItems(cs, new DialogInterface.OnClickListener() {
 
 						@Override
@@ -290,6 +294,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							reset();
 							toggleVisibilty(mListLayout);
 							mBrandModel = list.get(which);
+							// set direct to front
+							mCurrentDirect = Model.MODEL_DIRECT_FRONT;
+							// sync it
+							Model.getInstance().setCurrentDirection(
+									mCurrentDirect);
 							mHandler.sendMessage(mHandler.obtainMessage(2));
 						}
 					}).create();
@@ -383,6 +392,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void onClick(View v) {
+		android.content.DialogInterface.OnClickListener listener;
 		switch (v.getId()) {
 		case R.id.Button_showType:
 			toggleVisibilty(mTypeContainer);
@@ -393,39 +403,65 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		case R.id.Button_switchModel:
 			mHandler.sendMessage(mHandler.obtainMessage(8));
 			toggleSex();
-			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_turnBack:
 			toggleDirection();
 			mHandler.sendMessage(mHandler.obtainMessage(2));
-			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_undo:
-			reset();
-			mHandler.sendMessage(mHandler.obtainMessage(2));
-			mHandler.sendMessage(mHandler.obtainMessage(8));
-			toggleFunctionBtn(v.getId());
+			listener = new android.content.DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (which == DialogInterface.BUTTON_POSITIVE) {
+						reset();
+						mHandler.sendMessage(mHandler.obtainMessage(2));
+						mHandler.sendMessage(mHandler.obtainMessage(8));
+					} else {
+						// nothing to do
+					}
+				}
+			};
+			NotificUtil
+					.showAlertDiaWithYesOrNo(
+							R.string.alert_dial_undo_title,
+							StrUtil.charToString(getText(R.string.alert_dial_undo_message)),
+							mContext, listener);
 			break;
 		case R.id.Button_save:
-			try {
-				String fileName = "image.jpg";
-				if (FSUtil.writeBitmapToFile(mContext, mBitmap, fileName)) {
-					NotificUtil
-							.showShortToast(getText(R.string.toast_image_saved_to_local_successlly)
-									+ getFileStreamPath(fileName)
-											.getAbsolutePath());
+			listener = new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (which == DialogInterface.BUTTON_POSITIVE) {
+						try {
+							String fileName = "image.jpg";
+							if (FSUtil.writeBitmapToFile(mContext, mBitmap,
+									fileName)) {
+								NotificUtil
+										.showLongToast(getText(R.string.toast_image_saved_to_local_successlly)
+												+ getFileStreamPath(fileName)
+														.getAbsolutePath());
+							}
+						} catch (IOException e) {
+							LogUtil.logException(e, TAG);
+						}
+					} else {
+						// nothing to do
+					}
 				}
-			} catch (IOException e) {
-				LogUtil.logException(e, TAG);
-			}
-			toggleFunctionBtn(v.getId());
+			};
+			NotificUtil
+					.showAlertDiaWithYesOrNo(
+							R.string.alert_dial_save_to_local_title,
+							StrUtil.charToString(getText(R.string.alert_dial_save_to_local_message)),
+							mContext, listener);
 			break;
 		case R.id.Button_share:
 			mSocialService.setShareContent(StrUtil
 					.charToString(getText(R.string.umeng_share_content)));
 			mSocialService.setShareImage(new UMImage(mContext, mBitmap));
 			mSocialService.openShare(this, false);
-			toggleFunctionBtn(v.getId());
 			break;
 		case R.id.Button_cart:
 			if (toggleButton(v, false)) {
@@ -470,18 +506,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
-	 * change button's background while clicked
+	 * change button's background while touched
 	 * 
-	 * @param id
+	 * @param v
 	 */
-	private void toggleFunctionBtn(int id) {
-		for (int i = 0; i < mFunctionLayout.getChildCount(); i++) {
-			Button b = (Button) mFunctionLayout.getChildAt(i);
-			if (b.getId() == id) {
-				b.setBackgroundResource(R.drawable.bg_btn_bottom);
-			} else {
-				b.setBackground(null);
-			}
+	private void toggleFunctionBtn(View v) {
+		if (v.getBackground() == null) {
+			v.setBackgroundResource(R.drawable.bg_btn_bottom);
+		} else {
+			v.setBackground(null);
 		}
 	}
 
@@ -495,8 +528,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		LinearLayout layout = (LinearLayout) inflater.inflate(
 				R.layout.view_goods_info, null);
 		// get controls
-		TextView nameTextView = (TextView) layout
-				.findViewById(R.id.TextView_view_goods_info_name);
 		TextView dressWayLabelTextView = (TextView) layout
 				.findViewById(R.id.TextView_view_goods_info_dress_way_label);
 		Button dressWayOneButton = (Button) layout
@@ -593,14 +624,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 								Goods goods = Goods.doGoodsgetInfo(StrUtil
 										.StringToInt(id));
 								// wear it
-								setGoods(
+								boolean success = setGoods(
 										goods,
 										mCurrentDirect,
 										DataHolder
 												.getInstance()
 												.getMappingLayerByName(
 														goods.getCategoryName()));
-								list.add(goods);
+								if (success) {
+									list.add(goods);
+								} else {
+									mHandler.sendMessage(mHandler
+											.obtainMessage(11));
+									return;
+								}
 							}
 							// refresh UI
 							drawModel();
@@ -629,7 +666,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// set value
 		createCartItem(layout, mCurrentGoods,
 				mTempCart.indexOfValue(mCurrentGoods), false);
-		nameTextView.setText(mCurrentGoods.getName());
 		new Thread(new Runnable() {
 
 			@Override
@@ -652,10 +688,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			previewImageView.setURL(NetUtil.DOMAIN_FILE + c.getPreview());
 		} else {
 			// hide if no recommend
-			toggleVisibilty((View) previewImageView.getParent());
+			toggleVisibilty((View) previewImageView.getParent().getParent());
 		}
+		// make other unusable
+		toggleSidebarTouchable();
 		// attach view to popupWindow & show
-		mPopupWindow.setListener(null);
+		mPopupWindow.setListener(this);
+		mPopupWindow.setTag(false);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(layout);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -732,12 +771,28 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			listView.addView(layout);
 		}
 		mPopupWindow.setListener(this);
+		mPopupWindow.setTag(true);
 		mPopupWindow.setOutsideTouchable(true);
 		mPopupWindow.setContentView(listView.getChildCount() > 0 ? listView
 				: inflater.inflate(R.layout.view_empty_cart, null));
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.8),
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
+	}
+
+	boolean allDisabled = false;
+
+	/**
+	 * make the left/right side-bar enable/disable
+	 */
+	private void toggleSidebarTouchable() {
+		if (mListLayout.isEnabled()) {
+			mListLayout.setEnabled(false);
+			allDisabled = true;
+		} else {
+			mListLayout.setEnabled(true);
+			allDisabled = false;
+		}
 	}
 
 	int i = 0; // number counter for record button press
@@ -863,6 +918,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void onClick(View v) {
+				if (allDisabled) {
+					return;
+				}
 				mCategoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
 				mBrandIds = StrUtil.objToString(v
 						.getTag(R.string.tag_brands_id));
@@ -1128,11 +1186,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void onClick(final View v) {
-				mHandler.sendMessage(mHandler.obtainMessage(97));
 				new Thread(new Runnable() {
 
 					@Override
 					public void run() {
+						mHandler.sendMessage(mHandler.obtainMessage(97));
 						// get the goods object from array
 						Goods goods = mGoodsList.get(StrUtil.ObjToInt(v
 								.getTag()));
@@ -1147,11 +1205,24 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						// distinct its layer
 						mCurrentLayer = DataHolder.getInstance()
 								.getMappingLayerByName(goods.getCategoryName());
+						// check if already contain it,if so,take off it & end
+						Goods tmpG;
+						if ((tmpG = mTempCart.get(mCurrentLayer)) != null
+								&& tmpG.getId() == goods.getId()) {
+							removeGoodsFromCartAndRefreshUI(mCurrentLayer);
+							mHandler.sendMessage(mHandler.obtainMessage(98));
+							return;
+						}
 						// deploy this goods
-						setGoods(goods, mCurrentDirect, mCurrentLayer);
-						// notice UI thread to refresh
-						mHandler.sendMessage(mHandler.obtainMessage(3));
-						LogUtil.logDebug(TAG, "current id = " + goods.getName());
+						if (setGoods(goods, mCurrentDirect, mCurrentLayer)) {
+							// notice UI thread to refresh
+							mHandler.sendMessage(mHandler.obtainMessage(3));
+							LogUtil.logDebug(TAG,
+									"current id = " + goods.getName());
+						} else {
+							mHandler.sendMessage(mHandler.obtainMessage(11));
+							mHandler.sendMessage(mHandler.obtainMessage(98));
+						}
 					}
 				}).start();
 			}
@@ -1167,32 +1238,34 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		});
 		mListLayout.setVisibility(View.VISIBLE);
 		mListLayout.setOnScrollListener(this);
-		mCartButton.setVisibility(View.GONE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));
 	}
 
 	/**
-	 * add & deploy this goods
+	 * add & deploy this goods,or remove it if already wear
 	 * 
 	 * @param goods
 	 * @param direct
 	 * @param layer
 	 */
-	private void setGoods(Goods goods, String direct, int layer) {
+	private boolean setGoods(Goods goods, String direct, int layer) {
 		// add to temporary cart,not final
 		mTempCart.put(layer, goods);
 		// build the URI
 		String url = NetUtil.buildURLForNormal(goods.getPreview(), direct);
 		// retrieve the goods's image
 		Bitmap bm = NetUtil.getImageFromWeb(url, NetUtil.DOMAIN_FILE_PURE);
-		// set it
-		Model.getInstance().setLayer(layer, new MyBitmap(bm, url, direct));
 		// get the goods's [x,y] data
 		String json = NetUtil.getTextFromWeb(
 				NetUtil.buildURLForNormalConf(goods.getPreview()),
 				NetUtil.DOMAIN_FILE_PURE);
+		if (bm == null || json == null) {
+			return false;
+		}
 		// set it
+		Model.getInstance().setLayer(layer, new MyBitmap(bm, url, direct));
 		Model.getInstance().setPosDescribe(json, layer, direct);
+		return true;
 	}
 
 	/**
@@ -1211,6 +1284,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		undoButton.setOnClickListener(this);
 		saveButton.setOnClickListener(this);
 		shareButton.setOnClickListener(this);
+		switchModelButton.setOnTouchListener(this);
+		turnBackButton.setOnTouchListener(this);
+		undoButton.setOnTouchListener(this);
+		saveButton.setOnTouchListener(this);
+		shareButton.setOnTouchListener(this);
 	}
 
 	/*
@@ -1230,7 +1308,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			System.exit(0);
 		} else {
 			mListLayout.setVisibility(View.GONE);
-			mCartButton.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -1247,7 +1324,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		List<String> l = new ArrayList<String>();
 		// purge invalid layer data
 		for (String key : Model.getInstance().getLayer_pos().keySet()) {
-			if (key.indexOf("#") == -1 || key.indexOf(mCurrentDirect) == -1) {
+			if (key.indexOf("#") == -1
+					|| key.indexOf(mCurrentDirect) == -1
+					|| mTempCart.get(StrUtil.StringToInt(key.split("#")[0])) == null) {
 				continue;
 			}
 			l.add(key);
@@ -1282,6 +1361,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		// while on left side-bar
 		if (v.getId() == R.id.ScrollView_goodsType) {
 			if (tracker == null) {
 				tracker = VelocityTracker.obtain();
@@ -1297,9 +1377,22 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					if (mHandler.hasMessages(9)) {
 						mHandler.removeMessages(9);
 					}
-					mHandler.sendMessageDelayed(mHandler.obtainMessage(9),
+					mHandler.sendMessageDelayed(mHandler.obtainMessage(-1),
 							10000);
 				}
+			}
+			return false;
+		}
+		// while on bottom bar
+		if (v.getId() == R.id.Button_cart
+				|| v.getId() == R.id.Button_switchModel
+				|| v.getId() == R.id.Button_undo
+				|| v.getId() == R.id.Button_turnBack
+				|| v.getId() == R.id.Button_save
+				|| v.getId() == R.id.Button_share) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN
+					|| event.getAction() == MotionEvent.ACTION_UP) {
+				toggleFunctionBtn(v);
 			}
 			return false;
 		}
@@ -1425,7 +1518,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void onDismiss(boolean needRefresh) {
-		toggleButton(mCartButton, needRefresh);
+		if (mPopupWindow.isTag()) {
+			toggleButton(mCartButton, needRefresh);
+		} else {
+			toggleSidebarTouchable();
+		}
 	}
 
 	@Override

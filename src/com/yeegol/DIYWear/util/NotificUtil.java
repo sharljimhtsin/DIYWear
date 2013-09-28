@@ -5,8 +5,10 @@ package com.yeegol.DIYWear.util;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface.OnClickListener;
 import android.widget.Toast;
 
+import com.yeegol.DIYWear.R;
 import com.yeegol.DIYWear.res.DataHolder;
 
 /**
@@ -48,6 +50,16 @@ public class NotificUtil {
 	public static void showAlertDia(int resId, String msg, Context context) {
 		AlertDialog dialog = new AlertDialog.Builder(context).setMessage(msg)
 				.setTitle(resId).create();
+		dialog.show();
+	}
+
+	public static void showAlertDiaWithYesOrNo(int resId, String msg,
+			Context context, OnClickListener listener) {
+		AlertDialog dialog = new AlertDialog.Builder(context).setMessage(msg)
+				.setTitle(resId)
+				.setPositiveButton(R.string.alert_dial_undo_yes_btn, listener)
+				.setNegativeButton(R.string.alert_dial_undo_no_btn, listener)
+				.create();
 		dialog.show();
 	}
 }
