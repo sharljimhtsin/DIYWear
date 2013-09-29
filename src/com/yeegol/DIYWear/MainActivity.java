@@ -30,6 +30,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -292,7 +293,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							reset();
-							toggleVisibilty(mListLayout);
+							toggleVisibilty(mListLayout, View.GONE);
 							mBrandModel = list.get(which);
 							// set direct to front
 							mCurrentDirect = Model.MODEL_DIRECT_FRONT;
@@ -691,7 +692,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			toggleVisibilty((View) previewImageView.getParent().getParent());
 		}
 		// make other unusable
-		toggleSidebarTouchable();
+		togglePanelTouchable();
 		// attach view to popupWindow & show
 		mPopupWindow.setListener(this);
 		mPopupWindow.setTag(false);
@@ -783,15 +784,33 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	boolean allDisabled = false;
 
 	/**
-	 * make the left/right side-bar enable/disable
+	 * make the left/right/bottom side-bar enable/disable
 	 */
-	private void toggleSidebarTouchable() {
+	private void togglePanelTouchable() {
 		if (mListLayout.isEnabled()) {
 			mListLayout.setEnabled(false);
 			allDisabled = true;
+			toggleViewClickable(mFunctionLayout, false);
 		} else {
 			mListLayout.setEnabled(true);
 			allDisabled = false;
+			toggleViewClickable(mFunctionLayout, true);
+		}
+	}
+
+	/**
+	 * mark view & its child view click-able or UN-click-able,recursively
+	 * 
+	 * @param v
+	 * @param clickable
+	 */
+	private void toggleViewClickable(View v, boolean clickable) {
+		v.setClickable(clickable);
+		if (v instanceof ViewGroup) {
+			ViewGroup vg = (ViewGroup) v;
+			for (int i = 0; i < vg.getChildCount(); i++) {
+				toggleViewClickable(vg.getChildAt(i), clickable);
+			}
 		}
 	}
 
@@ -855,6 +874,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		} else {
 			v.setVisibility(View.VISIBLE);
 		}
+	}
+
+	/**
+	 * set view's visibility to given
+	 * 
+	 * @param v
+	 * @param state
+	 */
+	private void toggleVisibilty(View v, int state) {
+		v.setVisibility(state);
 	}
 
 	/**
@@ -1521,7 +1550,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		if (mPopupWindow.isTag()) {
 			toggleButton(mCartButton, needRefresh);
 		} else {
-			toggleSidebarTouchable();
+			togglePanelTouchable();
 		}
 	}
 
