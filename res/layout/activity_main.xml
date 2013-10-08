@@ -55,6 +55,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:background="@drawable/bg_goods_type_scale"
+            android:paddingBottom="70dip"
             android:visibility="gone" >
 
             <LinearLayout

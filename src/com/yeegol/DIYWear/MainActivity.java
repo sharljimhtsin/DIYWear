@@ -191,7 +191,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					}
 					break;
 				case 8:
-					if (mPopupWindow != null) {
+					// check this window already closed or not
+					if (mPopupWindow != null && mPopupWindow.isShowing()) {
 						if (mPopupWindow.isTag()) {
 							mPopupWindow.dismiss(true);
 						} else {
@@ -617,6 +618,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					mHandler.sendMessage(mHandler.obtainMessage(97));
 					new Thread(new Runnable() {
 						public void run() {
+							// remove all goods first
+							reset();
 							com.yeegol.DIYWear.entity.Collocation.Model model = Collocation
 									.doCollocationgetInfo(collocation.getId());
 							String[] ids = model.getGoodsIds().split(",");
