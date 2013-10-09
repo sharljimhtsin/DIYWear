@@ -101,6 +101,14 @@
                 android:layout_gravity="center_vertical"
                 android:text="@string/view_goods_info_next" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/TextView_view_goods_info_recommend_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
     </LinearLayout>
 
 </LinearLayout>

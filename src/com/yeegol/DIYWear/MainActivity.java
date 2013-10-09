@@ -63,6 +63,7 @@ import com.yeegol.DIYWear.entity.Goods;
 import com.yeegol.DIYWear.entity.Model;
 import com.yeegol.DIYWear.entity.Model.BrandModel;
 import com.yeegol.DIYWear.res.DataHolder;
+import com.yeegol.DIYWear.util.DateUtil;
 import com.yeegol.DIYWear.util.FSUtil;
 import com.yeegol.DIYWear.util.ImgUtil;
 import com.yeegol.DIYWear.util.LogUtil;
@@ -403,14 +404,23 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			toggleVisibilty(mFunctionLayout);
 			break;
 		case R.id.Button_switchModel:
+			if (allDisabled) {
+				return;
+			}
 			mHandler.sendMessage(mHandler.obtainMessage(8));
 			toggleSex();
 			break;
 		case R.id.Button_turnBack:
+			if (allDisabled) {
+				return;
+			}
 			toggleDirection();
 			mHandler.sendMessage(mHandler.obtainMessage(2));
 			break;
 		case R.id.Button_undo:
+			if (allDisabled) {
+				return;
+			}
 			listener = new android.content.DialogInterface.OnClickListener() {
 
 				@Override
@@ -431,13 +441,17 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							mContext, listener);
 			break;
 		case R.id.Button_save:
+			if (allDisabled) {
+				return;
+			}
 			listener = new DialogInterface.OnClickListener() {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					if (which == DialogInterface.BUTTON_POSITIVE) {
 						try {
-							String fileName = "image.jpg";
+							String fileName = "image" + DateUtil.getTimeStamp()
+									+ ".jpg";
 							if (FSUtil.writeBitmapToFile(mContext, mBitmap,
 									fileName)) {
 								NotificUtil
@@ -460,12 +474,18 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							mContext, listener);
 			break;
 		case R.id.Button_share:
+			if (allDisabled) {
+				return;
+			}
 			mSocialService.setShareContent(StrUtil
 					.charToString(getText(R.string.umeng_share_content)));
 			mSocialService.setShareImage(new UMImage(mContext, mBitmap));
 			mSocialService.openShare(this, false);
 			break;
 		case R.id.Button_cart:
+			if (allDisabled) {
+				return;
+			}
 			if (toggleButton(v, false)) {
 				prepareCartWindow();
 			} else {
@@ -546,6 +566,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				.findViewById(R.id.Button_view_goods_info_next);
 		final MyImageView previewImageView = (MyImageView) layout
 				.findViewById(R.id.ImageView_view_goods_info_preview);
+		final TextView recommendNameTextView = (TextView) layout
+				.findViewById(R.id.TextView_view_goods_info_recommend_name);
 		// handler
 		final Handler handler = new Handler(new Callback() {
 
@@ -554,7 +576,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				switch (msg.what) {
 				case 0:
 					if (mColList != null) {
-						previewImageView.setTag(mColList.get(0));
+						Collocation c = mColList.get(0);
+						previewImageView.setURL(NetUtil.DOMAIN_FILE
+								+ c.getPreview());
+						previewImageView.setTag(c);
+						recommendNameTextView.setText(c.getName());
+					} else {
+						// hide if no recommend
+						toggleVisibilty((View) previewImageView.getParent()
+								.getParent());
 					}
 					break;
 				case 1:
@@ -609,6 +639,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					// set image
 					previewImageView.setURL(NetUtil.DOMAIN_FILE
 							+ c.getPreview());
+					// set name
+					recommendNameTextView.setText(c.getName());
 					break;
 				case R.id.ImageView_view_goods_info_preview:
 					if (index == -1) {
@@ -620,6 +652,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						public void run() {
 							// remove all goods first
 							reset();
+							// re-get model's layer
+							mHandler.sendMessage(mHandler.obtainMessage(2));
+							// do with recommended goods
 							com.yeegol.DIYWear.entity.Collocation.Model model = Collocation
 									.doCollocationgetInfo(collocation.getId());
 							String[] ids = model.getGoodsIds().split(",");
@@ -661,6 +696,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					// set image
 					previewImageView.setURL(NetUtil.DOMAIN_FILE
 							+ c1.getPreview());
+					// set name
+					recommendNameTextView.setText(c1.getName());
 					break;
 				default:
 					break;
@@ -687,13 +724,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		previousButton.setOnClickListener(listener);
 		nextButton.setOnClickListener(listener);
 		previewImageView.setOnClickListener(listener);
-		if (mColList != null) {
-			Collocation c = mColList.get(0);
-			previewImageView.setURL(NetUtil.DOMAIN_FILE + c.getPreview());
-		} else {
-			// hide if no recommend
-			toggleVisibilty((View) previewImageView.getParent().getParent());
-		}
 		// make other unusable
 		togglePanelTouchable();
 		// attach view to popupWindow & show
@@ -732,7 +762,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	private void createCartItem(View layout, Goods g, int i,
 			boolean fromCartWindow) {
 		// get controls
-		ImageView iconImageView = (ImageView) layout
+		MyImageView iconImageView = (MyImageView) layout
 				.findViewById(R.id.ImageView_item_cart_icon);
 		TextView nameTextView = (TextView) layout
 				.findViewById(R.id.TextView_item_cart_name);
@@ -743,9 +773,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		Button removeButton = (Button) layout
 				.findViewById(R.id.Button_item_cart_remove);
 		// set value
-		iconImageView.setImageBitmap(Model.getInstance().getBitmapFromCache(
-				NetUtil.buildURLForThumb(g.getPreview())));
-		nameTextView.setText(g.getName());
+		iconImageView.setURL(NetUtil.buildURLForThumb(g.getPreview()));
+		nameTextView.setText(g.getGoodsName());
 		priceTextView.setText(StrUtil.dobToString(g.getSalePrice()));
 		addButton.setTag(i);
 		addButton.setOnClickListener(this);
@@ -776,7 +805,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 		mPopupWindow.setListener(this);
 		mPopupWindow.setTag(true);
-		mPopupWindow.setOutsideTouchable(true);
+		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(listView.getChildCount() > 0 ? listView
 				: inflater.inflate(R.layout.view_empty_cart, null));
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -793,11 +822,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		if (mListLayout.isEnabled()) {
 			mListLayout.setEnabled(false);
 			allDisabled = true;
-			toggleViewClickable(mFunctionLayout, false);
 		} else {
 			mListLayout.setEnabled(true);
 			allDisabled = false;
-			toggleViewClickable(mFunctionLayout, true);
 		}
 	}
 
@@ -807,6 +834,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * @param v
 	 * @param clickable
 	 */
+	@SuppressWarnings("unused")
 	private void toggleViewClickable(View v, boolean clickable) {
 		v.setClickable(clickable);
 		if (v instanceof ViewGroup) {
@@ -1180,6 +1208,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	private void prepareBottomBar(final int page, final int size,
 			final int categoryId, final String brandIds, final int gender,
 			final int ageGroup, final boolean isNew) {
+		// no more data to query
+		if (page == -1) {
+			underWorking = false;
+			return;
+		}
 		new Thread(new Runnable() {
 
 			@Override
@@ -1197,6 +1230,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					// notify the listView to refresh
 					mHandler.sendMessage(mHandler.obtainMessage(10));
 				}
+				LogUtil.logDebug("goods list count:" + mGoodsList.size(), TAG);
 			}
 		}).start();
 	}
@@ -1528,7 +1562,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	int scrollState;
-	boolean underWorking;
+	boolean underWorking = false;
 
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -1540,7 +1574,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			int visibleItemCount, int totalItemCount) {
 		if (firstVisibleItem + visibleItemCount == totalItemCount
 				&& scrollState == OnScrollListener.SCROLL_STATE_IDLE
-				&& !underWorking) {
+				&& !underWorking && visibleItemCount < totalItemCount) {
 			underWorking = true;
 			prepareBottomBar(getNextPage(), OFFSET, mCategoryId, mBrandIds,
 					mBrandModel.getGender(), mBrandModel.getAgeGroup(), false);

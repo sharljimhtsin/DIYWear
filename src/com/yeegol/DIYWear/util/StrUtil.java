@@ -40,4 +40,8 @@ public class StrUtil {
 	public static String charToString(CharSequence c) {
 		return c.toString();
 	}
+
+	public static String longToString(long l) {
+		return String.valueOf(l);
+	}
 }

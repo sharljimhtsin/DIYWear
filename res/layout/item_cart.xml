@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_goods_list_scale" >
 
-    <ImageView
+    <com.yeegol.DIYWear.clz.MyImageView
         android:id="@+id/ImageView_item_cart_icon"
         android:layout_width="100dip"
         android:layout_height="100dip"
