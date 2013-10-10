@@ -741,8 +741,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(layout);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
-		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.5),
-				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.6));
+		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.8),
+				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
 	}
 
 	/**

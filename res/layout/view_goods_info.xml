@@ -13,7 +13,7 @@
 
     <TextView
         android:id="@+id/TextView_view_goods_info_dress_way_label"
-        android:layout_width="200dip"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textColor="@android:color/black"
@@ -92,8 +92,8 @@
 
             <com.yeegol.DIYWear.clz.MyImageView
                 android:id="@+id/ImageView_view_goods_info_preview"
-                android:layout_width="200dip"
-                android:layout_height="300dip"
+                android:layout_width="150dip"
+                android:layout_height="200dip"
                 android:layout_gravity="center_vertical" />
 
             <Button
