@@ -72,9 +72,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:background="@drawable/bg_goods_list_scale"
-            android:divider="@drawable/line"
             android:paddingBottom="70dip"
-            android:showDividers="middle"
             android:visibility="gone" >
         </ListView>
 

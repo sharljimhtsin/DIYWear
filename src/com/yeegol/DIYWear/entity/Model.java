@@ -17,7 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.util.LruCache;
+import android.support.v4.util.LruCache;
 
 import com.google.gson.reflect.TypeToken;
 import com.yeegol.DIYWear.clz.MyBitmap;

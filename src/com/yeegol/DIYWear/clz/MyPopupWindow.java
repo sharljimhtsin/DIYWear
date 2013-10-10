@@ -77,17 +77,6 @@ public class MyPopupWindow extends PopupWindow {
 	}
 
 	/**
-	 * @param context
-	 * @param attrs
-	 * @param defStyleAttr
-	 * @param defStyleRes
-	 */
-	public MyPopupWindow(Context context, AttributeSet attrs, int defStyleAttr,
-			int defStyleRes) {
-		super(context, attrs, defStyleAttr, defStyleRes);
-	}
-
-	/**
 	 * @param contentView
 	 * @param width
 	 * @param height
