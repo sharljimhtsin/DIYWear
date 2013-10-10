@@ -421,6 +421,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
+			// skip if no goods to remove
+			if (mTempCart.size() == 0) {
+				NotificUtil.showShortToast(R.string.toast_no_cloth_on_model);
+				return;
+			}
 			listener = new android.content.DialogInterface.OnClickListener() {
 
 				@Override
@@ -483,20 +488,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mSocialService.openShare(this, false);
 			break;
 		case R.id.Button_cart:
-			if (allDisabled) {
+			if (allDisabled && !skipFirst) {
 				return;
 			}
 			if (toggleButton(v, false)) {
 				prepareCartWindow();
 			} else {
-				// make button UN-click-able
-				v.setClickable(false);
 				// push all goods to REAL cart
 				for (int i = 0; i < mTempCart.size(); i++) {
 					mCart.add(mTempCart.valueAt(i));
 				}
 				NotificUtil
 						.showShortToast(R.string.toast_all_add_to_cart_successlly);
+				// close pop-up window with virtual back-key press
+				onBackPressed();
 			}
 			break;
 		case R.id.Button_item_cart_add:
@@ -546,7 +551,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	private void prepareGoodsInfoWindow() {
 		mPopupWindow = new MyPopupWindow(mContext);
 		// get layout inflater
-		LayoutInflater inflater = LayoutInflater.from(mContext);
+		final LayoutInflater inflater = LayoutInflater.from(mContext);
 		LinearLayout layout = (LinearLayout) inflater.inflate(
 				R.layout.view_goods_info, null);
 		// get controls
@@ -575,6 +580,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			public boolean handleMessage(Message msg) {
 				switch (msg.what) {
 				case 0:
+					LinearLayout layout = (LinearLayout) previewImageView
+							.getParent().getParent();
 					if (mColList != null) {
 						Collocation c = mColList.get(0);
 						previewImageView.setURL(NetUtil.DOMAIN_FILE
@@ -582,10 +589,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						previewImageView.setTag(c);
 						recommendNameTextView.setText(c.getName());
 					} else {
-						// hide if no recommend
-						toggleVisibilty((View) previewImageView.getParent()
-								.getParent());
+						layout.removeAllViews();
+						layout.addView(inflater.inflate(
+								R.layout.view_empty_collation, null));
 					}
+					// show collation part
+					toggleVisibilty(layout);
 					break;
 				case 1:
 					NotificUtil.showAlertDia(R.string.alert_dial_info_title,
@@ -725,7 +734,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		nextButton.setOnClickListener(listener);
 		previewImageView.setOnClickListener(listener);
 		// make other unusable
-		togglePanelTouchable();
+		togglePanelTouchable(false);
 		// attach view to popupWindow & show
 		mPopupWindow.setListener(this);
 		mPopupWindow.setTag(false);
@@ -733,7 +742,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPopupWindow.setContentView(layout);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.5),
-				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.55));
+				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.6));
 	}
 
 	/**
@@ -803,6 +812,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			createCartItem(layout, g, i, true);
 			listView.addView(layout);
 		}
+		// make other unusable
+		togglePanelTouchable(true);
 		mPopupWindow.setListener(this);
 		mPopupWindow.setTag(true);
 		mPopupWindow.setOutsideTouchable(false);
@@ -813,12 +824,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
 	}
 
-	boolean allDisabled = false;
+	boolean allDisabled, skipFirst = false;
 
 	/**
 	 * make the left/right/bottom side-bar enable/disable
+	 * 
+	 * @param allowException
+	 *            make "add to cart" button usable
 	 */
-	private void togglePanelTouchable() {
+	private void togglePanelTouchable(boolean allowException) {
 		if (mListLayout.isEnabled()) {
 			mListLayout.setEnabled(false);
 			allDisabled = true;
@@ -826,6 +840,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mListLayout.setEnabled(true);
 			allDisabled = false;
 		}
+		skipFirst = allowException;
 	}
 
 	/**
@@ -874,8 +889,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		} else {
 			button.setText(R.string.popup_goods_list);
 			button.setTag(0);
-			// make button click-able
-			button.setClickable(true);
 			return false;
 		}
 	}
@@ -1230,7 +1243,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					// notify the listView to refresh
 					mHandler.sendMessage(mHandler.obtainMessage(10));
 				}
-				LogUtil.logDebug("goods list count:" + mGoodsList.size(), TAG);
+				if (mGoodsList != null) {
+					LogUtil.logDebug("goods list count:" + mGoodsList.size(),
+							TAG);
+				} else {
+					LogUtil.logDebug("goods list is null", TAG);
+				}
 			}
 		}).start();
 	}
@@ -1586,8 +1604,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	public void onDismiss(boolean needRefresh) {
 		if (mPopupWindow.isTag()) {
 			toggleButton(mCartButton, needRefresh);
+			togglePanelTouchable(true);
 		} else {
-			togglePanelTouchable();
+			togglePanelTouchable(false);
 		}
 	}
 

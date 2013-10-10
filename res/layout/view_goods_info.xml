@@ -17,7 +17,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textColor="@android:color/black"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -64,7 +65,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:visibility="invisible" >
 
         <TextView
             android:id="@+id/TextView_view_goods_info_recommend"
@@ -91,7 +93,7 @@
             <com.yeegol.DIYWear.clz.MyImageView
                 android:id="@+id/ImageView_view_goods_info_preview"
                 android:layout_width="200dip"
-                android:layout_height="200dip"
+                android:layout_height="300dip"
                 android:layout_gravity="center_vertical" />
 
             <Button

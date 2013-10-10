@@ -50,6 +50,8 @@
     <string name="alert_dial_pick_model_title">选择模特</string>
     <string name="alert_dial_save_to_local_title">确认保存？</string>
     <string name="alert_dial_save_to_local_message">这将会保存模特试衣图到本地</string>
+    <string name="toast_no_cloth_on_model">模特没有试穿任何衣物</string>
+    <string name="view_empty_collation_nothing">该件商品没有搭配</string>
 
     <!-- system strings -->
     <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>
