@@ -46,10 +46,6 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.umeng.socialize.controller.RequestType;
-import com.umeng.socialize.controller.UMServiceFactory;
-import com.umeng.socialize.controller.UMSocialService;
-import com.umeng.socialize.media.UMImage;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MyImageView;
@@ -126,8 +122,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	Bitmap mBitmap;
 
-	UMSocialService mSocialService;
-
 	int mCategoryId;
 
 	String mBrandIds;
@@ -146,8 +140,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mCurrentDirect = Model.MODEL_DIRECT_FRONT;
 		mTempCart = new SparseArray<Goods>();
 		mCart = new ArrayList<Goods>();
-		mSocialService = UMServiceFactory.getUMSocialService(TAG,
-				RequestType.SOCIAL);
 		DataHolder.init(mContext);
 		// sync with Model class
 		Model.getInstance().setCurrentDirection(mCurrentDirect);
@@ -296,6 +288,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						public void onClick(DialogInterface dialog, int which) {
 							reset();
 							toggleVisibilty(mListLayout, View.GONE);
+							// check if the same model
+							if (mBrandModel == list.get(which)) {
+								NotificUtil
+										.showShortToast(R.string.toast_no_need_to_switch);
+								return;
+							}
 							mBrandModel = list.get(which);
 							// set direct to front
 							mCurrentDirect = Model.MODEL_DIRECT_FRONT;
@@ -482,10 +480,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
-			mSocialService.setShareContent(StrUtil
-					.charToString(getText(R.string.umeng_share_content)));
-			mSocialService.setShareImage(new UMImage(mContext, mBitmap));
-			mSocialService.openShare(this, false);
+			// TODO: sns
 			break;
 		case R.id.Button_cart:
 			if (allDisabled && !skipFirst) {

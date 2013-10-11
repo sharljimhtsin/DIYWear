@@ -3,9 +3,7 @@
 
     <!-- UI strings -->
     <string name="app_name">DIYWear</string>
-    <string name="main_user_experience">用户体验</string>
-    <string name="main_goods_list">商品列表</string>
-    <string name="main_function_list">功能列表</string>
+    <string name="main_user_experience">VID体验</string>
     <string name="main_swith_model">模特</string>
     <string name="main_turn">转身</string>
     <string name="main_undo">撤除</string>
@@ -50,21 +48,17 @@
     <string name="alert_dial_pick_model_title">选择模特</string>
     <string name="alert_dial_save_to_local_title">确认保存？</string>
     <string name="alert_dial_save_to_local_message">这将会保存模特试衣图到本地</string>
-    <string name="toast_no_cloth_on_model">模特没有试穿任何衣物</string>
+    <string name="toast_no_cloth_on_model">模特身上无任何商品</string>
     <string name="view_empty_collation_nothing">该件商品没有搭配</string>
 
     <!-- system strings -->
     <string name="api_key">7bb93c4e63d37d2810b063f38f0f87f8</string>
-    <string name="api_key_old">d3c111daa7f83ab4b6930e2e45113dd4</string>
     <string name="api_domain_api">http://api.ihomebay.com/</string>
     <string name="api_domain_api_pure">api.ihomebay.com</string>
     <string name="api_domain_file">http://files.ihomebay.com/</string>
     <string name="api_domain_file_pure">files.ihomebay.com</string>
     <string name="tag_id">0</string>
-    <string name="tag_name">1</string>
-    <string name="tag_dress_map_id">2</string>
-    <string name="tag_brands_id">3</string>
+    <string name="tag_brands_id">1</string>
     <string name="tag_from_cart_window">3</string>
-    <string name="umeng_key">5243a95256240bd6440573e6</string>
 
 </resources>
