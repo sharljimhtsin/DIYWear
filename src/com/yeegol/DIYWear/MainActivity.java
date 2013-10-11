@@ -455,14 +455,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				public void onClick(DialogInterface dialog, int which) {
 					if (which == DialogInterface.BUTTON_POSITIVE) {
 						try {
-							String fileName = "image" + DateUtil.getTimeStamp()
-									+ ".jpg";
-							if (FSUtil.writeBitmapToFile(mContext, mBitmap,
-									fileName)) {
+							String directoryName = "/yeegol";
+							String fileName = "/image"
+									+ DateUtil.getTimeStamp() + ".jpg";
+							if (FSUtil.writeBitmapToFileOnSdcard(mContext,
+									mBitmap, fileName, directoryName)) {
 								NotificUtil
 										.showLongToast(getText(R.string.toast_image_saved_to_local_successlly)
-												+ getFileStreamPath(fileName)
-														.getAbsolutePath());
+												+ directoryName + fileName);
 							}
 						} catch (IOException e) {
 							LogUtil.logException(e, TAG);
@@ -801,10 +801,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 */
 	private void prepareCartWindow() {
 		mPopupWindow = new MyPopupWindow(mContext);
-		LinearLayout listView = new LinearLayout(mContext);
-		listView.setOrientation(LinearLayout.VERTICAL);
 		// get layout inflater
 		LayoutInflater inflater = LayoutInflater.from(mContext);
+		View v = inflater.inflate(R.layout.view_cart, null);
+		LinearLayout listView = (LinearLayout) v
+				.findViewById(R.id.LinearLayout_cartContainer);
 		for (int i = 0; i < mTempCart.size(); i++) {
 			Goods g = mTempCart.valueAt(i);
 			RelativeLayout layout = (RelativeLayout) inflater.inflate(
@@ -817,8 +818,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPopupWindow.setListener(this);
 		mPopupWindow.setTag(true);
 		mPopupWindow.setOutsideTouchable(false);
-		mPopupWindow.setContentView(listView.getChildCount() > 0 ? listView
-				: inflater.inflate(R.layout.view_empty_cart, null));
+		mPopupWindow.setContentView(listView.getChildCount() > 0 ? v : inflater
+				.inflate(R.layout.view_empty_cart, null));
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.8),
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));

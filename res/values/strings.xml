@@ -11,8 +11,8 @@
     <string name="main_undo">撤除</string>
     <string name="main_save">保存</string>
     <string name="main_share">分享</string>
-    <string name="popup_goods_list">商品清单</string>
-    <string name="popup_all_to_cart">全部放入购物车</string>
+    <string name="popup_goods_list">清单</string>
+    <string name="popup_all_to_cart">全购</string>
     <string name="popup_price">价格</string>
     <string name="popup_cart">购物车</string>
     <string name="popup_remove">移除</string>

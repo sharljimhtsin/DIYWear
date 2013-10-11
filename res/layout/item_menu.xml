@@ -15,6 +15,7 @@
         android:layout_width="80dip"
         android:layout_height="30dip"
         android:layout_gravity="center"
+        android:ellipsize="end"
         android:gravity="center"
         android:textColor="#8b898a"
         android:textSize="20sp" />
