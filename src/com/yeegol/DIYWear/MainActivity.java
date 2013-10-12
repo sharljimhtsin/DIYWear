@@ -55,7 +55,6 @@ import com.sina.weibo.sdk.api.IWeiboHandler;
 import com.tencent.weibo.sdk.android.api.util.Util;
 import com.tencent.weibo.sdk.android.component.Authorize;
 import com.tencent.weibo.sdk.android.component.ReAddActivity;
-import com.tencent.weibo.sdk.android.component.sso.AuthHelper;
 import com.tencent.weibo.sdk.android.component.sso.OnAuthListener;
 import com.tencent.weibo.sdk.android.component.sso.WeiboToken;
 import com.yeegol.DIYWear.clz.MyAdapter;
@@ -156,7 +155,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mCurrentDirect = Model.MODEL_DIRECT_FRONT;
 		mTempCart = new SparseArray<Goods>();
 		mCart = new ArrayList<Goods>();
-		mIWeiboAPI = WeiboSDK.createWeiboAPI(mContext, "", true);
+		mIWeiboAPI = WeiboSDK.createWeiboAPI(mContext, SNSUtil.SINA_APP_KEY,
+				true);
 		DataHolder.init(mContext);
 		// sync with Model class
 		Model.getInstance().setCurrentDirection(mCurrentDirect);
@@ -507,11 +507,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}
 				SNSUtil.shareToSinaWeibo(this, mIWeiboAPI, "model", mBitmap);
 			} else {
-				long appid = Long.valueOf(Util.getConfig().getProperty(
-						"APP_KEY"));
-				String app_secket = Util.getConfig().getProperty("APP_KEY_SEC");
-				AuthHelper.register(mContext, appid, app_secket, this);
-				AuthHelper.auth(mContext, "");
+				SNSUtil.shareToTencentMicroblog(mContext,
+						SNSUtil.TENCENT_APP_KEY,
+						SNSUtil.TENCENT_APP_SECRET_KEY, this);
 			}
 			break;
 		case R.id.Button_cart:
