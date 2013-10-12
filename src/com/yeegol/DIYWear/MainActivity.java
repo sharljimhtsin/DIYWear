@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -46,6 +47,17 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.sina.weibo.sdk.WeiboSDK;
+import com.sina.weibo.sdk.api.BaseResponse;
+import com.sina.weibo.sdk.api.IWeiboAPI;
+import com.sina.weibo.sdk.api.IWeiboDownloadListener;
+import com.sina.weibo.sdk.api.IWeiboHandler;
+import com.tencent.weibo.sdk.android.api.util.Util;
+import com.tencent.weibo.sdk.android.component.Authorize;
+import com.tencent.weibo.sdk.android.component.ReAddActivity;
+import com.tencent.weibo.sdk.android.component.sso.AuthHelper;
+import com.tencent.weibo.sdk.android.component.sso.OnAuthListener;
+import com.tencent.weibo.sdk.android.component.sso.WeiboToken;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MyImageView;
@@ -65,6 +77,7 @@ import com.yeegol.DIYWear.util.ImgUtil;
 import com.yeegol.DIYWear.util.LogUtil;
 import com.yeegol.DIYWear.util.NetUtil;
 import com.yeegol.DIYWear.util.NotificUtil;
+import com.yeegol.DIYWear.util.SNSUtil;
 import com.yeegol.DIYWear.util.StrUtil;
 import com.yeegol.DIYWear.util.ThreadUtil;
 
@@ -76,7 +89,8 @@ import com.yeegol.DIYWear.util.ThreadUtil;
  */
 public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		OnClickListener, MyOnDismissListener, OnTouchListener,
-		OnGestureListener, OnScrollListener {
+		OnGestureListener, OnScrollListener, IWeiboHandler.Response,
+		IWeiboDownloadListener, OnAuthListener {
 
 	private static final String TAG = MainActivity.class.getName();
 
@@ -126,6 +140,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	String mBrandIds;
 
+	IWeiboAPI mIWeiboAPI;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -140,6 +156,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mCurrentDirect = Model.MODEL_DIRECT_FRONT;
 		mTempCart = new SparseArray<Goods>();
 		mCart = new ArrayList<Goods>();
+		mIWeiboAPI = WeiboSDK.createWeiboAPI(mContext, "", true);
 		DataHolder.init(mContext);
 		// sync with Model class
 		Model.getInstance().setCurrentDirection(mCurrentDirect);
@@ -239,6 +256,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mSurfaceView.getHolder().addCallback(this);
 		mSurfaceView.setOnTouchListener(this);
 		mTypeContainer.setOnTouchListener(this);
+		mIWeiboAPI.responseListener(getIntent(), this);
+		mIWeiboAPI.registerWeiboDownloadListener(this);
 		// trigger
 		mHandler.sendMessage(mHandler.obtainMessage(0));
 	}
@@ -480,7 +499,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
-			// TODO: sns
+			if ("".equals("")) {
+				mIWeiboAPI.registerApp();
+				if (!mIWeiboAPI.isWeiboAppInstalled()
+						|| !mIWeiboAPI.isWeiboAppSupportAPI()) {
+					return;
+				}
+				SNSUtil.shareToSinaWeibo(this, mIWeiboAPI, "model", mBitmap);
+			} else {
+				long appid = Long.valueOf(Util.getConfig().getProperty(
+						"APP_KEY"));
+				String app_secket = Util.getConfig().getProperty("APP_KEY_SEC");
+				AuthHelper.register(mContext, appid, app_secket, this);
+				AuthHelper.auth(mContext, "");
+			}
 			break;
 		case R.id.Button_cart:
 			if (allDisabled && !skipFirst) {
@@ -1609,5 +1641,63 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	@Override
 	public void onDismiss() {
 		// do nothing
+	}
+
+	@Override
+	public void onResponse(BaseResponse arg0) {
+		switch (arg0.errCode) {
+		case com.sina.weibo.sdk.constant.Constants.ErrorCode.ERR_OK:
+			NotificUtil.showShortToast("ok");
+			break;
+		case com.sina.weibo.sdk.constant.Constants.ErrorCode.ERR_CANCEL:
+			NotificUtil.showShortToast("cancel");
+			break;
+		case com.sina.weibo.sdk.constant.Constants.ErrorCode.ERR_FAIL:
+			NotificUtil.showShortToast("fail");
+			break;
+		}
+	}
+
+	@Override
+	public void onCancel() {
+		NotificUtil.showShortToast("download cancel");
+	}
+
+	@Override
+	public void onAuthFail(int arg0, String arg1) {
+	}
+
+	@Override
+	public void onAuthPassed(String arg0, WeiboToken arg1) {
+		// store authorize data
+		Util.saveSharePersistent(mContext, "ACCESS_TOKEN", arg1.accessToken);
+		Util.saveSharePersistent(mContext, "EXPIRES_IN",
+				String.valueOf(arg1.expiresIn));
+		Util.saveSharePersistent(mContext, "OPEN_ID", arg1.openID);
+		Util.saveSharePersistent(mContext, "REFRESH_TOKEN", "");
+		Util.saveSharePersistent(mContext, "CLIENT_ID", Util.getConfig()
+				.getProperty("APP_KEY"));
+		Util.saveSharePersistent(mContext, "AUTHORIZETIME",
+				String.valueOf(System.currentTimeMillis() / 1000l));
+		// goto tencent share activity
+		Intent i = new Intent(mContext, ReAddActivity.class);
+		Bundle bundle = new Bundle();
+		bundle.putString("content", "Make U happy");
+		bundle.putString("pic_url",
+				"http://t2.qpic.cn/mblogpic/9c7e34358608bb61a696/2000");
+		i.putExtras(bundle);
+		startActivity(i);
+	}
+
+	@Override
+	public void onWeiBoNotInstalled() {
+		Intent i = new Intent(mContext, Authorize.class);
+		startActivity(i);
+	}
+
+	@Override
+	public void onWeiboVersionMisMatch() {
+		Intent i = new Intent(mContext, Authorize.class);
+		startActivity(i);
 	}
 }
