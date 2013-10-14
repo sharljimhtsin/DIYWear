@@ -44,4 +44,8 @@ public class StrUtil {
 	public static String longToString(long l) {
 		return String.valueOf(l);
 	}
+
+	public static long charToLong(CharSequence c) {
+		return Long.valueOf(charToString(c));
+	}
 }

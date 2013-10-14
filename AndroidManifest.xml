@@ -33,6 +33,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.yeegol.DIYWear.activity.ShareActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="com.sina.weibo.sdk.action.ACTION_SDK_REQ_ACTIVITY" />
+            </intent-filter>
+        </activity>
 
         <!-- ###################添加UmengAppkey###################### -->
         <meta-data
