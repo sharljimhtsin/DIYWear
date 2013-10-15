@@ -482,11 +482,19 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
+			// store bitmap to local
+			String fileName = "tmp.jpg";
+			try {
+				FSUtil.writeBitmapToFile(mContext, mBitmap, fileName);
+			} catch (IOException e) {
+				LogUtil.logException(e, TAG);
+			}
 			// show share activity
 			Intent intent = new Intent(mContext, ShareActivity.class);
 			Bundle bundle = new Bundle();
-			bundle.putParcelable("bitmap", mBitmap);
+			bundle.putString("which", "tencent");
 			bundle.putString("msg", "hey!");
+			bundle.putString("img", getFileStreamPath(fileName).getPath());
 			intent.putExtras(bundle);
 			startActivity(intent);
 			break;

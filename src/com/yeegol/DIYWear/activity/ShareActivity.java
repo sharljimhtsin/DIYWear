@@ -5,7 +5,9 @@ package com.yeegol.DIYWear.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import com.sina.weibo.sdk.WeiboSDK;
@@ -16,8 +18,8 @@ import com.sina.weibo.sdk.api.IWeiboHandler;
 import com.tencent.weibo.sdk.android.api.util.Util;
 import com.tencent.weibo.sdk.android.component.sso.OnAuthListener;
 import com.tencent.weibo.sdk.android.component.sso.WeiboToken;
+import com.tencent.weibo.sdk.android.model.ModelResult;
 import com.tencent.weibo.sdk.android.network.HttpCallback;
-import com.yeegol.DIYWear.util.LogUtil;
 import com.yeegol.DIYWear.util.NotificUtil;
 import com.yeegol.DIYWear.util.SNSUtil;
 
@@ -53,15 +55,16 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response,
 		mIWeiboAPI.registerWeiboDownloadListener(this);
 		// get data
 		Bundle data = getIntent().getExtras();
-		mBitmap = data.getParcelable("bitmap");
 		mMsg = data.getString("msg");
-		if ("1".equals("1")) {
+		mBitmap = BitmapFactory.decodeFile(data.getString("img"));
+		// launch API
+		if ("sina".equals(data.getString("which"))) {
 			mIWeiboAPI.registerApp();
 			if (!mIWeiboAPI.isWeiboAppInstalled()
 					|| !mIWeiboAPI.isWeiboAppSupportAPI()) {
 				return;
 			}
-			SNSUtil.shareToSinaWeibo(this, mIWeiboAPI, "model", mBitmap);
+			SNSUtil.shareToSinaWeibo(this, mIWeiboAPI, mMsg, mBitmap);
 		} else {
 			SNSUtil.authOnTencentMicroblog(mContext, SNSUtil.TENCENT_APP_KEY,
 					SNSUtil.TENCENT_APP_SECRET_KEY, this);
@@ -101,8 +104,7 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response,
 				String.valueOf(arg1.expiresIn));
 		Util.saveSharePersistent(mContext, "OPEN_ID", arg1.openID);
 		Util.saveSharePersistent(mContext, "REFRESH_TOKEN", "");
-		Util.saveSharePersistent(mContext, "CLIENT_ID", Util.getConfig()
-				.getProperty("APP_KEY"));
+		Util.saveSharePersistent(mContext, "CLIENT_ID", SNSUtil.TENCENT_APP_KEY);
 		Util.saveSharePersistent(mContext, "AUTHORIZETIME",
 				String.valueOf(System.currentTimeMillis() / 1000l));
 		// share it
@@ -110,10 +112,15 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response,
 
 			@Override
 			public void onResult(Object arg0) {
-				LogUtil.logDebug(arg0.toString(), TAG);
+				if (arg0 instanceof ModelResult) {
+					ModelResult mr = (ModelResult) arg0;
+					if (mr.isSuccess()) {
+						NotificUtil.showShortToast("make it!");
+					}
+				}
 			}
 		};
-		SNSUtil.shareToTencentMicroblog(mContext, "", mBitmap, callback);
+		SNSUtil.shareToTencentMicroblog(mContext, mMsg, mBitmap, callback);
 	}
 
 	@Override
@@ -124,6 +131,17 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response,
 	@Override
 	public void onWeiboVersionMisMatch() {
 		NotificUtil.showShortToast("weibo version not match");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onNewIntent(android.content.Intent)
+	 */
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		mIWeiboAPI.responseListener(getIntent(), this);
 	}
 
 }
