@@ -24,7 +24,6 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.yeegol.DIYWear.MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Light.NoTitleBar" >

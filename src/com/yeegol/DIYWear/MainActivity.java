@@ -541,7 +541,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		if (v.getBackground() == null) {
 			v.setBackgroundResource(R.drawable.bg_btn_bottom);
 		} else {
-			v.setBackground(null);
+			v.setBackgroundDrawable(null);
 		}
 	}
 
