@@ -116,11 +116,13 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response,
 					ModelResult mr = (ModelResult) arg0;
 					if (mr.isSuccess()) {
 						NotificUtil.showShortToast("make it!");
+						finish();
 					}
 				}
 			}
 		};
-		SNSUtil.shareToTencentMicroblog(mContext, mMsg, mBitmap, callback);
+		// SNSUtil.shareToTencentMicroblog(mContext, mMsg, mBitmap, callback);
+		SNSUtil.shareToTencentMicroblog(mContext, mMsg);
 	}
 
 	@Override
@@ -142,6 +144,18 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response,
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		mIWeiboAPI.responseListener(getIntent(), this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onDestroy()
+	 */
+	@Override
+	protected void onDestroy() {
+		mIWeiboAPI.responseListener(getIntent(), null);
+		SNSUtil.unregisterTencentMicroblogListener(mContext);
+		super.onDestroy();
 	}
 
 }

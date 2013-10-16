@@ -17,6 +17,7 @@ import com.tencent.weibo.sdk.android.api.util.Util;
 import com.tencent.weibo.sdk.android.component.sso.AuthHelper;
 import com.tencent.weibo.sdk.android.component.sso.OnAuthListener;
 import com.tencent.weibo.sdk.android.model.AccountModel;
+import com.tencent.weibo.sdk.android.model.BaseVO;
 import com.tencent.weibo.sdk.android.network.HttpCallback;
 import com.yeegol.DIYWear.R;
 import com.yeegol.DIYWear.res.DataHolder;
@@ -74,12 +75,29 @@ public class SNSUtil {
 		AuthHelper.auth(c, "");
 	}
 
+	public static void unregisterTencentMicroblogListener(Context c) {
+		AuthHelper.unregister(c);
+	}
+
 	public static void shareToTencentMicroblog(Context c, String msg,
 			Bitmap img, HttpCallback callback) {
 		WeiboAPI api = new WeiboAPI(new AccountModel(Util.getSharePersistent(c,
 				"ACCESS_TOKEN")));
-		// api.addWeibo(c, msg, "json", 0, 0, 0, 0, callback, null, 0);
-		api.addPic(c, msg, "json", 0.0, 0.0, img, 0, 0, callback, null, 4);
+		api.addPic(c, msg, "json", 0.0, 0.0, img, 0, 0, callback, null,
+				BaseVO.TYPE_JSON);
+	}
+
+	public static void shareToTencentMicroblog(Context c, String msg) {
+		String url = "https://open.t.qq.com/api/t/add_pic";
+		url += "?format=json";
+		url += "&content=" + msg;
+		url += "&clientip=" + Util.getLocalIPAddress(c);
+		url += "&access_token=" + Util.getSharePersistent(c, "ACCESS_TOKEN");
+		url += "&oauth_version=2.a";
+		url += "&oauth_consumer_key=" + Util.getSharePersistent(c, "CLIENT_ID");
+		url += "&openid=" + Util.getSharePersistent(c, "OPEN_ID");
+		url += "&scope=all";
+		NetUtil.getObjectFromWebInLowLevel(url);
 	}
 
 	private static TextObject prepareTextForWeibo(String s) {

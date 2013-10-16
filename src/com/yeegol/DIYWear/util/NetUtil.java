@@ -8,7 +8,18 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -165,12 +176,40 @@ public class NetUtil {
 		InputStream ret = null;
 		try {
 			URL path = new URL(url);
-			HttpURLConnection connection = (HttpURLConnection) path
-					.openConnection();
+			URLConnection connection;
+			if (url.startsWith("https")) {
+				SSLContext context = SSLContext.getInstance("TLS");
+				context.init(null, new TrustManager[] { new X509TrustManager() {
+
+					@Override
+					public X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+
+					@Override
+					public void checkServerTrusted(X509Certificate[] chain,
+							String authType) throws CertificateException {
+					}
+
+					@Override
+					public void checkClientTrusted(X509Certificate[] chain,
+							String authType) throws CertificateException {
+					}
+				} }, new SecureRandom());
+				connection = (HttpsURLConnection) path.openConnection();
+				((HttpsURLConnection) connection).setSSLSocketFactory(context
+						.getSocketFactory());
+			} else {
+				connection = (HttpURLConnection) path.openConnection();
+			}
 			ret = connection.getInputStream();
 		} catch (MalformedURLException e) {
 			LogUtil.logException(e, TAG);
 		} catch (IOException e) {
+			LogUtil.logException(e, TAG);
+		} catch (NoSuchAlgorithmException e) {
+			LogUtil.logException(e, TAG);
+		} catch (KeyManagementException e) {
 			LogUtil.logException(e, TAG);
 		}
 		return ret;

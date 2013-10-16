@@ -17,6 +17,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Handler.Callback;
@@ -47,7 +48,6 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.yeegol.DIYWear.activity.ShareActivity;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MyImageView;
@@ -490,12 +490,17 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				LogUtil.logException(e, TAG);
 			}
 			// show share activity
-			Intent intent = new Intent(mContext, ShareActivity.class);
-			Bundle bundle = new Bundle();
-			bundle.putString("which", "tencent");
-			bundle.putString("msg", "hey!");
-			bundle.putString("img", getFileStreamPath(fileName).getPath());
-			intent.putExtras(bundle);
+			Intent intent = new Intent(Intent.ACTION_SEND);
+			intent.setType("text/plain");
+			intent.putExtra(Intent.EXTRA_TEXT, "hehe");
+			intent.putExtra(Intent.EXTRA_STREAM,
+					Uri.fromFile(getFileStreamPath(fileName)).getPath());
+			// Intent intent = new Intent(mContext, ShareActivity.class);
+			// Bundle bundle = new Bundle();
+			// bundle.putString("which", "tencent");
+			// bundle.putString("msg", "hey!");
+			// bundle.putString("img", getFileStreamPath(fileName).getPath());
+			// intent.putExtras(bundle);
 			startActivity(intent);
 			break;
 		case R.id.Button_cart:
