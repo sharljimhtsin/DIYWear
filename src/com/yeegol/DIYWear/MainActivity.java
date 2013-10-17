@@ -455,14 +455,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				public void onClick(DialogInterface dialog, int which) {
 					if (which == DialogInterface.BUTTON_POSITIVE) {
 						try {
-							String fileName = "image" + DateUtil.getTimeStamp()
-									+ ".jpg";
-							if (FSUtil.writeBitmapToFile(mContext, mBitmap,
-									fileName)) {
+							String directoryName = "/yeegol";
+							String fileName = "/image"
+									+ DateUtil.getTimeStamp() + ".jpg";
+							if (FSUtil.writeBitmapToFileOnSdcard(mContext,
+									mBitmap, fileName, directoryName)) {
 								NotificUtil
 										.showLongToast(getText(R.string.toast_image_saved_to_local_successlly)
-												+ getFileStreamPath(fileName)
-														.getAbsolutePath());
+												+ directoryName + fileName);
 							}
 						} catch (IOException e) {
 							LogUtil.logException(e, TAG);
