@@ -37,10 +37,10 @@ public class MyBitmap {
 	}
 
 	/**
+	 * get goods picture from cache or remote with specify direction
 	 * 
 	 * @param direct
-	 * @param done
-	 *            callback,removed
+	 * @return bitmap with direction
 	 */
 	public Bitmap getBitmapWithDirection(String direct) {
 		Bitmap ret = null;
@@ -74,6 +74,17 @@ public class MyBitmap {
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * cut the bitmap to hide shoes
+	 * 
+	 * @return bitmap resized
+	 */
+	public Bitmap getBitmapWithCutOff() {
+		Bitmap bitmap = getBitmap();
+		return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+				bitmap.getHeight() - 100);
 	}
 
 	/**

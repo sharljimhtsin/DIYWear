@@ -267,6 +267,13 @@ public class Model {
 	}
 
 	/**
+	 * @return model wear shoes or not
+	 */
+	private boolean haveShoes() {
+		return layers.get(SHOES_LAYER) != null;
+	}
+
+	/**
 	 * draw the model with all elements user selected
 	 * 
 	 * @param canvas
@@ -314,7 +321,8 @@ public class Model {
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
 			case MODEL_UNDERWEAR_LAYER:
-				baseCanvas.drawBitmap(b.getBitmap(),
+				baseCanvas.drawBitmap(
+						haveShoes() ? b.getBitmapWithCutOff() : b.getBitmap(),
 						layer_pos.get(String.valueOf(j))[0],
 						layer_pos.get(String.valueOf(j))[1], null);
 				break;
