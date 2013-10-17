@@ -75,8 +75,8 @@ public class Model {
 	 * offset on x,y axis,different on different phone screen
 	 */
 	interface Offset {
-		static final int OFFSET_OF_MODEL_ON_X = 50;
-		static final int OFFSET_OF_MODEL_ON_Y = 90;
+		static final int OFFSET_OF_MODEL_ON_X = 130;
+		static final int OFFSET_OF_MODEL_ON_Y = 250;
 	}
 
 	String currentDirection;
