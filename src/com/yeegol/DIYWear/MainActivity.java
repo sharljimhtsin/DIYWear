@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
+import android.provider.MediaStore.Images;
 import android.util.SparseArray;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
@@ -482,25 +483,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
-			// store bitmap to local
-			String fileName = "tmp.jpg";
-			try {
-				FSUtil.writeBitmapToFile(mContext, mBitmap, fileName);
-			} catch (IOException e) {
-				LogUtil.logException(e, TAG);
-			}
-			// show share activity
+			// save to local
+			String path = Images.Media.insertImage(getContentResolver(),
+					mBitmap, "title", "desc");
+			// show share dialogue
 			Intent intent = new Intent(Intent.ACTION_SEND);
-			intent.setType("text/plain");
-			intent.putExtra(Intent.EXTRA_TEXT, "hehe");
-			intent.putExtra(Intent.EXTRA_STREAM,
-					Uri.fromFile(getFileStreamPath(fileName)).getPath());
-			// Intent intent = new Intent(mContext, ShareActivity.class);
-			// Bundle bundle = new Bundle();
-			// bundle.putString("which", "tencent");
-			// bundle.putString("msg", "hey!");
-			// bundle.putString("img", getFileStreamPath(fileName).getPath());
-			// intent.putExtras(bundle);
+			intent.setType("image/jpeg");
+			intent.putExtra(Intent.EXTRA_TEXT, getText(R.string.share_content));
+			intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(path));
 			startActivity(intent);
 			break;
 		case R.id.Button_cart:
