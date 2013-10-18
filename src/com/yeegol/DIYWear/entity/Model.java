@@ -81,6 +81,8 @@ public class Model {
 
 	String currentDirection;
 
+	BrandModel currentBrandModel;
+
 	private Model() {
 		bitmapCache = new LruCache<String, Bitmap>(cacheSize);
 		layer_pos = new HashMap<String, Integer[]>();
@@ -274,6 +276,13 @@ public class Model {
 	}
 
 	/**
+	 * @return model is a women or not
+	 */
+	private boolean isFemale() {
+		return currentBrandModel.getGender() == 0;
+	}
+
+	/**
 	 * draw the model with all elements user selected
 	 * 
 	 * @param canvas
@@ -322,9 +331,10 @@ public class Model {
 				break;
 			case MODEL_UNDERWEAR_LAYER:
 				baseCanvas.drawBitmap(
-						haveShoes() ? b.getBitmapWithCutOff() : b.getBitmap(),
-						layer_pos.get(String.valueOf(j))[0],
-						layer_pos.get(String.valueOf(j))[1], null);
+						haveShoes() && isFemale() ? b.getBitmapWithCutOff() : b
+								.getBitmap(),
+						layer_pos.get(String.valueOf(j))[0], layer_pos
+								.get(String.valueOf(j))[1], null);
 				break;
 			case SHOES_LAYER:
 				baseCanvas.drawBitmap(
@@ -532,5 +542,20 @@ public class Model {
 	 */
 	public void setLayers(LinkedList<MyBitmap> layers) {
 		this.layers = layers;
+	}
+
+	/**
+	 * @return the currentBrandModel
+	 */
+	public BrandModel getCurrentBrandModel() {
+		return currentBrandModel;
+	}
+
+	/**
+	 * @param currentBrandModel
+	 *            the currentBrandModel to set
+	 */
+	public void setCurrentBrandModel(BrandModel currentBrandModel) {
+		this.currentBrandModel = currentBrandModel;
 	}
 }
