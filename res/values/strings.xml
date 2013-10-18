@@ -4,8 +4,6 @@
     <!-- UI strings -->
     <string name="app_name">DIYWear</string>
     <string name="main_user_experience">VID体验</string>
-    <string name="main_goods_list">商品列表</string>
-    <string name="main_function_list">功能列表</string>
     <string name="main_swith_model">模特</string>
     <string name="main_turn">转身</string>
     <string name="main_undo">撤除</string>
@@ -22,6 +20,7 @@
     <string name="toast_remove_from_list_successlly">已移除</string>
     <string name="toast_do_not_add_it_twice">请勿重复添加</string>
     <string name="toast_all_add_to_cart_successlly">已全部加入购物车</string>
+    <string name="toast_all_add_to_cart_failed">购物车为空</string>
     <string name="main_type_shoes">鞋子</string>
     <string name="main_type_shawl">围巾</string>
     <string name="main_type_coat">外套</string>
