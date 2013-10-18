@@ -20,7 +20,7 @@
     <string name="toast_remove_from_list_successlly">已移除</string>
     <string name="toast_do_not_add_it_twice">请勿重复添加</string>
     <string name="toast_all_add_to_cart_successlly">已全部加入购物车</string>
-    <string name="toast_all_add_to_cart_failed">购物车为空</string>
+    <string name="toast_all_add_to_cart_failed">商品列表为空</string>
     <string name="main_type_shoes">鞋子</string>
     <string name="main_type_shawl">围巾</string>
     <string name="main_type_coat">外套</string>
@@ -38,7 +38,7 @@
     <string name="toast_only_one_model_now">只有一个模特</string>
     <string name="toast_no_goods_item_under_the_type">该类别下无商品</string>
     <string name="alert_dial_info_title">商品信息</string>
-    <string name="view_empty_cart_nothing">购物车里面没有任何东西</string>
+    <string name="view_empty_cart_nothing">模特身上没有任何东西</string>
     <string name="main_goods_list_brand">品牌</string>
     <string name="toast_image_saved_to_local_successlly">图片已成功保存到本地，</string>
     <string name="share_content">我喜爱的模特搭配，分享一下</string>
