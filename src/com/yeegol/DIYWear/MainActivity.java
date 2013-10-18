@@ -749,7 +749,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPopupWindow.setContentView(layout);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.5),
-				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.6));
+				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.5));
 	}
 
 	/**
