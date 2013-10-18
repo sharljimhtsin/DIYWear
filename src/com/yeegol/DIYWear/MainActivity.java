@@ -308,12 +308,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							// sync it
 							Model.getInstance().setCurrentDirection(
 									mCurrentDirect);
+							Model.getInstance().setCurrentBrandModel(
+									mBrandModel);
 							mHandler.sendMessage(mHandler.obtainMessage(2));
 						}
 					}).create();
 			dialog.show();
 		} else {
 			mBrandModel = list.get(1);// make lady default
+			Model.getInstance().setCurrentBrandModel(mBrandModel);
 			mHandler.sendMessage(mHandler.obtainMessage(2));
 		}
 	}
@@ -525,7 +528,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			int index = StrUtil.ObjToInt(v.getTag());
 			// get its layer
 			int layer = mTempCart.keyAt(index);
-			removeGoodsFromCartAndRefreshUI(layer);
+			removeGoodsFromTempCartAndRefreshUI(layer);
 			NotificUtil
 					.showShortToast(R.string.toast_remove_from_list_successlly);
 			mPopupWindow.dismiss(false); // close old one
@@ -628,7 +631,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						.indexOfValue(mCurrentGoods));
 				switch (v.getId()) {
 				case R.id.Button_view_goods_info_remove:
-					removeGoodsFromCartAndRefreshUI(layer);
+					removeGoodsFromTempCartAndRefreshUI(layer);
 					mHandler.sendMessage(mHandler.obtainMessage(8));
 					break;
 				case R.id.Button_view_goods_info_dress_way_one:
@@ -753,16 +756,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
-	 * remove goods from cart & refresh the model
+	 * remove goods from temporarily cart & refresh the model
 	 * 
 	 * @param layer
 	 *            key of the layer
 	 */
-	private void removeGoodsFromCartAndRefreshUI(int layer) {
+	private void removeGoodsFromTempCartAndRefreshUI(int layer) {
 		// remove the layer & data related
 		Model.getInstance().setLayer(layer, null);
 		mTempCart.remove(layer);
-		mCart.remove(mCurrentGoods);
 		// refresh UI
 		drawModel();
 	}
@@ -1300,7 +1302,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						Goods tmpG;
 						if ((tmpG = mTempCart.get(mCurrentLayer)) != null
 								&& tmpG.getId() == goods.getId()) {
-							removeGoodsFromCartAndRefreshUI(mCurrentLayer);
+							removeGoodsFromTempCartAndRefreshUI(mCurrentLayer);
 							mHandler.sendMessage(mHandler.obtainMessage(98));
 							return;
 						}
@@ -1525,7 +1527,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		Model.getInstance().getLayer_pos().clear();
 		Model.getInstance().resetLinkedList();
 		mTempCart.clear();
-		mCart.clear();
 		DataHolder.getInstance().resetLayerMapping();
 	}
 
