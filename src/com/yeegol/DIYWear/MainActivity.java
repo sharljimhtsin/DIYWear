@@ -294,9 +294,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							BrandModel model = list.get(which);
+							if (mBrandModel == model) {
+								NotificUtil
+										.showShortToast(R.string.toast_no_need_to_switch);
+								return;
+							}
 							reset();
 							toggleVisibilty(mListLayout, View.GONE);
-							mBrandModel = list.get(which);
+							mBrandModel = model;
 							// set direct to front
 							mCurrentDirect = Model.MODEL_DIRECT_FRONT;
 							// sync it
@@ -499,7 +505,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					mCart.add(mTempCart.valueAt(i));
 				}
 				NotificUtil
-						.showShortToast(R.string.toast_all_add_to_cart_successlly);
+						.showShortToast(mTempCart.size() != 0 ? R.string.toast_all_add_to_cart_successlly
+								: R.string.toast_all_add_to_cart_failed);
 				// close pop-up window with virtual back-key press
 				onBackPressed();
 			}
