@@ -1419,7 +1419,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// purge invalid layer data
 		for (String key : Model.getInstance().getLayer_pos().keySet()) {
 			if (key.indexOf("#") == -1
-					|| key.indexOf(mCurrentDirect) == -1
+					|| key.indexOf("#" + mCurrentDirect) == -1
 					|| mTempCart.get(StrUtil.StringToInt(key.split("#")[0])) == null) {
 				continue;
 			}
