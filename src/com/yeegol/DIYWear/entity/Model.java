@@ -279,7 +279,7 @@ public class Model {
 	 * @return model is a women or not
 	 */
 	private boolean isFemale() {
-		return currentBrandModel.getGender() == 0;
+		return currentBrandModel.getGender() == 2;
 	}
 
 	/**
