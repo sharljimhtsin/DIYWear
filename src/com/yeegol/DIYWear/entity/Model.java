@@ -73,10 +73,12 @@ public class Model {
 
 	/**
 	 * offset on x,y axis,different on different phone screen
+	 * 
+	 * @deprecated bad due to hard-coded
 	 */
 	interface Offset {
 		static final int OFFSET_OF_MODEL_ON_X = 0;
-		static final int OFFSET_OF_MODEL_ON_Y = 10;
+		static final int OFFSET_OF_MODEL_ON_Y = 0;
 	}
 
 	String currentDirection;
@@ -114,6 +116,8 @@ public class Model {
 		return bitmapCache.get(key);
 	}
 
+	int xoff, yoff = 0;
+
 	/**
 	 * @param json
 	 * @return Integer[] {x,y,width,height}
@@ -125,8 +129,16 @@ public class Model {
 		int width = StrUtil.StringToInt(JSONUtil.getValueByName(json, "width"));
 		int height = StrUtil.StringToInt(JSONUtil
 				.getValueByName(json, "height"));
-		Integer[] xy = new Integer[] { x + Offset.OFFSET_OF_MODEL_ON_X,
-				y + Offset.OFFSET_OF_MODEL_ON_Y, width, height };
+		// calculate the model's offset of height & width
+		if (yoff == 0) {
+			Bitmap background = layers.get(BG_LAYER).getBitmap();
+			Bitmap body = layers.get(MODEL_BODY_LAYER).getBitmap();
+			int xdiff = background.getWidth() - body.getWidth();
+			int ydiff = background.getHeight() - body.getHeight();
+			xoff = xdiff / 2 - x;
+			yoff = ydiff / 2 - 100 - y;
+		}
+		Integer[] xy = new Integer[] { x + xoff, y + yoff, width, height };
 		return xy;
 	}
 
@@ -279,7 +291,7 @@ public class Model {
 	 * @return model is a women or not
 	 */
 	private boolean isFemale() {
-		return currentBrandModel.getGender() == 0;
+		return currentBrandModel.getGender() == 2;
 	}
 
 	/**
