@@ -16,6 +16,7 @@
         android:layout_height="50dip"
         android:layout_gravity="center"
         android:gravity="center"
+        android:singleLine="true"
         android:textColor="#8b898a"
         android:textSize="20sp" />
 
