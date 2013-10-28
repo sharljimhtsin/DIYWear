@@ -747,6 +747,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		togglePanelTouchable(false);
 		// attach view to popupWindow & show
 		mPopupWindow.setListener(this);
+		mPopupWindow.setOnDismissListener(this);
 		mPopupWindow.setTag(false);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(layout);
@@ -825,6 +826,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// make other unusable
 		togglePanelTouchable(true);
 		mPopupWindow.setListener(this);
+		mPopupWindow.setOnDismissListener(this);
 		mPopupWindow.setTag(true);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(listView.getChildCount() > 0 ? v : inflater
@@ -1613,15 +1615,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	public void onDismiss(boolean needRefresh) {
 		if (mPopupWindow.isTag()) {
 			toggleButton(mCartButton, needRefresh);
-			togglePanelTouchable(true);
-		} else {
-			togglePanelTouchable(false);
 		}
 	}
 
 	@Override
 	public void onDismiss() {
-		// do nothing
+		if (mPopupWindow.isTag()) {
+			togglePanelTouchable(true);
+		} else {
+			togglePanelTouchable(false);
+		}
 	}
 
 }
