@@ -404,6 +404,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void onClick(View v) {
+		if (lockTouch) {
+			return;
+		}
 		android.content.DialogInterface.OnClickListener listener;
 		switch (v.getId()) {
 		case R.id.Button_showType:
@@ -1453,6 +1456,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	int layer = -1; // identifier of layer finger touch on surfaceView
 	VelocityTracker tracker;
+	boolean lockTouch;
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -1487,6 +1491,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				|| v.getId() == R.id.Button_share) {
 			if (event.getAction() == MotionEvent.ACTION_DOWN
 					|| event.getAction() == MotionEvent.ACTION_UP) {
+				lockTouch = !lockTouch;
 				toggleFunctionBtn(v);
 			}
 			return false;
