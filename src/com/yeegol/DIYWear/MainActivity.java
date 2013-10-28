@@ -205,6 +205,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					toggleVisibilty(mTypeContainer, true);
 					break;
 				case 10:
+					@SuppressWarnings("unchecked")
+					List<Goods> l = (List<Goods>) msg.obj;
+					mGoodsList.addAll(l);
 					((BaseAdapter) mListLayout.getAdapter())
 							.notifyDataSetChanged();
 					underWorking = false;
@@ -1250,9 +1253,17 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					List<Goods> tmpList = Goods.doGoodsgetList(page, size,
 							categoryId, brandIds, gender, ageGroup, null, 0, 0,
 							null);
-					mGoodsList.addAll(tmpList);
-					// notify the listView to refresh
-					mHandler.sendMessage(mHandler.obtainMessage(10));
+					/*
+					 * change the dataSet and notify the listView to refresh at
+					 * same thread in the reason of low performance
+					 * 
+					 * java.lang.IllegalStateException: The content of the
+					 * adapter has changed but ListView did not receive a
+					 * notification. Make sure the content of your adapter is
+					 * not modified from a background thread, but only from the
+					 * UI thread.
+					 */
+					mHandler.sendMessage(mHandler.obtainMessage(10, tmpList));
 				}
 				if (mGoodsList != null) {
 					LogUtil.logDebug("goods list count:" + mGoodsList.size(),
