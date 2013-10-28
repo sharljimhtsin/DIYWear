@@ -531,7 +531,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			removeGoodsFromTempCartAndRefreshUI(layer);
 			NotificUtil
 					.showShortToast(R.string.toast_remove_from_list_successlly);
-			mPopupWindow.dismiss(false); // close old one
+			mPopupWindow.dismiss(); // close old one
 			if ("1".equals(v.getTag(R.string.tag_from_cart_window))) {
 				// refresh current cart window
 				prepareCartWindow(); // generate new one
