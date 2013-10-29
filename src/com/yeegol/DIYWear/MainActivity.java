@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 import android.app.Activity;
@@ -405,9 +406,26 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	}
 
+	/**
+	 * check wrong action on bottom bar
+	 * 
+	 * @return this figurer action is valid or not.
+	 */
+	private boolean shouldSkipAction() {
+		if (timeList.isEmpty() || timeList.size() == 1) {
+			return false;
+		}
+		long interval = timeList.getLast() - timeList.get(timeList.size() - 2);
+		return interval < 1000; // less than one second
+	}
+
 	@Override
 	public void onClick(View v) {
 		if (lockTouch) {
+			return;
+		}
+		if (shouldSkipAction()) {
+			LogUtil.logDebug("meaningless action,ignored", TAG);
 			return;
 		}
 		android.content.DialogInterface.OnClickListener listener;
@@ -1468,6 +1486,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	int layer = -1; // identifier of layer finger touch on surfaceView
 	VelocityTracker tracker;
 	boolean lockTouch;
+	LinkedList<Long> timeList = new LinkedList<Long>(); // with order-sort
+	int lockButtonId = 0;
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -1502,8 +1522,25 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				|| v.getId() == R.id.Button_share) {
 			if (event.getAction() == MotionEvent.ACTION_DOWN
 					|| event.getAction() == MotionEvent.ACTION_UP) {
-				lockTouch = !lockTouch;
+				// lock the whole panel if user hold one key
+				if (lockButtonId == 0
+						&& event.getAction() == MotionEvent.ACTION_DOWN) {
+					lockTouch = !lockTouch;
+					lockButtonId = v.getId();
+				} else if (lockButtonId == v.getId()
+						&& event.getAction() == MotionEvent.ACTION_UP) {
+					lockTouch = !lockTouch;
+					lockButtonId = 0;
+				}
+				LogUtil.logDebug(lockTouch ? "function panel locked now"
+						: "function panel unlocked now", TAG);
 				toggleFunctionBtn(v);
+				// record time point
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					timeList.clear();
+				} else {
+					timeList.add(System.currentTimeMillis());
+				}
 			}
 			return false;
 		}
