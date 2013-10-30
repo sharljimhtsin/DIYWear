@@ -44,7 +44,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.umeng.socialize.controller.RequestType;
@@ -123,7 +123,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	List<Collocation> mColList;
 
-	ScrollView mTypeContainer;
+	TabHost mConditionContainer;
 
 	Bitmap mBitmap;
 
@@ -203,7 +203,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					}
 					break;
 				case 9:
-					toggleVisibilty(mTypeContainer, true);
+					toggleVisibilty(mConditionContainer, true);
 					break;
 				case 10:
 					((BaseAdapter) mListLayout.getAdapter())
@@ -234,12 +234,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		ImageButton showFunctionButton = (ImageButton) findViewById(R.id.Button_showFunction);
 		// get controls
 		mSurfaceView = (MySurfaceView) findViewById(R.id.surface_main);
-		mTypeLayout = (LinearLayout) findViewById(R.id.LinearLayout_goodsType);
+		// mTypeLayout = (LinearLayout)
+		// findViewById(R.id.LinearLayout_goodsType);
 		mFunctionLayout = (LinearLayout) findViewById(R.id.LinearLayout_functionArea);
 		mMainLayout = (RelativeLayout) findViewById(R.id.RelativeLayout_main);
 		mListLayout = (ListView) findViewById(R.id.ListView_goodsList);
 		mCartButton = (Button) findViewById(R.id.Button_cart);
-		mTypeContainer = (ScrollView) findViewById(R.id.ScrollView_goodsType);
+		mConditionContainer = (TabHost) findViewById(R.id.TabHost_goodsCondition);
 		// set listener
 		showTypeButton.setOnClickListener(this);
 		showFunctionButton.setOnClickListener(this);
@@ -247,7 +248,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mCartButton.setOnTouchListener(this);
 		mSurfaceView.getHolder().addCallback(this);
 		mSurfaceView.setOnTouchListener(this);
-		mTypeContainer.setOnTouchListener(this);
+		mConditionContainer.setOnTouchListener(this);
 		// trigger
 		mHandler.sendMessage(mHandler.obtainMessage(0));
 	}
@@ -428,7 +429,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		android.content.DialogInterface.OnClickListener listener;
 		switch (v.getId()) {
 		case R.id.Button_showType:
-			toggleVisibilty(mTypeContainer);
+			toggleVisibilty(mConditionContainer);
 			break;
 		case R.id.Button_showFunction:
 			toggleVisibilty(mFunctionLayout);
@@ -1481,7 +1482,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		// while on left side-bar
-		if (v.getId() == R.id.ScrollView_goodsType) {
+		if (v.getId() == R.id.TabHost_goodsCondition) {
 			if (tracker == null) {
 				tracker = VelocityTracker.obtain();
 			}

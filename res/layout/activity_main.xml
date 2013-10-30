@@ -49,22 +49,15 @@
             android:layout_height="match_parent"
             android:layout_centerInParent="true" />
 
-        <ScrollView
-            android:id="@+id/ScrollView_goodsType"
+        <TabHost
+            android:id="@+id/TabHost_goodsCondition"
             android:layout_width="200dip"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:background="@drawable/bg_goods_type_scale"
             android:paddingBottom="70dip"
             android:visibility="gone" >
-
-            <LinearLayout
-                android:id="@+id/LinearLayout_goodsType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-            </LinearLayout>
-        </ScrollView>
+        </TabHost>
 
         <ListView
             android:id="@+id/ListView_goodsList"
