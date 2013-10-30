@@ -1303,6 +1303,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 */
 	private void buildBottomBar() {
 		if (mGoodsList == null) {
+			mListLayout.setVisibility(View.INVISIBLE);
 			mHandler.sendMessage(mHandler.obtainMessage(98));
 			NotificUtil
 					.showShortToast(R.string.toast_no_goods_item_under_the_type);
