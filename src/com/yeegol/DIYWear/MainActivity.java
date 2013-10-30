@@ -426,28 +426,24 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			return;
 		}
 		android.content.DialogInterface.OnClickListener listener;
-		switch (v.getId()) {
-		case R.id.Button_showType:
+		int id = v.getId();
+		if (id == R.id.Button_showType) {
 			toggleVisibilty(mTypeContainer);
-			break;
-		case R.id.Button_showFunction:
+		} else if (id == R.id.Button_showFunction) {
 			toggleVisibilty(mFunctionLayout);
-			break;
-		case R.id.Button_switchModel:
+		} else if (id == R.id.Button_switchModel) {
 			if (allDisabled) {
 				return;
 			}
 			mHandler.sendMessage(mHandler.obtainMessage(8));
 			toggleSex();
-			break;
-		case R.id.Button_turnBack:
+		} else if (id == R.id.Button_turnBack) {
 			if (allDisabled) {
 				return;
 			}
 			toggleDirection();
 			mHandler.sendMessage(mHandler.obtainMessage(2));
-			break;
-		case R.id.Button_undo:
+		} else if (id == R.id.Button_undo) {
 			if (allDisabled) {
 				return;
 			}
@@ -474,8 +470,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							R.string.alert_dial_undo_title,
 							StrUtil.charToString(getText(R.string.alert_dial_undo_message)),
 							mContext, listener);
-			break;
-		case R.id.Button_save:
+		} else if (id == R.id.Button_save) {
 			if (allDisabled) {
 				return;
 			}
@@ -507,8 +502,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							R.string.alert_dial_save_to_local_title,
 							StrUtil.charToString(getText(R.string.alert_dial_save_to_local_message)),
 							mContext, listener);
-			break;
-		case R.id.Button_share:
+		} else if (id == R.id.Button_share) {
 			if (allDisabled) {
 				return;
 			}
@@ -516,8 +510,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					.charToString(getText(R.string.umeng_share_content)));
 			mSocialService.setShareImage(new UMImage(mContext, mBitmap));
 			mSocialService.openShare(this, false);
-			break;
-		case R.id.Button_cart:
+		} else if (id == R.id.Button_cart) {
 			if (allDisabled && !skipFirst) {
 				return;
 			}
@@ -534,8 +527,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				// close pop-up window with virtual back-key press
 				onBackPressed();
 			}
-			break;
-		case R.id.Button_item_cart_add:
+		} else if (id == R.id.Button_item_cart_add) {
 			Goods g = mTempCart.valueAt(StrUtil.ObjToInt(v.getTag()));
 			if (mCart.contains(g)) {
 				NotificUtil.showShortToast(R.string.toast_do_not_add_it_twice);
@@ -544,8 +536,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				NotificUtil
 						.showShortToast(R.string.toast_add_to_cart_successlly);
 			}
-			break;
-		case R.id.Button_item_cart_remove:
+		} else if (id == R.id.Button_item_cart_remove) {
 			int index = StrUtil.ObjToInt(v.getTag());
 			// get its layer
 			int layer = mTempCart.keyAt(index);
@@ -557,9 +548,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				// refresh current cart window
 				prepareCartWindow(); // generate new one
 			}
-			break;
-		default:
-			break;
+		} else {
 		}
 	}
 
@@ -650,25 +639,21 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				// get its layer
 				int layer = mTempCart.keyAt(mTempCart
 						.indexOfValue(mCurrentGoods));
-				switch (v.getId()) {
-				case R.id.Button_view_goods_info_remove:
+				int id = v.getId();
+				if (id == R.id.Button_view_goods_info_remove) {
 					removeGoodsFromTempCartAndRefreshUI(layer);
 					mHandler.sendMessage(mHandler.obtainMessage(8));
-					break;
-				case R.id.Button_view_goods_info_dress_way_one:
+				} else if (id == R.id.Button_view_goods_info_dress_way_one) {
 					DataHolder.getInstance().mapThisToLow(layer);
 					// refresh UI
 					drawModel();
-					break;
-				case R.id.Button_view_goods_info_dress_way_two:
+				} else if (id == R.id.Button_view_goods_info_dress_way_two) {
 					DataHolder.getInstance().mapThisToHigh(layer);
 					// refresh UI
 					drawModel();
-					break;
-				case R.id.Button_view_goods_info_detail:
+				} else if (id == R.id.Button_view_goods_info_detail) {
 					handler.sendMessage(handler.obtainMessage(1));
-					break;
-				case R.id.Button_view_goods_info_previous:
+				} else if (id == R.id.Button_view_goods_info_previous) {
 					// check if is the first
 					if (index == 0 || index == -1) {
 						return;
@@ -681,8 +666,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							+ c.getPreview());
 					// set name
 					recommendNameTextView.setText(c.getName());
-					break;
-				case R.id.ImageView_view_goods_info_preview:
+				} else if (id == R.id.ImageView_view_goods_info_preview) {
 					if (index == -1) {
 						return;
 					}
@@ -724,8 +708,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							mHandler.sendMessage(mHandler.obtainMessage(8));
 						}
 					}).start();
-					break;
-				case R.id.Button_view_goods_info_next:
+				} else if (id == R.id.Button_view_goods_info_next) {
 					// check if is the last
 					if (index == -1 || index == mColList.size() - 1) {
 						return;
@@ -738,9 +721,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 							+ c1.getPreview());
 					// set name
 					recommendNameTextView.setText(c1.getName());
-					break;
-				default:
-					break;
+				} else {
 				}
 			}
 		};
