@@ -32,7 +32,7 @@ public class MyAdapter extends BaseAdapter {
 
 	Context context;
 
-	Object[] list;
+	List<?> list;
 
 	Handler handler;
 
@@ -41,7 +41,7 @@ public class MyAdapter extends BaseAdapter {
 	 */
 	public MyAdapter(Context c, List<?> l, Handler h) {
 		context = c;
-		list = l.toArray();
+		list = l;
 		handler = h;
 	}
 
@@ -52,7 +52,7 @@ public class MyAdapter extends BaseAdapter {
 	 */
 	@Override
 	public int getCount() {
-		return list.length;
+		return list.size();
 	}
 
 	/*
@@ -62,7 +62,7 @@ public class MyAdapter extends BaseAdapter {
 	 */
 	@Override
 	public Object getItem(int arg0) {
-		return list[arg0];
+		return list.get(arg0);
 	}
 
 	/*
@@ -83,7 +83,7 @@ public class MyAdapter extends BaseAdapter {
 	 */
 	@Override
 	public View getView(int arg0, View arg1, ViewGroup arg2) {
-		final Object o = list[arg0];
+		final Object o = list.get(arg0);
 		final boolean isGood = o instanceof Goods;
 		final ImageView imageView = new ImageView(context);
 		imageView.setTag(arg0);// record the position as key for further find

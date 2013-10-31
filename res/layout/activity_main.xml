@@ -81,17 +81,38 @@
             </LinearLayout>
         </TabHost>
 
-        <ListView
-            android:id="@+id/ListView_goodsList"
+        <LinearLayout
+            android:id="@+id/LinearLayout_goodsList"
             android:layout_width="100dip"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="@drawable/bg_goods_list_scale"
-            android:divider="@drawable/line"
+            android:orientation="vertical"
             android:paddingBottom="70dip"
-            android:showDividers="middle"
-            android:visibility="gone" >
-        </ListView>
+            android:visibility="gone"
+            android:weightSum="10" >
+
+            <TextView
+                android:id="@+id/TextView_goodsList_count"
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/Button_goodsList_sort"
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="1" />
+
+            <ListView
+                android:id="@+id/ListView_goodsList"
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="8"
+                android:background="@drawable/bg_goods_list_scale"
+                android:divider="@drawable/line"
+                android:showDividers="middle" >
+            </ListView>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/LinearLayout_functionArea"

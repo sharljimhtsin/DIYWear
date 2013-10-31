@@ -90,6 +90,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	LinearLayout mFunctionLayout;
 
+	LinearLayout mGoodsLayout;
+
 	RelativeLayout mMainLayout;
 
 	ListView mListLayout;
@@ -118,11 +120,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	List<Goods> mCart;
 
-	Button mCartButton;
-
 	MyPopupWindow mPopupWindow;
-
-	List<Collocation> mColList;
 
 	TabHost mConditionContainer;
 
@@ -161,7 +159,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				case 0:
 					mHandler.sendMessage(mHandler.obtainMessage(97));
 					prepareModelList();
-					prepareRightSidebar();
+					prepareBottombar();
 					break;
 				case 1:
 					pickUpIfNeed(true);
@@ -236,15 +234,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// get controls
 		mSurfaceView = (MySurfaceView) findViewById(R.id.surface_main);
 		mFunctionLayout = (LinearLayout) findViewById(R.id.LinearLayout_functionArea);
+		mGoodsLayout = (LinearLayout) findViewById(R.id.LinearLayout_goodsList);
 		mMainLayout = (RelativeLayout) findViewById(R.id.RelativeLayout_main);
 		mListLayout = (ListView) findViewById(R.id.ListView_goodsList);
-		mCartButton = (Button) findViewById(R.id.Button_cart);
 		mConditionContainer = (TabHost) findViewById(R.id.TabHost_goodsCondition);
 		// set listener
 		showTypeButton.setOnClickListener(this);
 		showFunctionButton.setOnClickListener(this);
-		mCartButton.setOnClickListener(this);
-		mCartButton.setOnTouchListener(this);
 		mSurfaceView.getHolder().addCallback(this);
 		mSurfaceView.setOnTouchListener(this);
 		mConditionContainer.setOnTouchListener(this);
@@ -302,7 +298,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 								return;
 							}
 							reset();
-							toggleVisibilty(mListLayout, View.GONE);
+							toggleVisibilty(mGoodsLayout, View.GONE);
 							mBrandModel = model;
 							// set direct to front
 							mCurrentDirect = Model.MODEL_DIRECT_FRONT;
@@ -558,6 +554,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				prepareCartWindow(); // generate new one
 			}
 			break;
+		case R.id.Button_goodsList_sort:
+			// TODO sort
+			break;
 		default:
 			break;
 		}
@@ -575,6 +574,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			v.setBackground(null);
 		}
 	}
+
+	List<Collocation> tmpCollocations;
 
 	/**
 	 * create & pop-up the goods information window
@@ -611,12 +612,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			public boolean handleMessage(Message msg) {
 				switch (msg.what) {
 				case 0:
+					@SuppressWarnings("unchecked")
+					List<Collocation> colList = (List<Collocation>) msg.obj;
 					LinearLayout layout = (LinearLayout) previewImageView
 							.getParent().getParent();
-					if (mColList != null) {
-						Collocation c = mColList.get(0);
-						previewImageView.setURL(NetUtil.DOMAIN_FILE
-								+ c.getPreview());
+					if (colList != null) {
+						Collocation c = colList.get(0);
+						previewImageView.setURL(NetUtil
+								.buildURLForCollocation(c.getPreview()));
 						previewImageView.setTag(c);
 						recommendNameTextView.setText(c.getName());
 					} else {
@@ -626,6 +629,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					}
 					// show collation part
 					toggleVisibilty(layout);
+					tmpCollocations = colList;
 					break;
 				case 1:
 					NotificUtil.showAlertDia(R.string.alert_dial_info_title,
@@ -644,8 +648,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			public void onClick(View v) {
 				// get location of current entity
 				int index = -1;
-				if (mColList != null) {
-					index = mColList.indexOf(previewImageView.getTag());
+				if (tmpCollocations != null) {
+					index = tmpCollocations.indexOf(previewImageView.getTag());
 				}
 				// get its layer
 				int layer = mTempCart.keyAt(mTempCart
@@ -674,11 +678,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						return;
 					}
 					// bind the object
-					Collocation c = mColList.get(index - 1);
+					Collocation c = tmpCollocations.get(index - 1);
 					previewImageView.setTag(c);
 					// set image
-					previewImageView.setURL(NetUtil.DOMAIN_FILE
-							+ c.getPreview());
+					previewImageView.setURL(NetUtil.buildURLForCollocation(c
+							.getPreview()));
 					// set name
 					recommendNameTextView.setText(c.getName());
 					break;
@@ -698,15 +702,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					break;
 				case R.id.Button_view_goods_info_next:
 					// check if is the last
-					if (index == -1 || index == mColList.size() - 1) {
+					if (index == -1 || index == tmpCollocations.size() - 1) {
 						return;
 					}
 					// bind object
-					Collocation c1 = mColList.get(index + 1);
+					Collocation c1 = tmpCollocations.get(index + 1);
 					previewImageView.setTag(c1);
 					// set image
-					previewImageView.setURL(NetUtil.DOMAIN_FILE
-							+ c1.getPreview());
+					previewImageView.setURL(NetUtil.buildURLForCollocation(c1
+							.getPreview()));
 					// set name
 					recommendNameTextView.setText(c1.getName());
 					break;
@@ -722,10 +726,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void run() {
-				mColList = Collocation.doCollocationgetList(0,
+				List<Collocation> list = Collocation.doCollocationgetList(0,
 						mCurrentGoods.getId(), mBrandModel.getGender(), "",
 						StrUtil.intToString(mBrandModel.getAgeGroup()), 0, 0);
-				handler.sendMessage(handler.obtainMessage(0));
+				handler.sendMessage(handler.obtainMessage(0, list));
 			}
 		}).start();
 		dressWayOneButton.setOnClickListener(listener);
@@ -1053,6 +1057,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 	}
 
+	/**
+	 * add collocation entrance into menu,and others
+	 * 
+	 * @param viewRoot
+	 * @param listener
+	 */
 	private void addCollationWithCategory(LinearLayout viewRoot,
 			OnClickListener listener) {
 		// get inflater
@@ -1233,7 +1243,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * @param isNew
 	 *            reset or append
 	 */
-	private void prepareBottomBar(final int page, final int size,
+	private void prepareRightBar(final int page, final int size,
 			final int categoryId, final String brandIds, final int gender,
 			final int ageGroup, final boolean isNew) {
 		// no more data to query
@@ -1263,18 +1273,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					mHandler.sendMessage(mHandler.obtainMessage(5));
 				} else {
 					if (isCollocationMod) {
-						List<Goods> tmpList = Goods.doGoodsgetList(page, size,
-								categoryId, brandIds, gender, ageGroup, null,
-								0, 0, null);
-						mGoodsList.addAll(tmpList);
-						mCollocationsList.clear();
-					} else {
 						List<Collocation> tmpList = Collocation
 								.doCollocationgetList(-1, -1, gender, "",
 										StrUtil.intToString(ageGroup), page,
 										size);
 						mCollocationsList.addAll(tmpList);
-						mGoodsList.clear();
+					} else {
+						List<Goods> tmpList = Goods.doGoodsgetList(page, size,
+								categoryId, brandIds, gender, ageGroup, null,
+								0, 0, null);
+						mGoodsList.addAll(tmpList);
 					}
 					// notify the listView to refresh
 					mHandler.sendMessage(mHandler.obtainMessage(10));
@@ -1296,7 +1304,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 */
 	private void buildBottomBar() {
 		if (mGoodsList == null && mCollocationsList == null) {
-			mListLayout.setVisibility(View.INVISIBLE);
+			mGoodsLayout.setVisibility(View.INVISIBLE);
 			mHandler.sendMessage(mHandler.obtainMessage(98));
 			NotificUtil
 					.showShortToast(R.string.toast_no_goods_item_under_the_type);
@@ -1378,8 +1386,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}
 			}
 		});
-		mListLayout.setVisibility(View.VISIBLE);
 		mListLayout.setOnScrollListener(this);
+		// set count at header
+		prepareRightSidebar();
+		mGoodsLayout.setVisibility(View.VISIBLE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));
 	}
 
@@ -1445,27 +1455,49 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		drawModel();
 	}
 
+	Button cartButton;
+
 	/**
 	 * build function bar
 	 */
-	private void prepareRightSidebar() {
+	private void prepareBottombar() {
 		// get controls
+		cartButton = (Button) findViewById(R.id.Button_cart);
 		Button switchModelButton = (Button) findViewById(R.id.Button_switchModel);
 		Button turnBackButton = (Button) findViewById(R.id.Button_turnBack);
 		Button undoButton = (Button) findViewById(R.id.Button_undo);
 		Button saveButton = (Button) findViewById(R.id.Button_save);
 		Button shareButton = (Button) findViewById(R.id.Button_share);
 		// register event
+		cartButton.setOnClickListener(this);
 		switchModelButton.setOnClickListener(this);
 		turnBackButton.setOnClickListener(this);
 		undoButton.setOnClickListener(this);
 		saveButton.setOnClickListener(this);
 		shareButton.setOnClickListener(this);
+		cartButton.setOnTouchListener(this);
 		switchModelButton.setOnTouchListener(this);
 		turnBackButton.setOnTouchListener(this);
 		undoButton.setOnTouchListener(this);
 		saveButton.setOnTouchListener(this);
 		shareButton.setOnTouchListener(this);
+	}
+
+	/**
+	 * 
+	 */
+	private void prepareRightSidebar() {
+		// get controls
+		TextView countTextView = (TextView) findViewById(R.id.TextView_goodsList_count);
+		Button sortButton = (Button) findViewById(R.id.Button_goodsList_sort);
+		// set value
+		countTextView.setText("Total count is "
+				+ (mGoodsList != null ? mGoodsList.size() : mCollocationsList
+						.size()));
+		sortButton.setText("Sort");
+		// set listener
+		countTextView.setOnClickListener(this);
+		sortButton.setOnClickListener(this);
 	}
 
 	/*
@@ -1481,10 +1513,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			return;
 		}
 		// hide goods list by back key
-		if (mListLayout.getVisibility() == View.GONE) {
+		if (mGoodsLayout.getVisibility() == View.GONE) {
 			System.exit(0);
 		} else {
-			mListLayout.setVisibility(View.GONE);
+			mGoodsLayout.setVisibility(View.GONE);
 		}
 	}
 
@@ -1542,7 +1574,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		// while on left side-bar
-		if (v.getId() == android.R.id.tabs) {
+		if (v.getId() == R.id.TabHost_goodsCondition) {
 			if (tracker == null) {
 				tracker = VelocityTracker.obtain();
 			}
@@ -1707,7 +1739,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				&& scrollState == OnScrollListener.SCROLL_STATE_IDLE
 				&& !underWorking && visibleItemCount < totalItemCount) {
 			underWorking = true;
-			prepareBottomBar(getNextPage(), OFFSET, mCategoryId, mBrandIds,
+			prepareRightBar(getNextPage(), OFFSET, mCategoryId, mBrandIds,
 					mBrandModel.getGender(), mBrandModel.getAgeGroup(), false);
 			LogUtil.logDebug("hit bottom", TAG);
 		}
@@ -1716,7 +1748,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	@Override
 	public void onDismiss(boolean needRefresh) {
 		if (mPopupWindow.isTag()) {
-			toggleButton(mCartButton, needRefresh);
+			toggleButton(cartButton, needRefresh);
 		}
 	}
 
@@ -1742,7 +1774,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				mCategoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
 				mBrandIds = StrUtil.objToString(v
 						.getTag(R.string.tag_brands_id));
-				prepareBottomBar(PAGE, OFFSET, mCategoryId, mBrandIds,
+				prepareRightBar(PAGE, OFFSET, mCategoryId, mBrandIds,
 						mBrandModel.getGender(), mBrandModel.getAgeGroup(),
 						true);
 			}
