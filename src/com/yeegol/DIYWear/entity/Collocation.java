@@ -37,14 +37,31 @@ public class Collocation {
 		NameValuePair method = new BasicNameValuePair("method",
 				"Collocation.getList");
 		pairs.add(method);
-		NameValuePair goodsIdd = new BasicNameValuePair("goodsId",
-				StrUtil.intToString(goodsId));
-		pairs.add(goodsIdd);
+		if (brandId != -1) {
+			NameValuePair brandIdd = new BasicNameValuePair("brandId",
+					StrUtil.intToString(goodsId));
+			pairs.add(brandIdd);
+		}
+		if (goodsId != -1) {
+			NameValuePair goodsIdd = new BasicNameValuePair("goodsId",
+					StrUtil.intToString(goodsId));
+			pairs.add(goodsIdd);
+		}
 		NameValuePair genderr = new BasicNameValuePair("gender",
 				StrUtil.intToString(gender));
 		pairs.add(genderr);
+		if (!"".equals(season)) {
+			NameValuePair seasonn = new BasicNameValuePair("season", season);
+			pairs.add(seasonn);
+		}
 		NameValuePair ageGroupp = new BasicNameValuePair("ageGroup", ageGroup);
 		pairs.add(ageGroupp);
+		NameValuePair pagee = new BasicNameValuePair("page",
+				StrUtil.intToString(page));
+		pairs.add(pagee);
+		NameValuePair sizee = new BasicNameValuePair("size",
+				StrUtil.intToString(size));
+		pairs.add(sizee);
 		String json = NetUtil.getTextFromWeb(NetUtil.buildURL(pairs),
 				NetUtil.DOMAIN_API_PURE);
 		json = JSONUtil.getValueByName(json, "rows");

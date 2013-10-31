@@ -95,6 +95,10 @@ public class NetUtil {
 		return NetUtil.DOMAIN_FILE + preview + "preview/thumb.jpg";
 	}
 
+	public static String buildURLForCollocation(String preview) {
+		return NetUtil.DOMAIN_FILE + preview;
+	}
+
 	/**
 	 * @param url
 	 * @return text

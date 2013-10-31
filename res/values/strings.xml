@@ -40,6 +40,10 @@
     <string name="alert_dial_info_title">商品信息</string>
     <string name="view_empty_cart_nothing">模特身上没有任何东西</string>
     <string name="main_goods_list_brand">品牌</string>
+    <string name="main_goods_list_category">分类</string>
+    <string name="main_goods_list_menu_brand_all">全部品牌</string>
+    <string name="main_goods_list_menu_category_all">全部分类</string>
+    <string name="main_goods_list_menu_collocation_all">搭配</string>
     <string name="toast_image_saved_to_local_successlly">图片已成功保存到本地，</string>
     <string name="umeng_share_content">我喜爱的模特搭配，分享一下</string>
     <string name="alert_dial_undo_title">确认撤销？</string>

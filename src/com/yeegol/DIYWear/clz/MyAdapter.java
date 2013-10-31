@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 import com.yeegol.DIYWear.R;
+import com.yeegol.DIYWear.entity.Collocation;
 import com.yeegol.DIYWear.entity.Goods;
 import com.yeegol.DIYWear.util.NetUtil;
 
@@ -31,16 +32,16 @@ public class MyAdapter extends BaseAdapter {
 
 	Context context;
 
-	List<Goods> list;
+	Object[] list;
 
 	Handler handler;
 
 	/**
 	 * 
 	 */
-	public MyAdapter(Context c, List<Goods> l, Handler h) {
+	public MyAdapter(Context c, List<?> l, Handler h) {
 		context = c;
-		list = l;
+		list = l.toArray();
 		handler = h;
 	}
 
@@ -51,7 +52,7 @@ public class MyAdapter extends BaseAdapter {
 	 */
 	@Override
 	public int getCount() {
-		return list.size();
+		return list.length;
 	}
 
 	/*
@@ -61,7 +62,7 @@ public class MyAdapter extends BaseAdapter {
 	 */
 	@Override
 	public Object getItem(int arg0) {
-		return list.get(arg0);
+		return list[arg0];
 	}
 
 	/*
@@ -82,19 +83,24 @@ public class MyAdapter extends BaseAdapter {
 	 */
 	@Override
 	public View getView(int arg0, View arg1, ViewGroup arg2) {
-		final Goods goods = list.get(arg0);
+		final Object o = list[arg0];
+		final boolean isGood = o instanceof Goods;
 		final ImageView imageView = new ImageView(context);
 		imageView.setTag(arg0);// record the position as key for further find
 		imageView.setImageResource(R.drawable.ic_launcher); // default icon
 		imageView.setScaleType(ScaleType.CENTER_CROP);
 		imageView.setLayoutParams(new LayoutParams(100, 100));
-		if (goods.getPreview() != null) {
+		if (isGood ? ((Goods) o).getPreview() != null : ((Collocation) o)
+				.getPreview() != null) {
 			new Thread(new Runnable() {
 
 				@Override
 				public void run() {
 					Bitmap bm = NetUtil.getImageFromWeb(
-							NetUtil.buildURLForThumb(goods.getPreview()),
+							isGood ? NetUtil.buildURLForThumb(((Goods) o)
+									.getPreview()) : NetUtil
+									.buildURLForCollocation(((Collocation) o)
+											.getPreview()),
 							NetUtil.DOMAIN_FILE_PURE);
 					Object[] obj = new Object[] { imageView, bm };
 					// notice the UI thread to draw

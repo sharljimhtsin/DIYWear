@@ -45,6 +45,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TabHost;
+import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
 
 import com.umeng.socialize.controller.RequestType;
@@ -81,13 +82,11 @@ import com.yeegol.DIYWear.util.ThreadUtil;
  */
 public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		OnClickListener, MyOnDismissListener, OnTouchListener,
-		OnGestureListener, OnScrollListener {
+		OnGestureListener, OnScrollListener, TabContentFactory {
 
 	private static final String TAG = MainActivity.class.getName();
 
 	MySurfaceView mSurfaceView;
-
-	LinearLayout mTypeLayout;
 
 	LinearLayout mFunctionLayout;
 
@@ -102,6 +101,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	List<Category> mCategoryList;
 
 	List<Goods> mGoodsList;
+
+	List<Collocation> mCollocationsList;
 
 	Context mContext;
 
@@ -234,8 +235,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		ImageButton showFunctionButton = (ImageButton) findViewById(R.id.Button_showFunction);
 		// get controls
 		mSurfaceView = (MySurfaceView) findViewById(R.id.surface_main);
-		// mTypeLayout = (LinearLayout)
-		// findViewById(R.id.LinearLayout_goodsType);
 		mFunctionLayout = (LinearLayout) findViewById(R.id.LinearLayout_functionArea);
 		mMainLayout = (RelativeLayout) findViewById(R.id.RelativeLayout_main);
 		mListLayout = (ListView) findViewById(R.id.ListView_goodsList);
@@ -691,36 +690,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					mHandler.sendMessage(mHandler.obtainMessage(97));
 					new Thread(new Runnable() {
 						public void run() {
-							// remove all goods first
-							reset();
-							// re-get model's layer
-							mHandler.sendMessage(mHandler.obtainMessage(2));
-							// do with recommended goods
-							com.yeegol.DIYWear.entity.Collocation.Model model = Collocation
-									.doCollocationgetInfo(collocation.getId());
-							String[] ids = model.getGoodsIds().split(",");
-							List<Goods> list = new ArrayList<Goods>();
-							for (String id : ids) {
-								Goods goods = Goods.doGoodsgetInfo(StrUtil
-										.StringToInt(id));
-								// wear it
-								boolean success = setGoods(
-										goods,
-										mCurrentDirect,
-										DataHolder
-												.getInstance()
-												.getMappingLayerByName(
-														goods.getCategoryName()));
-								if (success) {
-									list.add(goods);
-								} else {
-									mHandler.sendMessage(mHandler
-											.obtainMessage(11));
-									return;
-								}
-							}
-							// refresh UI
-							drawModel();
+							setCollocation(collocation);
 							mHandler.sendMessage(mHandler.obtainMessage(98));
 							mHandler.sendMessage(mHandler.obtainMessage(8));
 						}
@@ -1019,39 +989,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * fill the category bar with data from web
 	 */
 	private void buildLeftSidebar() {
-		// create listener
-		OnClickListener listener = new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				if (allDisabled) {
-					return;
-				}
-				mCategoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
-				mBrandIds = StrUtil.objToString(v
-						.getTag(R.string.tag_brands_id));
-				prepareBottomBar(PAGE, OFFSET, mCategoryId, mBrandIds,
-						mBrandModel.getGender(), mBrandModel.getAgeGroup(),
-						true);
-			}
-		};
-		// pick the top of the tree
-		Category treeTop;
-		if (mBrandModel.getGender() == 1) {
-			treeTop = mCategoryList.get(0);
-		} else {
-			treeTop = mCategoryList.get(1);
-		}
-		// clear first
-		mTypeLayout.removeAllViews();
 		// build the bar
-		addBrandTypeWithCategory(mTypeLayout, listener);
-		buildLeftSidebarRecursively(treeTop.getChildren(), mTypeLayout,
-				listener);
+		mConditionContainer.setup();
+		mConditionContainer.clearAllTabs();
+		mConditionContainer.addTab(mConditionContainer.newTabSpec("Brand")
+				.setContent(this)
+				.setIndicator(getText(R.string.main_goods_list_brand)));
+		mConditionContainer.addTab(mConditionContainer.newTabSpec("Type")
+				.setContent(this)
+				.setIndicator(getText(R.string.main_goods_list_category)));
+		mConditionContainer.setCurrentTab(0);
 	}
 
 	/**
-	 * build the category list recursively
+	 * build the category list <b>recursively</b>
 	 * 
 	 * @param category
 	 *            category list from top
@@ -1102,6 +1053,43 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 	}
 
+	private void addCollationWithCategory(LinearLayout viewRoot,
+			OnClickListener listener) {
+		// get inflater
+		LayoutInflater inflater = getLayoutInflater();
+		// add "All Category"
+		LinearLayout itemLayout = (LinearLayout) inflater.inflate(
+				R.layout.item_menu, null);
+		TextView textView = (TextView) itemLayout
+				.findViewById(R.id.TextView_item_menu_name);
+		textView.setText(R.string.main_goods_list_menu_category_all);
+		textView.setTag(R.string.tag_id, 0);
+		textView.setTag(R.string.tag_brands_id, "-1");
+		textView.setTextSize(25);
+		textView.setOnClickListener(listener);
+		viewRoot.addView(itemLayout);
+		// insert the divider
+		View view = new View(mContext);
+		view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
+		view.setBackgroundColor(Color.parseColor("#d1d1d1"));
+		viewRoot.addView(view);
+		// add "Collocation"
+		itemLayout = (LinearLayout) inflater.inflate(R.layout.item_menu, null);
+		textView = (TextView) itemLayout
+				.findViewById(R.id.TextView_item_menu_name);
+		textView.setText(R.string.main_goods_list_menu_collocation_all);
+		textView.setTag(R.string.tag_id, "-1");
+		textView.setTag(R.string.tag_brands_id, "-1");
+		textView.setTextSize(25);
+		textView.setOnClickListener(listener);
+		viewRoot.addView(itemLayout);
+		// insert the divider
+		view = new View(mContext);
+		view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
+		view.setBackgroundColor(Color.parseColor("#d1d1d1"));
+		viewRoot.addView(view);
+	}
+
 	/**
 	 * insert brand item to left side-bar
 	 * 
@@ -1110,33 +1098,27 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * @param listener
 	 *            trigger
 	 */
-	private void addBrandTypeWithCategory(LinearLayout viewRoot,
+	private void addBrandTypeWithCategory(final LinearLayout viewRoot,
 			final OnClickListener listener) {
 		// get inflater
 		final LayoutInflater inflater = getLayoutInflater();
-		final LinearLayout subLayout = new LinearLayout(mContext);
-		subLayout.setOrientation(LinearLayout.VERTICAL);
-		subLayout.setVisibility(View.GONE);
+		// add "All Brand" item
 		LinearLayout itemLayout = (LinearLayout) inflater.inflate(
 				R.layout.item_menu, null);
 		TextView textView = (TextView) itemLayout
 				.findViewById(R.id.TextView_item_menu_name);
-		textView.setText(R.string.main_goods_list_brand);
+		// bind data
+		textView.setTag(R.string.tag_id, -1);
+		textView.setTag(R.string.tag_brands_id, 0);
+		textView.setText(R.string.main_goods_list_menu_brand_all);
 		textView.setTextSize(25);
-		textView.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				toggleVisibilty(subLayout);
-			}
-		});
+		textView.setOnClickListener(listener);
 		viewRoot.addView(itemLayout);
 		// insert the divider
 		View view = new View(mContext);
 		view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 1));
 		view.setBackgroundColor(Color.parseColor("#d1d1d1"));
 		viewRoot.addView(view);
-		viewRoot.addView(subLayout);
 		final Handler handler = new Handler(new Callback() {
 
 			@Override
@@ -1156,15 +1138,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					textView.setTag(R.string.tag_id, -1);
 					textView.setTag(R.string.tag_brands_id, brand.getId());
 					textView.setText(brand.getCnName());
-					textView.setTextSize(15);
+					textView.setTextSize(25);
 					textView.setOnClickListener(listener);
-					subLayout.addView(itemLayout);
+					viewRoot.addView(itemLayout);
 					// insert the divider
 					View view = new View(mContext);
 					view.setLayoutParams(new LayoutParams(
 							LayoutParams.MATCH_PARENT, 1));
 					view.setBackgroundColor(Color.parseColor("#d1d1d1"));
-					subLayout.addView(view);
+					viewRoot.addView(view);
 				}
 				return true;
 			}
@@ -1259,20 +1241,41 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			underWorking = false;
 			return;
 		}
+		final boolean isCollocationMod = categoryId == -1
+				&& "-1".equals(brandIds);
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				if (isNew) {
 					mHandler.sendMessage(mHandler.obtainMessage(97));
-					mGoodsList = Goods.doGoodsgetList(page, size, categoryId,
-							brandIds, gender, ageGroup, null, 0, 0, null);
+					if (isCollocationMod) {
+						mCollocationsList = Collocation.doCollocationgetList(
+								-1, -1, gender, "",
+								StrUtil.intToString(ageGroup), page, size);
+						mGoodsList = null;
+					} else {
+						mGoodsList = Goods.doGoodsgetList(page, size,
+								categoryId, brandIds, gender, ageGroup, null,
+								0, 0, null);
+						mCollocationsList = null;
+					}
 					mHandler.sendMessage(mHandler.obtainMessage(5));
 				} else {
-					List<Goods> tmpList = Goods.doGoodsgetList(page, size,
-							categoryId, brandIds, gender, ageGroup, null, 0, 0,
-							null);
-					mGoodsList.addAll(tmpList);
+					if (isCollocationMod) {
+						List<Goods> tmpList = Goods.doGoodsgetList(page, size,
+								categoryId, brandIds, gender, ageGroup, null,
+								0, 0, null);
+						mGoodsList.addAll(tmpList);
+						mCollocationsList.clear();
+					} else {
+						List<Collocation> tmpList = Collocation
+								.doCollocationgetList(-1, -1, gender, "",
+										StrUtil.intToString(ageGroup), page,
+										size);
+						mCollocationsList.addAll(tmpList);
+						mGoodsList.clear();
+					}
 					// notify the listView to refresh
 					mHandler.sendMessage(mHandler.obtainMessage(10));
 				}
@@ -1287,19 +1290,19 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
-	 * fill the goods list with every item
+	 * fill the goods/collocation list with every item
 	 * 
 	 * @notice change to RightSideBar now
 	 */
 	private void buildBottomBar() {
-		if (mGoodsList == null) {
+		if (mGoodsList == null && mCollocationsList == null) {
 			mListLayout.setVisibility(View.INVISIBLE);
 			mHandler.sendMessage(mHandler.obtainMessage(98));
 			NotificUtil
 					.showShortToast(R.string.toast_no_goods_item_under_the_type);
 			return;
 		}
-		// listener for each item click
+		// listener for each item click when goods list
 		final OnClickListener listener = new OnClickListener() {
 
 			@Override
@@ -1345,13 +1348,34 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}).start();
 			}
 		};
-		mListLayout.setAdapter(new MyAdapter(mContext, mGoodsList, mHandler));
+		// listener for each item click when collocation list
+		final OnClickListener listener2 = new OnClickListener() {
+
+			@Override
+			public void onClick(final View v) {
+				ThreadUtil.doInBackgroundWithTip(new Runnable() {
+
+					@Override
+					public void run() {
+						Collocation collocation = mCollocationsList.get(StrUtil
+								.ObjToInt(v.getTag()));
+						setCollocation(collocation);
+					}
+				}, mHandler);
+			}
+		};
+		mListLayout.setAdapter(new MyAdapter(mContext,
+				mGoodsList != null ? mGoodsList : mCollocationsList, mHandler));
 		mListLayout.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				listener.onClick(arg1);
+				if (mGoodsList != null) {
+					listener.onClick(arg1);
+				} else {
+					listener2.onClick(arg1);
+				}
 			}
 		});
 		mListLayout.setVisibility(View.VISIBLE);
@@ -1384,6 +1408,41 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		Model.getInstance().setLayer(layer, new MyBitmap(bm, url, direct));
 		Model.getInstance().setPosDescribe(json, layer, direct);
 		return true;
+	}
+
+	/**
+	 * deploy selected collocation
+	 * 
+	 * @param collocation
+	 *            collocation user selected
+	 */
+	private void setCollocation(Collocation collocation) {
+		// remove all goods first
+		reset();
+		// re-get model's layer
+		mHandler.sendMessage(mHandler.obtainMessage(2));
+		// do with recommended goods
+		com.yeegol.DIYWear.entity.Collocation.Model model = Collocation
+				.doCollocationgetInfo(collocation.getId());
+		String[] ids = model.getGoodsIds().split(",");
+		List<Goods> list = new ArrayList<Goods>();
+		for (String id : ids) {
+			Goods goods = Goods.doGoodsgetInfo(StrUtil.StringToInt(id));
+			// wear it
+			boolean success = setGoods(
+					goods,
+					mCurrentDirect,
+					DataHolder.getInstance().getMappingLayerByName(
+							goods.getCategoryName()));
+			if (success) {
+				list.add(goods);
+			} else {
+				mHandler.sendMessage(mHandler.obtainMessage(11));
+				return;
+			}
+		}
+		// refresh UI
+		drawModel();
 	}
 
 	/**
@@ -1483,7 +1542,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		// while on left side-bar
-		if (v.getId() == R.id.TabHost_goodsCondition) {
+		if (v.getId() == android.R.id.tabs) {
 			if (tracker == null) {
 				tracker = VelocityTracker.obtain();
 			}
@@ -1668,5 +1727,47 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		} else {
 			togglePanelTouchable(false);
 		}
+	}
+
+	@Override
+	public View createTabContent(String tag) {
+		// create listener
+		OnClickListener listener = new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (allDisabled) {
+					return;
+				}
+				mCategoryId = StrUtil.ObjToInt(v.getTag(R.string.tag_id));
+				mBrandIds = StrUtil.objToString(v
+						.getTag(R.string.tag_brands_id));
+				prepareBottomBar(PAGE, OFFSET, mCategoryId, mBrandIds,
+						mBrandModel.getGender(), mBrandModel.getAgeGroup(),
+						true);
+			}
+		};
+		// pick the top of the tree
+		Category treeTop;
+		if (mBrandModel.getGender() == 1) {
+			treeTop = mCategoryList.get(0);
+		} else {
+			treeTop = mCategoryList.get(1);
+		}
+		// get inflater
+		LayoutInflater inflater = getLayoutInflater();
+		View v = inflater.inflate(R.layout.item_condition, null);
+		LinearLayout typeLayout = (LinearLayout) v
+				.findViewById(R.id.LinearLayout_goodsType);
+		// clear first
+		typeLayout.removeAllViews();
+		if ("Brand".equals(tag)) {
+			addBrandTypeWithCategory(typeLayout, listener);
+		} else {
+			addCollationWithCategory(typeLayout, listener);
+			buildLeftSidebarRecursively(treeTop.getChildren(), typeLayout,
+					listener);
+		}
+		return v;
 	}
 }

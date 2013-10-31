@@ -51,4 +51,23 @@ public class ThreadUtil {
 		}
 		h.sendMessage(h.obtainMessage(98));
 	}
+
+	/**
+	 * run worker thread in foreground with "waiting" tip
+	 * 
+	 * @param r
+	 * @param h
+	 */
+	public static void doInForegroundWithTip(Runnable r, Handler h) {
+		h.sendMessage(h.obtainMessage(97));
+		Thread t = new Thread(r);
+		t.start();
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			LogUtil.logException(e, TAG);
+		} finally {
+			h.sendMessage(h.obtainMessage(98));
+		}
+	}
 }
