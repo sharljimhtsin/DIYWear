@@ -212,6 +212,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				case 11:
 					NotificUtil.showShortToast("networking error");
 					break;
+				case 12:
+					// update count at header
+					prepareRightSidebar();
+					break;
 				case 97:
 					mProgressDialog.show();
 					break;
@@ -555,11 +559,59 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			}
 			break;
 		case R.id.Button_goodsList_sort:
-			// TODO sort
+			CharSequence[] items = new CharSequence[] {
+					getText(R.string.main_goods_list_view_sort_price_asc),
+					getText(R.string.main_goods_list_view_sort_price_desc),
+					getText(R.string.main_goods_list_view_sort_id),
+					getText(R.string.main_goods_list_view_sort_time) };
+			listener = new android.content.DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					sortListView(mGoodsList != null ? mGoodsList
+							: mCollocationsList, which);
+					mHandler.sendMessage(mHandler.obtainMessage(10));
+				}
+			};
+			NotificUtil.showAlertDiaWithMultiItem(
+					R.string.main_goods_list_view_sort, items, mContext,
+					listener);
 			break;
 		default:
 			break;
 		}
+	}
+
+	/**
+	 * sort list with order
+	 * 
+	 * @param l
+	 *            list
+	 * @param w
+	 *            0 refer min to max <br>
+	 *            1 refer max to min
+	 */
+	private void sortListView(List<?> l, final int w) {
+		Collections.sort(l, new Comparator<Object>() {
+
+			@Override
+			public int compare(Object lhs, Object rhs) {
+				if (lhs instanceof Goods) {
+					switch (w) {
+					case 0:
+						return StrUtil.dobToInt(((Goods) lhs).getSalePrice()
+								- ((Goods) rhs).getSalePrice());
+					case 1:
+						return StrUtil.dobToInt(((Goods) rhs).getSalePrice()
+								- ((Goods) lhs).getSalePrice());
+					default:
+						break;
+					}
+				} else {
+				}
+				return 0;
+			}
+		});
 	}
 
 	/**
@@ -1286,6 +1338,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					}
 					// notify the listView to refresh
 					mHandler.sendMessage(mHandler.obtainMessage(10));
+					mHandler.sendMessage(mHandler.obtainMessage(12));
 				}
 				if (mGoodsList != null) {
 					LogUtil.logDebug("goods list count:" + mGoodsList.size(),
@@ -1491,10 +1544,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		TextView countTextView = (TextView) findViewById(R.id.TextView_goodsList_count);
 		Button sortButton = (Button) findViewById(R.id.Button_goodsList_sort);
 		// set value
-		countTextView.setText("Total count is "
-				+ (mGoodsList != null ? mGoodsList.size() : mCollocationsList
-						.size()));
-		sortButton.setText("Sort");
+		countTextView
+				.setText(getText(R.string.main_goods_list_view_total_count_prefix)
+						+ ""
+						+ (mGoodsList != null ? mGoodsList.size()
+								: mCollocationsList.size())
+						+ getText(R.string.main_goods_list_view_total_count_suffix));
+		sortButton.setText(R.string.main_goods_list_view_sort);
 		// set listener
 		countTextView.setOnClickListener(this);
 		sortButton.setOnClickListener(this);

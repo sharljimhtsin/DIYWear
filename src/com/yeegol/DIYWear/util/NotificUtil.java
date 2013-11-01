@@ -62,4 +62,18 @@ public class NotificUtil {
 				.create();
 		dialog.show();
 	}
+
+	public static void showAlertDiaWithMultiItem(String title,
+			CharSequence[] items, Context context, OnClickListener listener) {
+		AlertDialog dialog = new AlertDialog.Builder(context).setTitle(title)
+				.setItems(items, listener).create();
+		dialog.show();
+	}
+
+	public static void showAlertDiaWithMultiItem(int resId,
+			CharSequence[] items, Context context, OnClickListener listener) {
+		AlertDialog dialog = new AlertDialog.Builder(context).setTitle(resId)
+				.setItems(items, listener).create();
+		dialog.show();
+	}
 }

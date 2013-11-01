@@ -44,6 +44,13 @@
     <string name="main_goods_list_menu_brand_all">全部品牌</string>
     <string name="main_goods_list_menu_category_all">全部分类</string>
     <string name="main_goods_list_menu_collocation_all">搭配</string>
+    <string name="main_goods_list_view_total_count_prefix">共</string>
+    <string name="main_goods_list_view_total_count_suffix">件商品</string>
+    <string name="main_goods_list_view_sort">筛选</string>
+    <string name="main_goods_list_view_sort_price_desc">价格升序</string>
+    <string name="main_goods_list_view_sort_price_asc">价格降序</string>
+    <string name="main_goods_list_view_sort_id">按照ID</string>
+    <string name="main_goods_list_view_sort_time">按时间</string>
     <string name="toast_image_saved_to_local_successlly">图片已成功保存到本地，</string>
     <string name="umeng_share_content">我喜爱的模特搭配，分享一下</string>
     <string name="alert_dial_undo_title">确认撤销？</string>
