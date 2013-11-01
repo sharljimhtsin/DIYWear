@@ -37,10 +37,13 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -95,6 +98,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	RelativeLayout mMainLayout;
 
 	ListView mListLayout;
+
+	LinearLayout mColDetailLayout;
 
 	Handler mHandler;
 
@@ -216,6 +221,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					// update count at header
 					prepareRightSidebar();
 					break;
+				case 13:
+					buildCollocationPanel((Object[]) msg.obj);
+					break;
 				case 97:
 					mProgressDialog.show();
 					break;
@@ -241,6 +249,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mGoodsLayout = (LinearLayout) findViewById(R.id.LinearLayout_goodsList);
 		mMainLayout = (RelativeLayout) findViewById(R.id.RelativeLayout_main);
 		mListLayout = (ListView) findViewById(R.id.ListView_goodsList);
+		mColDetailLayout = (LinearLayout) findViewById(R.id.LinearLayout_collocation_detail);
 		mConditionContainer = (TabHost) findViewById(R.id.TabHost_goodsCondition);
 		// set listener
 		showTypeButton.setOnClickListener(this);
@@ -1439,11 +1448,68 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}
 			}
 		});
+		mListLayout.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					final int position, long id) {
+				if (mGoodsList == null) {
+					ThreadUtil.doInBackgroundWithTip(new Runnable() {
+
+						@Override
+						public void run() {
+							Collocation collocation = mCollocationsList
+									.get(position);
+							List<Goods> list = getGoodsByCollocation(collocation);
+							Object[] args = new Object[] { collocation, list };
+							mHandler.sendMessage(mHandler.obtainMessage(13,
+									args));
+						}
+					}, mHandler);
+					return true;
+				}
+				return false;
+			}
+		});
 		mListLayout.setOnScrollListener(this);
 		// set count at header
 		prepareRightSidebar();
 		mGoodsLayout.setVisibility(View.VISIBLE);
 		mHandler.sendMessage(mHandler.obtainMessage(98));
+	}
+
+	/**
+	 * @param objects
+	 */
+	private void buildCollocationPanel(Object... objects) {
+		// get controls
+		MyImageView previewImageView = (MyImageView) findViewById(R.id.ImageView_collocation_preview);
+		TextView countTextView = (TextView) findViewById(R.id.TextView_collocation_count);
+		GridLayout itemsGridLayout = (GridLayout) findViewById(R.id.GridLayout_collocation_items);
+		// get object
+		Collocation collocation = (Collocation) objects[0];
+		@SuppressWarnings("unchecked")
+		List<Goods> list = (List<Goods>) objects[1];
+		// bind data
+		previewImageView.setURL(NetUtil.buildURLForCollocation(collocation
+				.getPreview()));
+		countTextView
+				.setText(getText(R.string.main_goods_list_view_total_count_prefix)
+						+ ""
+						+ list.size()
+						+ getText(R.string.main_goods_list_view_total_count_suffix));
+		// clear first
+		itemsGridLayout.removeAllViews();
+		for (Goods goods : list) {
+			MyImageView miv = new MyImageView(mContext);
+			miv.setLayoutParams(new LinearLayout.LayoutParams(50, 50));
+			miv.setScaleType(ScaleType.CENTER_CROP);
+			miv.setURL(NetUtil.buildURLForThumb(goods.getPreview()));
+			itemsGridLayout.addView(miv);
+		}
+		// show and hide
+		toggleVisibilty(mColDetailLayout, View.VISIBLE);
+		toggleVisibilty(mListLayout, View.GONE);
 	}
 
 	/**
@@ -1474,6 +1540,24 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
+	 * get all goods of specify collocation
+	 * 
+	 * @param collocation
+	 * @return Goods under this collocation
+	 */
+	private List<Goods> getGoodsByCollocation(Collocation collocation) {
+		List<Goods> ret = new ArrayList<Goods>();
+		com.yeegol.DIYWear.entity.Collocation.Model model = Collocation
+				.doCollocationgetInfo(collocation.getId());
+		String[] ids = model.getGoodsIds().split(",");
+		for (String id : ids) {
+			Goods goods = Goods.doGoodsgetInfo(StrUtil.StringToInt(id));
+			ret.add(goods);
+		}
+		return ret;
+	}
+
+	/**
 	 * deploy selected collocation
 	 * 
 	 * @param collocation
@@ -1485,21 +1569,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// re-get model's layer
 		mHandler.sendMessage(mHandler.obtainMessage(2));
 		// do with recommended goods
-		com.yeegol.DIYWear.entity.Collocation.Model model = Collocation
-				.doCollocationgetInfo(collocation.getId());
-		String[] ids = model.getGoodsIds().split(",");
-		List<Goods> list = new ArrayList<Goods>();
-		for (String id : ids) {
-			Goods goods = Goods.doGoodsgetInfo(StrUtil.StringToInt(id));
+		List<Goods> list = getGoodsByCollocation(collocation);
+		for (Goods goods : list) {
 			// wear it
 			boolean success = setGoods(
 					goods,
 					mCurrentDirect,
 					DataHolder.getInstance().getMappingLayerByName(
 							goods.getCategoryName()));
-			if (success) {
-				list.add(goods);
-			} else {
+			if (!success) {
 				mHandler.sendMessage(mHandler.obtainMessage(11));
 				return;
 			}
@@ -1568,11 +1646,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mPopupWindow.dismiss(true);
 			return;
 		}
-		// hide goods list by back key
-		if (mGoodsLayout.getVisibility() == View.GONE) {
-			System.exit(0);
+		// hide goods list by back key;switch to goods list if collaction list
+		// shown
+		if (mColDetailLayout.getVisibility() == View.VISIBLE) {
+			toggleVisibilty(mColDetailLayout);
+			toggleVisibilty(mListLayout);
+		} else if (mGoodsLayout.getVisibility() == View.VISIBLE) {
+			toggleVisibilty(mGoodsLayout);
 		} else {
-			mGoodsLayout.setVisibility(View.GONE);
+			System.exit(0);
 		}
 	}
 

@@ -114,6 +114,39 @@
                 android:divider="@drawable/line"
                 android:showDividers="middle" >
             </ListView>
+
+            <LinearLayout
+                android:id="@+id/LinearLayout_collocation_detail"
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="9"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:weightSum="10" >
+
+                <com.yeegol.DIYWear.clz.MyImageView
+                    android:id="@+id/ImageView_collocation_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_weight="4" />
+
+                <TextView
+                    android:id="@+id/TextView_collocation_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dip"
+                    android:layout_weight="1" />
+
+                <GridLayout
+                    android:id="@+id/GridLayout_collocation_items"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_weight="5"
+                    android:columnCount="2"
+                    android:orientation="horizontal"
+                    android:rowCount="3" >
+                </GridLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
