@@ -131,6 +131,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	Bitmap mBitmap;
 
+	Bitmap mPreviousBitmap;
+
 	UMSocialService mSocialService;
 
 	int mCategoryId;
@@ -404,18 +406,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		drawModel();
 	}
 
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
-
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-
 	}
 
 	/**
@@ -597,6 +596,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		case R.id.Button_changeBg:
 			mPopupWindow.dismiss();
 			prepareBgPickWindow();
+			break;
+		case R.id.Button_diff:
+			prepareDiffWindow();
 			break;
 		default:
 			break;
@@ -904,6 +906,33 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
 	}
 
+	private void prepareDiffWindow() {
+		mPopupWindow = new MyPopupWindow(mContext);
+		// get inflater
+		LayoutInflater inflater = getLayoutInflater();
+		LinearLayout viewRoot = (LinearLayout) inflater.inflate(
+				R.layout.view_diff, null);
+		// get controls
+		ImageView aImageView = (ImageView) viewRoot
+				.findViewById(R.id.ImageView_model_a);
+		ImageView bImageView = (ImageView) viewRoot
+				.findViewById(R.id.ImageView_model_b);
+		if (mPreviousBitmap != null) {
+			aImageView.setImageBitmap(mPreviousBitmap);
+			bImageView.setImageBitmap(mBitmap);
+			mPopupWindow.setListener(null);
+			mPopupWindow.setOnDismissListener(null);
+			mPopupWindow.setTag(false);
+			mPopupWindow.setOutsideTouchable(false);
+			mPopupWindow.setContentView(viewRoot);
+			mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
+			mPopupWindow.update(mSurfaceView.getWidth(),
+					mSurfaceView.getHeight());
+		} else {
+			NotificUtil.showShortToast("no diff");
+		}
+	}
+
 	private void prepareMoreFunctionWindow() {
 		mPopupWindow = new MyPopupWindow(mContext);
 		// get inflater
@@ -1000,41 +1029,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 	}
 
-	int i = 0; // number counter for record button press
-
-	/**
-	 * @deprecated UI redesign
-	 * 
-	 * @param v
-	 *            target button
-	 * @param isBackKey
-	 *            is back key pressed or not
-	 * @return
-	 */
-	private boolean toggleButton(View v, boolean isBackKey) {
-		if (!isBackKey) {
-			i++;
-			// check if is the "add all" button
-			if (i % 2 == 0) {
-				return false; // skip this action
-			}
-		} else {
-			// reset the counter
-			i = 0;
-		}
-		Button button = (Button) v;
-		if (StrUtil.objToString(button.getTag()).equals("null")
-				|| StrUtil.ObjToInt(button.getTag()) == 0) {
-			button.setText(R.string.popup_all_to_cart);
-			button.setTag(1);
-			return true;
-		} else {
-			button.setText(R.string.popup_goods_list);
-			button.setTag(0);
-			return false;
-		}
-	}
-
 	/**
 	 * variable that hold model's status of direction
 	 */
@@ -1099,7 +1093,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// clear the canvas
 		canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 		// draw the model
-		mBitmap = Model.getInstance().drawModel(canvas);
+		Bitmap bitmap = Model.getInstance().drawModel(canvas);
+		if (mBitmap != null) {
+			mPreviousBitmap = mBitmap; // for compare
+			mBitmap = bitmap;
+		} else {
+			mPreviousBitmap = null;
+			mBitmap = bitmap;
+		}
 		holder.unlockCanvasAndPost(canvas);
 	}
 
