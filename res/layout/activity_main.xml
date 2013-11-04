@@ -26,14 +26,22 @@
             android:textColor="@android:color/black"
             android:textSize="20sp" />
 
+        <Button
+            android:id="@+id/Button_cart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/Button_showMoreFunction"
+            android:background="@drawable/bg_button"
+            android:text="@string/popup_goods_list"
+            android:textSize="20sp" />
+
         <ImageButton
-            android:id="@+id/Button_showFunction"
+            android:id="@+id/Button_showMoreFunction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:background="@drawable/bg_button"
-            android:src="@drawable/icon_function"
-            android:visibility="invisible" />
+            android:src="@drawable/icon_function" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -156,18 +164,7 @@
             android:layout_alignParentBottom="true"
             android:background="@drawable/bg_bottom"
             android:orientation="horizontal"
-            android:visibility="visible"
-            android:weightSum="6" >
-
-            <Button
-                android:id="@+id/Button_cart"
-                android:layout_width="0dip"
-                android:layout_height="50dip"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:background="@null"
-                android:text="@string/popup_goods_list"
-                android:textSize="20sp" />
+            android:weightSum="5" >
 
             <Button
                 android:id="@+id/Button_switchModel"
@@ -177,16 +174,6 @@
                 android:layout_weight="1"
                 android:background="@null"
                 android:text="@string/main_swith_model"
-                android:textSize="20sp" />
-
-            <Button
-                android:id="@+id/Button_turnBack"
-                android:layout_width="0dip"
-                android:layout_height="50dip"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:background="@null"
-                android:text="@string/main_turn"
                 android:textSize="20sp" />
 
             <Button
@@ -200,23 +187,33 @@
                 android:textSize="20sp" />
 
             <Button
-                android:id="@+id/Button_save"
+                android:id="@+id/Button_diff"
                 android:layout_width="0dip"
                 android:layout_height="50dip"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:background="@null"
-                android:text="@string/main_save"
+                android:text="@string/main_diff"
                 android:textSize="20sp" />
 
             <Button
-                android:id="@+id/Button_share"
+                android:id="@+id/Button_redo"
                 android:layout_width="0dip"
                 android:layout_height="50dip"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:background="@null"
-                android:text="@string/main_share"
+                android:text="@string/main_redo"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/Button_turnBack"
+                android:layout_width="0dip"
+                android:layout_height="50dip"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:background="@null"
+                android:text="@string/main_turn"
                 android:textSize="20sp" />
         </LinearLayout>
     </RelativeLayout>

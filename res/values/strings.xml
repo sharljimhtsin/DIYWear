@@ -6,9 +6,12 @@
     <string name="main_user_experience">VID体验</string>
     <string name="main_swith_model">模特</string>
     <string name="main_turn">转身</string>
-    <string name="main_undo">撤除</string>
-    <string name="main_save">保存</string>
+    <string name="main_undo">上一步</string>
+    <string name="main_diff">对比</string>
+    <string name="main_redo">下一步</string>
+    <string name="main_save">保存至手机</string>
     <string name="main_share">分享</string>
+    <string name="main_changeBg">更换背景</string>
     <string name="popup_goods_list">商品清单</string>
     <string name="popup_all_to_cart">全部放入购物车</string>
     <string name="popup_price">价格</string>

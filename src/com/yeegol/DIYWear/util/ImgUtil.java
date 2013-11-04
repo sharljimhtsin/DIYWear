@@ -5,6 +5,7 @@ package com.yeegol.DIYWear.util;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.view.View;
 
 /**
@@ -27,6 +28,13 @@ public class ImgUtil {
 		return Bitmap.createScaledBitmap(b, Resources.getSystem()
 				.getDisplayMetrics().widthPixels, Resources.getSystem()
 				.getDisplayMetrics().heightPixels, false);
+	}
+
+	public static Bitmap createBitmapWithSingleColor(int color) {
+		Bitmap bitmap = Bitmap.createBitmap(100, 100, Config.ARGB_8888);
+		// fill full with color
+		bitmap.eraseColor(color);
+		return bitmap;
 	}
 
 	/**

@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -58,6 +57,7 @@ import com.umeng.socialize.media.UMImage;
 import com.yeegol.DIYWear.clz.MyAdapter;
 import com.yeegol.DIYWear.clz.MyBitmap;
 import com.yeegol.DIYWear.clz.MyImageView;
+import com.yeegol.DIYWear.clz.MyLinearLayout;
 import com.yeegol.DIYWear.clz.MyOnDismissListener;
 import com.yeegol.DIYWear.clz.MyPopupWindow;
 import com.yeegol.DIYWear.clz.MySurfaceView;
@@ -242,7 +242,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// initial controls
 		prepareProgressDialog();
 		ImageButton showTypeButton = (ImageButton) findViewById(R.id.Button_showType);
-		ImageButton showFunctionButton = (ImageButton) findViewById(R.id.Button_showFunction);
+		ImageButton showFunctionButton = (ImageButton) findViewById(R.id.Button_showMoreFunction);
+		Button cartButton = (Button) findViewById(R.id.Button_cart);
 		// get controls
 		mSurfaceView = (MySurfaceView) findViewById(R.id.surface_main);
 		mFunctionLayout = (LinearLayout) findViewById(R.id.LinearLayout_functionArea);
@@ -254,6 +255,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// set listener
 		showTypeButton.setOnClickListener(this);
 		showFunctionButton.setOnClickListener(this);
+		cartButton.setOnClickListener(this);
 		mSurfaceView.getHolder().addCallback(this);
 		mSurfaceView.setOnTouchListener(this);
 		mConditionContainer.setOnTouchListener(this);
@@ -290,40 +292,44 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * check the model's quality,and order user to choice one
 	 */
 	private void pickUpIfNeed(boolean isStart) {
-		final List<BrandModel> list = Model.getInstance().getModels();
+		List<BrandModel> list = Model.getInstance().getModels();
 		if (list != null && list.size() > 1 && !isStart) {
-			// convert
-			CharSequence[] cs = new CharSequence[list.size()];
-			for (int i = 0; i < cs.length; i++) {
-				cs[i] = list.get(i).getName();
-			}
-			// create a pick dialogue
-			AlertDialog dialog = new AlertDialog.Builder(mContext)
-					.setTitle(R.string.alert_dial_pick_model_title)
-					.setItems(cs, new DialogInterface.OnClickListener() {
+			mPopupWindow = new MyPopupWindow(mContext);
+			MyLinearLayout viewRoot = new MyLinearLayout(mContext);
+			viewRoot.setOrientation(LinearLayout.HORIZONTAL);
+			viewRoot.setGravity(Gravity.CENTER);
+			viewRoot.setList(list);
+			viewRoot.setListener(new OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							BrandModel model = list.get(which);
-							if (mBrandModel == model) {
-								NotificUtil
-										.showShortToast(R.string.toast_no_need_to_switch);
-								return;
-							}
-							reset();
-							toggleVisibilty(mGoodsLayout, View.GONE);
-							mBrandModel = model;
-							// set direct to front
-							mCurrentDirect = Model.MODEL_DIRECT_FRONT;
-							// sync it
-							Model.getInstance().setCurrentDirection(
-									mCurrentDirect);
-							Model.getInstance().setCurrentBrandModel(
-									mBrandModel);
-							mHandler.sendMessage(mHandler.obtainMessage(2));
-						}
-					}).create();
-			dialog.show();
+				@Override
+				public void onClick(View v) {
+					BrandModel model = (BrandModel) v.getTag();
+					if (mBrandModel == model) {
+						NotificUtil
+								.showShortToast(R.string.toast_no_need_to_switch);
+						return;
+					}
+					reset();
+					toggleVisibilty(mGoodsLayout, View.GONE);
+					mBrandModel = model;
+					// set direct to front
+					mCurrentDirect = Model.MODEL_DIRECT_FRONT;
+					// sync it
+					Model.getInstance().setCurrentDirection(mCurrentDirect);
+					Model.getInstance().setCurrentBrandModel(mBrandModel);
+					mHandler.sendMessage(mHandler.obtainMessage(2));
+					mPopupWindow.dismiss();
+				}
+			});
+			viewRoot.bindUI();
+			mPopupWindow.setListener(null);
+			mPopupWindow.setOnDismissListener(null);
+			mPopupWindow.setTag(false);
+			mPopupWindow.setOutsideTouchable(false);
+			mPopupWindow.setContentView(viewRoot);
+			mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
+			mPopupWindow.update(mSurfaceView.getWidth(),
+					mSurfaceView.getHeight());
 		} else {
 			mBrandModel = list.get(1);// make lady default
 			Model.getInstance().setCurrentBrandModel(mBrandModel);
@@ -439,8 +445,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		case R.id.Button_showType:
 			toggleVisibilty(mConditionContainer);
 			break;
-		case R.id.Button_showFunction:
-			toggleVisibilty(mFunctionLayout);
+		case R.id.Button_showMoreFunction:
+			prepareMoreFunctionWindow();
 			break;
 		case R.id.Button_switchModel:
 			if (allDisabled) {
@@ -488,6 +494,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
+			mPopupWindow.dismiss();
 			listener = new DialogInterface.OnClickListener() {
 
 				@Override
@@ -521,6 +528,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
+			mPopupWindow.dismiss();
 			mSocialService.setShareContent(StrUtil
 					.charToString(getText(R.string.umeng_share_content)));
 			mSocialService.setShareImage(new UMImage(mContext, mBitmap));
@@ -530,19 +538,19 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled && !skipFirst) {
 				return;
 			}
-			if (toggleButton(v, false)) {
-				prepareCartWindow();
-			} else {
-				// push all goods to REAL cart
-				for (int i = 0; i < mTempCart.size(); i++) {
-					mCart.add(mTempCart.valueAt(i));
-				}
-				NotificUtil
-						.showShortToast(mTempCart.size() != 0 ? R.string.toast_all_add_to_cart_successlly
-								: R.string.toast_all_add_to_cart_failed);
-				// close pop-up window with virtual back-key press
-				onBackPressed();
+			prepareCartWindow();
+			break;
+		case -1:
+			// TODO: add button
+			// push all goods to REAL cart
+			for (int i = 0; i < mTempCart.size(); i++) {
+				mCart.add(mTempCart.valueAt(i));
 			}
+			NotificUtil
+					.showShortToast(mTempCart.size() != 0 ? R.string.toast_all_add_to_cart_successlly
+							: R.string.toast_all_add_to_cart_failed);
+			// close pop-up window with virtual back-key press
+			onBackPressed();
 			break;
 		case R.id.Button_item_cart_add:
 			Goods g = mTempCart.valueAt(StrUtil.ObjToInt(v.getTag()));
@@ -585,6 +593,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			NotificUtil.showAlertDiaWithMultiItem(
 					R.string.main_goods_list_view_sort, items, mContext,
 					listener);
+			break;
+		case R.id.Button_changeBg:
+			mPopupWindow.dismiss();
+			prepareBgPickWindow();
 			break;
 		default:
 			break;
@@ -892,6 +904,66 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
 	}
 
+	private void prepareMoreFunctionWindow() {
+		mPopupWindow = new MyPopupWindow(mContext);
+		// get inflater
+		LayoutInflater inflater = getLayoutInflater();
+		LinearLayout viewRoot = (LinearLayout) inflater.inflate(
+				R.layout.view_more_funct, null);
+		// get controls
+		Button changeBgButton = (Button) viewRoot
+				.findViewById(R.id.Button_changeBg);
+		Button saveButton = (Button) viewRoot.findViewById(R.id.Button_save);
+		Button shareButton = (Button) viewRoot.findViewById(R.id.Button_share);
+		// set event
+		changeBgButton.setOnClickListener(this);
+		saveButton.setOnClickListener(this);
+		shareButton.setOnClickListener(this);
+		// attach to popup window
+		mPopupWindow.setListener(null);
+		mPopupWindow.setOnDismissListener(null);
+		mPopupWindow.setTag(false);
+		mPopupWindow.setOutsideTouchable(false);
+		mPopupWindow.setContentView(viewRoot);
+		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
+		mPopupWindow.update(mSurfaceView.getWidth(), mSurfaceView.getHeight());
+	}
+
+	private void prepareBgPickWindow() {
+		mPopupWindow = new MyPopupWindow(mContext);
+		// test data
+		List<Integer> colors = new ArrayList<Integer>();
+		colors.add(Color.BLACK);
+		colors.add(Color.BLUE);
+		colors.add(Color.CYAN);
+		colors.add(Color.GRAY);
+		MyLinearLayout listView = new MyLinearLayout(mContext);
+		listView.setOrientation(LinearLayout.HORIZONTAL);
+		listView.setGravity(Gravity.CENTER);
+		listView.setList(colors);
+		listView.setListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int color = StrUtil.ObjToInt(v.getTag());
+				Model.getInstance().setModelShadow(
+						new MyBitmap(ImgUtil.scaleBitmapToFullScreen(ImgUtil
+								.createBitmapWithSingleColor(color)),
+								"no need", "no need"));
+				drawModel();
+				mPopupWindow.dismiss();
+			}
+		});
+		listView.bindUI();
+		mPopupWindow.setListener(null);
+		mPopupWindow.setOnDismissListener(null);
+		mPopupWindow.setTag(false);
+		mPopupWindow.setOutsideTouchable(false);
+		mPopupWindow.setContentView(listView);
+		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
+		mPopupWindow.update(mSurfaceView.getWidth(), mSurfaceView.getHeight());
+	}
+
 	boolean allDisabled, skipFirst = false;
 
 	/**
@@ -931,6 +1003,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	int i = 0; // number counter for record button press
 
 	/**
+	 * @deprecated UI redesign
+	 * 
 	 * @param v
 	 *            target button
 	 * @param isBackKey
@@ -1586,32 +1660,28 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		drawModel();
 	}
 
-	Button cartButton;
-
 	/**
 	 * build function bar
 	 */
 	private void prepareBottombar() {
 		// get controls
-		cartButton = (Button) findViewById(R.id.Button_cart);
 		Button switchModelButton = (Button) findViewById(R.id.Button_switchModel);
 		Button turnBackButton = (Button) findViewById(R.id.Button_turnBack);
 		Button undoButton = (Button) findViewById(R.id.Button_undo);
-		Button saveButton = (Button) findViewById(R.id.Button_save);
-		Button shareButton = (Button) findViewById(R.id.Button_share);
+		Button redoButton = (Button) findViewById(R.id.Button_redo);
+		Button diffButton = (Button) findViewById(R.id.Button_diff);
 		// register event
-		cartButton.setOnClickListener(this);
 		switchModelButton.setOnClickListener(this);
 		turnBackButton.setOnClickListener(this);
 		undoButton.setOnClickListener(this);
-		saveButton.setOnClickListener(this);
-		shareButton.setOnClickListener(this);
-		cartButton.setOnTouchListener(this);
+		redoButton.setOnClickListener(this);
+		diffButton.setOnClickListener(this);
+
 		switchModelButton.setOnTouchListener(this);
 		turnBackButton.setOnTouchListener(this);
 		undoButton.setOnTouchListener(this);
-		saveButton.setOnTouchListener(this);
-		shareButton.setOnTouchListener(this);
+		redoButton.setOnTouchListener(this);
+		diffButton.setOnTouchListener(this);
 	}
 
 	/**
@@ -1734,12 +1804,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			return false;
 		}
 		// while on bottom bar
-		if (v.getId() == R.id.Button_cart
-				|| v.getId() == R.id.Button_switchModel
+		if (v.getId() == R.id.Button_switchModel
 				|| v.getId() == R.id.Button_undo
 				|| v.getId() == R.id.Button_turnBack
-				|| v.getId() == R.id.Button_save
-				|| v.getId() == R.id.Button_share) {
+				|| v.getId() == R.id.Button_redo
+				|| v.getId() == R.id.Button_diff) {
 			if (event.getAction() == MotionEvent.ACTION_DOWN
 					|| event.getAction() == MotionEvent.ACTION_UP) {
 				// lock the whole panel if user hold one key
@@ -1885,9 +1954,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void onDismiss(boolean needRefresh) {
-		if (mPopupWindow.isTag()) {
-			toggleButton(cartButton, needRefresh);
-		}
 	}
 
 	@Override
