@@ -139,6 +139,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	String mBrandIds;
 
+	LinkedList<Goods> mPreviousGoods;
+
+	LinkedList<Goods> mNextGoods;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -155,6 +159,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mCart = new ArrayList<Goods>();
 		mSocialService = UMServiceFactory.getUMSocialService(TAG,
 				RequestType.SOCIAL);
+		mPreviousGoods = new LinkedList<Goods>();
+		mNextGoods = new LinkedList<Goods>();
 		DataHolder.init(mContext);
 		// sync with Model class
 		Model.getInstance().setCurrentDirection(mCurrentDirect);
@@ -466,28 +472,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				return;
 			}
 			// skip if no goods to remove
-			if (mTempCart.size() == 0) {
-				NotificUtil.showShortToast(R.string.toast_no_cloth_on_model);
+			if (mPreviousGoods.getLast() != null) {
+				Goods g = mPreviousGoods.getLast();
+				setGoods(g, mCurrentDirect, DataHolder.getInstance()
+						.getMappingLayerByName(g.getCategoryName()));
+				drawModel();
+				mPreviousGoods.removeLast();
+				mNextGoods.addLast(g);
 				return;
 			}
-			listener = new android.content.DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					if (which == DialogInterface.BUTTON_POSITIVE) {
-						reset();
-						mHandler.sendMessage(mHandler.obtainMessage(2));
-						mHandler.sendMessage(mHandler.obtainMessage(8));
-					} else {
-						// nothing to do
-					}
-				}
-			};
-			NotificUtil
-					.showAlertDiaWithYesOrNo(
-							R.string.alert_dial_undo_title,
-							StrUtil.charToString(getText(R.string.alert_dial_undo_message)),
-							mContext, listener);
+			break;
+		case R.id.Button_redo:
+			if (allDisabled) {
+				return;
+			}
 			break;
 		case R.id.Button_save:
 			if (allDisabled) {
@@ -1588,15 +1586,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	/**
-	 * add & deploy this goods,or remove it if already wear
+	 * add & deploy this goods
 	 * 
 	 * @param goods
 	 * @param direct
 	 * @param layer
 	 */
 	private boolean setGoods(Goods goods, String direct, int layer) {
-		// add to temporary cart,not final
-		mTempCart.put(layer, goods);
 		// build the URI
 		String url = NetUtil.buildURLForNormal(goods.getPreview(), direct);
 		// retrieve the goods's image
@@ -1608,6 +1604,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		if (bm == null || json == null) {
 			return false;
 		}
+		// add to temporary cart,not final
+		mTempCart.put(layer, goods);
+		// add to history
+		mPreviousGoods.add(goods);
 		// set it
 		Model.getInstance().setLayer(layer, new MyBitmap(bm, url, direct));
 		Model.getInstance().setPosDescribe(json, layer, direct);
