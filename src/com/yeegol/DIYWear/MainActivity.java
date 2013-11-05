@@ -486,40 +486,22 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
+			if (mNextGoods.getLast() != null) {
+				Goods g = mNextGoods.getLast();
+				setGoods(g, mCurrentDirect, DataHolder.getInstance()
+						.getMappingLayerByName(g.getCategoryName()));
+				drawModel();
+				mNextGoods.removeLast();
+				mPreviousGoods.addLast(g);
+				return;
+			}
 			break;
 		case R.id.Button_save:
 			if (allDisabled) {
 				return;
 			}
 			mPopupWindow.dismiss();
-			listener = new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					if (which == DialogInterface.BUTTON_POSITIVE) {
-						try {
-							String directoryName = "/yeegol";
-							String fileName = "/image"
-									+ DateUtil.getTimeStamp() + ".jpg";
-							if (FSUtil.writeBitmapToFileOnSdcard(mContext,
-									mBitmap, fileName, directoryName)) {
-								NotificUtil
-										.showLongToast(getText(R.string.toast_image_saved_to_local_successlly)
-												+ directoryName + fileName);
-							}
-						} catch (IOException e) {
-							LogUtil.logException(e, TAG);
-						}
-					} else {
-						// nothing to do
-					}
-				}
-			};
-			NotificUtil
-					.showAlertDiaWithYesOrNo(
-							R.string.alert_dial_save_to_local_title,
-							StrUtil.charToString(getText(R.string.alert_dial_save_to_local_message)),
-							mContext, listener);
+			prepareConfirmSave();
 			break;
 		case R.id.Button_share:
 			if (allDisabled) {
@@ -902,6 +884,39 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.8),
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
+	}
+
+	private void prepareConfirmSave() {
+		LayoutInflater inflater = getLayoutInflater();
+		View viewRoot = inflater.inflate(R.layout.view_confirm_save, null);
+		Button yesButton = (Button) viewRoot.findViewById(R.id.Button_save_yes);
+		Button noButton = (Button) viewRoot.findViewById(R.id.Button_save_no);
+		OnClickListener listener = new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (v.getId() == R.id.Button_save_yes) {
+					try {
+						String directoryName = "/yeegol";
+						String fileName = "/image" + DateUtil.getTimeStamp()
+								+ ".jpg";
+						if (FSUtil.writeBitmapToFileOnSdcard(mContext, mBitmap,
+								fileName, directoryName)) {
+							NotificUtil
+									.showLongToast(getText(R.string.toast_image_saved_to_local_successlly)
+											+ directoryName + fileName);
+						}
+					} catch (IOException e) {
+						LogUtil.logException(e, TAG);
+					}
+				} else {
+					onBackPressed();
+				}
+			}
+		};
+		yesButton.setOnClickListener(listener);
+		noButton.setOnClickListener(listener);
+		NotificUtil.showAlertDia(viewRoot, mContext);
 	}
 
 	private void prepareDiffWindow() {

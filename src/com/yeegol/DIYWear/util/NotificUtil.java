@@ -6,6 +6,7 @@ package com.yeegol.DIYWear.util;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface.OnClickListener;
+import android.view.View;
 import android.widget.Toast;
 
 import com.yeegol.DIYWear.R;
@@ -44,6 +45,12 @@ public class NotificUtil {
 	public static void showAlertDia(String title, String msg, Context context) {
 		AlertDialog dialog = new AlertDialog.Builder(context).setMessage(msg)
 				.setTitle(title).create();
+		dialog.show();
+	}
+
+	public static void showAlertDia(View view, Context context) {
+		AlertDialog dialog = new AlertDialog.Builder(context).setView(view)
+				.create();
 		dialog.show();
 	}
 
