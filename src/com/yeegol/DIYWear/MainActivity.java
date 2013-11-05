@@ -207,11 +207,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				case 8:
 					// check this window already closed or not
 					if (mPopupWindow != null && mPopupWindow.isShowing()) {
-						if (mPopupWindow.isTag()) {
-							mPopupWindow.dismiss(true);
-						} else {
-							mPopupWindow.dismiss(false);
-						}
+						mPopupWindow.dismiss();
 					}
 					break;
 				case 9:
@@ -330,9 +326,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}
 			});
 			viewRoot.bindUI();
-			mPopupWindow.setListener(null);
 			mPopupWindow.setOnDismissListener(null);
-			mPopupWindow.setTag(false);
 			mPopupWindow.setOutsideTouchable(false);
 			mPopupWindow.setContentView(viewRoot);
 			mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -445,7 +439,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			LogUtil.logDebug("meaningless action,ignored", TAG);
 			return;
 		}
-		android.content.DialogInterface.OnClickListener listener;
+
 		switch (v.getId()) {
 		case R.id.Button_showType:
 			toggleVisibilty(mConditionContainer);
@@ -560,7 +554,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					getText(R.string.main_goods_list_view_sort_price_desc),
 					getText(R.string.main_goods_list_view_sort_id),
 					getText(R.string.main_goods_list_view_sort_time) };
-			listener = new android.content.DialogInterface.OnClickListener() {
+			android.content.DialogInterface.OnClickListener listener = new android.content.DialogInterface.OnClickListener() {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -797,9 +791,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// make other unusable
 		togglePanelTouchable(false);
 		// attach view to popupWindow & show
-		mPopupWindow.setListener(this);
 		mPopupWindow.setOnDismissListener(this);
-		mPopupWindow.setTag(false);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(layout);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -875,15 +867,32 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 		// make other unusable
 		togglePanelTouchable(true);
-		mPopupWindow.setListener(this);
 		mPopupWindow.setOnDismissListener(this);
-		mPopupWindow.setTag(true);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(listView.getChildCount() > 0 ? listView
 				: inflater.inflate(R.layout.view_empty_cart, null));
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
 		mPopupWindow.update(StrUtil.dobToInt(mSurfaceView.getWidth() * 0.8),
 				StrUtil.dobToInt(mSurfaceView.getHeight() * 0.8));
+	}
+
+	private void prepareNoClothOnModel() {
+		mPopupWindow = new MyPopupWindow(mContext);
+		LayoutInflater inflater = getLayoutInflater();
+		View viewRoot = inflater.inflate(R.layout.view_no_cloth_on_model, null);
+		Button okButton = (Button) viewRoot.findViewById(R.id.Button_save_yes);
+		okButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				onBackPressed();
+			}
+		});
+		mPopupWindow.setOnDismissListener(null);
+		mPopupWindow.setOutsideTouchable(false);
+		mPopupWindow.setContentView(viewRoot);
+		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
+		mPopupWindow.update(mSurfaceView.getWidth(), mSurfaceView.getHeight());
 	}
 
 	private void prepareConfirmSave() {
@@ -933,9 +942,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		if (mPreviousBitmap != null) {
 			aImageView.setImageBitmap(mPreviousBitmap);
 			bImageView.setImageBitmap(mBitmap);
-			mPopupWindow.setListener(null);
 			mPopupWindow.setOnDismissListener(null);
-			mPopupWindow.setTag(false);
 			mPopupWindow.setOutsideTouchable(false);
 			mPopupWindow.setContentView(viewRoot);
 			mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -962,9 +969,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		saveButton.setOnClickListener(this);
 		shareButton.setOnClickListener(this);
 		// attach to popup window
-		mPopupWindow.setListener(null);
 		mPopupWindow.setOnDismissListener(null);
-		mPopupWindow.setTag(false);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(viewRoot);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -997,9 +1002,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			}
 		});
 		listView.bindUI();
-		mPopupWindow.setListener(null);
 		mPopupWindow.setOnDismissListener(null);
-		mPopupWindow.setTag(false);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(listView);
 		mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
@@ -1974,11 +1977,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void onDismiss() {
-		if (mPopupWindow.isTag()) {
-			togglePanelTouchable(true);
-		} else {
-			togglePanelTouchable(false);
-		}
+		togglePanelTouchable(false);
 	}
 
 	@Override

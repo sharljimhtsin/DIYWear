@@ -56,14 +56,10 @@
     <string name="main_goods_list_view_sort_time">按时间</string>
     <string name="toast_image_saved_to_local_successlly">图片已成功保存到本地，</string>
     <string name="umeng_share_content">我喜爱的模特搭配，分享一下</string>
-    <string name="alert_dial_undo_title">确认撤销？</string>
-    <string name="alert_dial_undo_message">这将会去除模特身上的所有衣服</string>
     <string name="alert_dial_undo_yes_btn">是</string>
     <string name="alert_dial_undo_no_btn">否</string>
-    <string name="alert_dial_pick_model_title">选择模特</string>
-    <string name="alert_dial_save_to_local_title">确认保存？</string>
     <string name="alert_dial_save_to_local_message">这将会保存模特试衣图到本地</string>
-    <string name="toast_no_cloth_on_model">模特没有试穿任何衣物</string>
+    <string name="toast_no_cloth_on_model">模特身上没有商品</string>
     <string name="view_empty_collation_nothing">该件商品没有搭配</string>
 
     <!-- system strings -->
