@@ -132,11 +132,10 @@ public class Model {
 		// calculate the model's offset of height & width
 		if (yoff == 0) {
 			Bitmap background = layers.get(BG_LAYER).getBitmap();
-			Bitmap body = layers.get(MODEL_BODY_LAYER).getBitmap();
-			int xdiff = background.getWidth() - body.getWidth();
-			int ydiff = background.getHeight() - body.getHeight();
-			xoff = Math.abs(xdiff / 2 - x);
-			yoff = Math.abs(ydiff / 2 - 100 - y);
+			int xdiff = background.getWidth() - width;
+			int ydiff = background.getHeight() - height;
+			xoff = xdiff / 2 - x;
+			yoff = ydiff / 3 * 2 - y; // assert it as shadow layer
 		}
 		Integer[] xy = new Integer[] { x + xoff, y + yoff, width, height };
 		return xy;
