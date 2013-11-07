@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.yeegol.DIYWear.R;
+import com.yeegol.DIYWear.clz.MyLinearLayout;
+import com.yeegol.DIYWear.clz.MyLinearLayout.OnFinishListener;
 import com.yeegol.DIYWear.res.DataHolder;
 
 /**
@@ -49,8 +51,18 @@ public class NotificUtil {
 	}
 
 	public static void showAlertDia(View view, Context context) {
-		AlertDialog dialog = new AlertDialog.Builder(context).setView(view)
-				.create();
+		final AlertDialog dialog = new AlertDialog.Builder(context).setView(
+				view).create();
+		// add a close entrance if MyLinearLayout
+		if (view instanceof MyLinearLayout) {
+			((MyLinearLayout) view).setFinishListener(new OnFinishListener() {
+
+				@Override
+				public void finish() {
+					dialog.dismiss();
+				}
+			});
+		}
 		dialog.show();
 	}
 

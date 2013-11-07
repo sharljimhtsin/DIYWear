@@ -300,8 +300,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	private void pickUpIfNeed(boolean isStart) {
 		List<BrandModel> list = Model.getInstance().getModels();
 		if (list != null && list.size() > 1 && !isStart) {
-			mPopupWindow = new MyPopupWindow(mContext);
-			MyLinearLayout viewRoot = new MyLinearLayout(mContext);
+			final MyLinearLayout viewRoot = new MyLinearLayout(mContext);
 			viewRoot.setOrientation(LinearLayout.HORIZONTAL);
 			viewRoot.setGravity(Gravity.CENTER);
 			viewRoot.setList(list);
@@ -309,6 +308,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 				@Override
 				public void onClick(View v) {
+					// trigger to exit on item click
+					viewRoot.getFinishListener().finish();
 					BrandModel model = (BrandModel) v.getTag();
 					if (mBrandModel == model) {
 						NotificUtil
@@ -324,16 +325,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					Model.getInstance().setCurrentDirection(mCurrentDirect);
 					Model.getInstance().setCurrentBrandModel(mBrandModel);
 					mHandler.sendMessage(mHandler.obtainMessage(2));
-					mPopupWindow.dismiss();
 				}
 			});
 			viewRoot.bindUI();
-			mPopupWindow.setOnDismissListener(null);
-			mPopupWindow.setOutsideTouchable(false);
-			mPopupWindow.setContentView(viewRoot);
-			mPopupWindow.showAtLocation(mMainLayout, Gravity.CENTER, 0, 0);
-			mPopupWindow.update(mSurfaceView.getWidth(),
-					mSurfaceView.getHeight());
+			NotificUtil.showAlertDia(viewRoot, mContext);
 		} else {
 			mBrandModel = list.get(2);// make lady default
 			Model.getInstance().setCurrentBrandModel(mBrandModel);

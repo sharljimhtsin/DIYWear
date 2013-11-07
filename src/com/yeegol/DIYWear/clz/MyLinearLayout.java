@@ -19,11 +19,17 @@ import com.yeegol.DIYWear.util.NetUtil;
  */
 public class MyLinearLayout extends LinearLayout {
 
+	public interface OnFinishListener {
+		void finish();
+	}
+
 	Context context;
 
 	List<?> list;
 
 	OnClickListener listener;
+
+	OnFinishListener finishListener;
 
 	public MyLinearLayout(Context context) {
 		super(context);
@@ -85,4 +91,18 @@ public class MyLinearLayout extends LinearLayout {
 		}
 	}
 
+	/**
+	 * @return the finishListener
+	 */
+	public OnFinishListener getFinishListener() {
+		return finishListener;
+	}
+
+	/**
+	 * @param finishListener
+	 *            the finishListener to set
+	 */
+	public void setFinishListener(OnFinishListener finishListener) {
+		this.finishListener = finishListener;
+	}
 }
