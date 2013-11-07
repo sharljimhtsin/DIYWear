@@ -36,6 +36,17 @@ public class JSONUtil {
 		return ret;
 	}
 
+	public static String getValueByName(JSONObject json, String name) {
+		String ret = "";
+
+		try {
+			ret = String.valueOf(json.get(name));
+		} catch (JSONException e) {
+			LogUtil.logException(e, TAG);
+		}
+		return ret;
+	}
+
 	public static <T> T getObjectInArray(String json, Type t) {
 		Gson gson = new Gson();
 		return gson.fromJson(json, t);

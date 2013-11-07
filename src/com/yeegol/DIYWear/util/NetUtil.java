@@ -82,13 +82,17 @@ public class NetUtil {
 		return NetUtil.DOMAIN_FILE + preview + "views/" + direcetion + "/1.txt";
 	}
 
+	public static String buildURLForBasicConf(String preview) {
+		return NetUtil.DOMAIN_FILE + preview + "views/" + "/1.txt";
+	}
+
 	public static String buildURLForNormal(String preview, String direction) {
 		return NetUtil.DOMAIN_FILE + preview + "variants/0/" + direction + "/"
 				+ direction + ".png";
 	}
 
 	public static String buildURLForNormalConf(String preview) {
-		return NetUtil.DOMAIN_FILE + preview + "variants/0/" + "/1.txt";
+		return NetUtil.DOMAIN_FILE + preview + "variants/" + "/1.txt";
 	}
 
 	public static String buildURLForThumb(String preview) {

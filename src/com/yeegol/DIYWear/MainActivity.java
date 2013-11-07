@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONException;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -350,6 +352,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void run() {
+				int currentPercent = DataHolder.getInstance()
+						.getProperResolution();
+
 				Model.getInstance().setBackground(
 						new MyBitmap(ImgUtil
 								.scaleBitmapToFullScreen(BitmapFactory
@@ -359,45 +364,55 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 								"no need", "no need"));
 
 				String tmp1 = NetUtil.buildURLForBasic(
-						mBrandModel.getPreview(), direcetion, "shadow0.png");
+						mBrandModel.getPreview(), direcetion, "shadow0_"
+								+ currentPercent + ".png");
 				Bitmap tmp2 = NetUtil.getImageFromWeb(tmp1,
 						NetUtil.DOMAIN_FILE_PURE);
 				Model.getInstance().setModelShadow(
 						new MyBitmap(tmp2, tmp1, direcetion));
 
 				String tmp3 = NetUtil.buildURLForBasic(
-						mBrandModel.getPreview(), direcetion, "body.png");
+						mBrandModel.getPreview(), direcetion, "body_"
+								+ currentPercent + ".png");
 				Bitmap tmp4 = NetUtil.getImageFromWeb(tmp3,
 						NetUtil.DOMAIN_FILE_PURE);
 				Model.getInstance().setModelBody(
 						new MyBitmap(tmp4, tmp3, direcetion));
 
 				String tmp5 = NetUtil.buildURLForBasic(
-						mBrandModel.getPreview(), direcetion, "face.png");
+						mBrandModel.getPreview(), direcetion, "face_"
+								+ currentPercent + ".png");
 				Bitmap tmp6 = NetUtil.getImageFromWeb(tmp5,
 						NetUtil.DOMAIN_FILE_PURE);
 				Model.getInstance().setModelFace(
 						new MyBitmap(tmp6, tmp5, direcetion));
 
 				String tmp7 = NetUtil.buildURLForBasic(
-						mBrandModel.getPreview(), direcetion, "hair.png");
+						mBrandModel.getPreview(), direcetion, "hair_"
+								+ currentPercent + ".png");
 				Bitmap tmp8 = NetUtil.getImageFromWeb(tmp7,
 						NetUtil.DOMAIN_FILE_PURE);
 				Model.getInstance().setModelHair(
 						new MyBitmap(tmp8, tmp7, direcetion));
 
 				String tmp9 = NetUtil.buildURLForBasic(
-						mBrandModel.getPreview(), direcetion, "underwear.png");
+						mBrandModel.getPreview(), direcetion, "underwear_"
+								+ currentPercent + ".png");
 				Bitmap tmp10 = NetUtil.getImageFromWeb(tmp9,
 						NetUtil.DOMAIN_FILE_PURE);
 				Model.getInstance().setModelUnderwear(
 						new MyBitmap(tmp10, tmp9, direcetion));
 				// get position description
-				Model.getInstance().setPosDescribe(
-						NetUtil.getTextFromWeb(
-								NetUtil.buildURLForBasicConf(
-										mBrandModel.getPreview(), direcetion),
-								NetUtil.DOMAIN_FILE_PURE));
+				try {
+					Model.getInstance().setPosDescribe(
+							NetUtil.getTextFromWeb(NetUtil
+									.buildURLForBasicConf(mBrandModel
+											.getPreview()),
+									NetUtil.DOMAIN_FILE_PURE), mCurrentDirect);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				mHandler.sendMessage(mHandler.obtainMessage(3));
 			}
 		}).start();
@@ -439,7 +454,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			LogUtil.logDebug("meaningless action,ignored", TAG);
 			return;
 		}
-
 		switch (v.getId()) {
 		case R.id.Button_showType:
 			toggleVisibilty(mConditionContainer);
@@ -508,7 +522,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mSocialService.openShare(this, false);
 			break;
 		case R.id.Button_cart:
-			if (allDisabled && !skipFirst) {
+			if (allDisabled) {
 				return;
 			}
 			prepareCartWindow();
@@ -789,7 +803,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		nextButton.setOnClickListener(listener);
 		previewImageView.setOnClickListener(listener);
 		// make other unusable
-		togglePanelTouchable(false);
+		togglePanelTouchable();
 		// attach view to popupWindow & show
 		mPopupWindow.setOnDismissListener(this);
 		mPopupWindow.setOutsideTouchable(false);
@@ -866,7 +880,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			listView.addView(layout);
 		}
 		// make other unusable
-		togglePanelTouchable(true);
+		togglePanelTouchable();
 		mPopupWindow.setOnDismissListener(this);
 		mPopupWindow.setOutsideTouchable(false);
 		mPopupWindow.setContentView(listView.getChildCount() > 0 ? listView
@@ -1009,15 +1023,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPopupWindow.update(mSurfaceView.getWidth(), mSurfaceView.getHeight());
 	}
 
-	boolean allDisabled, skipFirst = false;
+	boolean allDisabled = false;
 
 	/**
 	 * make the left/right/bottom side-bar enable/disable
 	 * 
-	 * @param allowException
-	 *            make "add to cart" button usable
 	 */
-	private void togglePanelTouchable(boolean allowException) {
+	private void togglePanelTouchable() {
 		if (mListLayout.isEnabled()) {
 			mListLayout.setEnabled(false);
 			allDisabled = true;
@@ -1025,7 +1037,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mListLayout.setEnabled(true);
 			allDisabled = false;
 		}
-		skipFirst = allowException;
 	}
 
 	/**
@@ -1628,7 +1639,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mPreviousGoods.add(goods);
 		// set it
 		Model.getInstance().setLayer(layer, new MyBitmap(bm, url, direct));
-		Model.getInstance().setPosDescribe(json, layer, direct);
+		try {
+			Model.getInstance().setPosDescribe(json, layer);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return true;
 	}
 
@@ -1977,7 +1993,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 	@Override
 	public void onDismiss() {
-		togglePanelTouchable(false);
+		togglePanelTouchable();
 	}
 
 	@Override

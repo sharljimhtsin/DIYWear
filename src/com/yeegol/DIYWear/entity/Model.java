@@ -5,13 +5,14 @@ package com.yeegol.DIYWear.entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -121,9 +122,8 @@ public class Model {
 	/**
 	 * @param json
 	 * @return Integer[] {x,y,width,height}
-	 * @notice use OFFSET_OF_MODEL_ON_X for center of horizontal
 	 */
-	private Integer[] getNodeValueAsListFromJson(String json) {
+	private Integer[] getNodeValueAsListFromJson(JSONObject json) {
 		int x = StrUtil.StringToInt(JSONUtil.getValueByName(json, "x"));
 		int y = StrUtil.StringToInt(JSONUtil.getValueByName(json, "y"));
 		int width = StrUtil.StringToInt(JSONUtil.getValueByName(json, "width"));
@@ -135,36 +135,43 @@ public class Model {
 			Bitmap body = layers.get(MODEL_BODY_LAYER).getBitmap();
 			int xdiff = background.getWidth() - body.getWidth();
 			int ydiff = background.getHeight() - body.getHeight();
-			xoff = xdiff / 2 - x;
-			yoff = ydiff / 2 - 100 - y;
+			xoff = Math.abs(xdiff / 2 - x);
+			yoff = Math.abs(ydiff / 2 - 100 - y);
 		}
 		Integer[] xy = new Integer[] { x + xoff, y + yoff, width, height };
 		return xy;
 	}
 
 	/**
-	 * record x,y position for basic part of model, head,hair,body etc
+	 * record x,y position for basic part of model,head,hair,body etc
 	 * 
 	 * @param json
+	 * @param direct
+	 * @throws JSONException
 	 */
-	public void setPosDescribe(String json) {
-		Pattern pattern = Pattern.compile("\\w+\\=\\{.+\\}"); // \w+\=\{.+\}
-		Matcher matcher = pattern.matcher(json);
-		while (matcher.find()) {
-			String tmp = matcher.group();
-			String[] item = tmp.split("=");
-			Integer[] xy = getNodeValueAsListFromJson(item[1]);
-			// save the x,y position
-			if (item[0].equals("body")) {
-				layer_pos.put(String.valueOf(MODEL_BODY_LAYER), xy);
-			} else if (item[0].equals("face")) {
-				layer_pos.put(String.valueOf(MODEL_FACE_LAYER), xy);
-			} else if (item[0].equals("hair")) {
-				layer_pos.put(String.valueOf(MODEL_HAIR_LAYER), xy);
-			} else if (item[0].equals("shadow0")) {
-				layer_pos.put(String.valueOf(MODEL_SHADOW_LAYER), xy);
-			} else {
-				layer_pos.put(String.valueOf(MODEL_UNDERWEAR_LAYER), xy);
+	public void setPosDescribe(String json, String direct) throws JSONException {
+		JSONObject jsonObject = new JSONObject(json);
+		JSONObject innerJsonObject = jsonObject.getJSONObject(direct);
+		for (Iterator<?> iterator = innerJsonObject.keys(); iterator.hasNext();) {
+			String type = (String) iterator.next();// face,hair,etc
+			int currentPercent = DataHolder.getInstance().getProperResolution();
+			// pick up right scale
+			if (type.endsWith(StrUtil.intToString(currentPercent))) {
+				Integer[] xy = getNodeValueAsListFromJson(innerJsonObject
+						.getJSONObject(type));
+				String[] item = type.split("_");
+				// save the x,y position
+				if (item[0].equals("body")) {
+					layer_pos.put(String.valueOf(MODEL_BODY_LAYER), xy);
+				} else if (item[0].equals("face")) {
+					layer_pos.put(String.valueOf(MODEL_FACE_LAYER), xy);
+				} else if (item[0].equals("hair")) {
+					layer_pos.put(String.valueOf(MODEL_HAIR_LAYER), xy);
+				} else if (item[0].equals("shadow0")) {
+					layer_pos.put(String.valueOf(MODEL_SHADOW_LAYER), xy);
+				} else {
+					layer_pos.put(String.valueOf(MODEL_UNDERWEAR_LAYER), xy);
+				}
 			}
 		}
 	}
@@ -174,18 +181,26 @@ public class Model {
 	 * 
 	 * @param json
 	 * @param layer
-	 * @param direct
-	 *            useless now
+	 * @throws JSONException
 	 */
-	public void setPosDescribe(String json, int layer, String direct) {
-		Pattern pattern = Pattern.compile("\\w+\\=\\{.+\\}"); // \w+\=\{.+\}
-		Matcher matcher = pattern.matcher(json);
-		while (matcher.find()) {
-			String tmp = matcher.group();
-			String[] item = tmp.split("=");
-			Integer[] xy = getNodeValueAsListFromJson(item[1]);
-			// save the x,y position of every direct
-			layer_pos.put(layer + "#" + item[0], xy); // e.g. 1#front
+	public void setPosDescribe(String json, int layer) throws JSONException {
+		JSONObject jsonObject = new JSONObject(json);
+		for (Iterator<?> iterator = jsonObject.keys(); iterator.hasNext();) {
+			String type = (String) iterator.next();// front,back,etc
+			JSONObject innerJsonObject = jsonObject.getJSONObject(type);
+			for (Iterator<?> iterator2 = innerJsonObject.keys(); iterator2
+					.hasNext();) {
+				String type2 = (String) iterator2.next();// face,hair,etc
+				int currentPercent = 16;
+				// pick up right scale
+				if (type2.endsWith(StrUtil.intToString(currentPercent))) {
+					Integer[] xy = getNodeValueAsListFromJson(innerJsonObject
+							.getJSONObject(type2));
+					String[] item = type2.split("_");
+					// save the x,y position of every direct
+					layer_pos.put(layer + "#" + item[0], xy); // e.g. 1#front
+				}
+			}
 		}
 	}
 

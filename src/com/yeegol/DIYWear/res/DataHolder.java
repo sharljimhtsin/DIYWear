@@ -30,6 +30,8 @@ public class DataHolder {
 
 	static Context context;
 
+	int currentPercent = 16;
+
 	private DataHolder() {
 		layerMapping = new SparseIntArray();
 		charMapping = new HashMap<String, Integer>();
@@ -112,5 +114,9 @@ public class DataHolder {
 
 	public Context getContext() {
 		return context;
+	}
+
+	public int getProperResolution() {
+		return currentPercent;
 	}
 }
