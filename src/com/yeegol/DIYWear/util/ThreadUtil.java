@@ -42,14 +42,21 @@ public class ThreadUtil {
 	 *            handle to be notify
 	 * @see doInForeground
 	 */
-	public static void doInBackgroundWithTip(Runnable r, Handler h) {
-		h.sendMessage(h.obtainMessage(97));
-		Thread t = new Thread(r);
+	public static void doInBackgroundWithTip(Runnable r, final Handler h) {
+		final Thread t = new Thread(r);
 		t.start();
-		while (t.getState() == State.RUNNABLE) {
-			// do nothing
-		}
-		h.sendMessage(h.obtainMessage(98));
+		// start a new non-UI thread to show tip
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				h.sendMessageAtFrontOfQueue(h.obtainMessage(97));
+				while (!(t.getState() == State.TERMINATED)) {
+					// do nothing
+				}
+				h.sendMessage(h.obtainMessage(98));
+			}
+		}).start();
 	}
 
 	/**

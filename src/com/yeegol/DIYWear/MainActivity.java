@@ -172,7 +172,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			public boolean handleMessage(Message msg) {
 				switch (msg.what) {
 				case 0:
-					mHandler.sendMessage(mHandler.obtainMessage(97));
 					prepareModelList();
 					prepareBottombar();
 					break;
@@ -180,13 +179,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					pickUpIfNeed(true);
 					break;
 				case 2:
-					mHandler.sendMessage(mHandler.obtainMessage(97));
 					prepareLeftSidebar();
 					prepareLayer(mCurrentDirect);
 					break;
 				case 3:
 					drawModel();
-					mHandler.sendMessage(mHandler.obtainMessage(98));
 					break;
 				case 4:
 					buildLeftSidebar();
@@ -231,6 +228,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					buildCollocationPanel((Object[]) msg.obj);
 					break;
 				case 97:
+					NotificUtil.showShortToast("networking error");
 					mProgressDialog.show();
 					break;
 				case 98:
@@ -273,14 +271,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * get model list from web,run once
 	 */
 	private void prepareModelList() {
-		new Thread(new Runnable() {
+		ThreadUtil.doInBackgroundWithTip(new Runnable() {
 
 			@Override
 			public void run() {
 				Model.getInstance().setModels(Model.doBrandModelgetList());
 				mHandler.sendMessage(mHandler.obtainMessage(1));
 			}
-		}).start();
+		}, mHandler);
 	}
 
 	/**
@@ -343,7 +341,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 *            front in default.back,portrait,portrait_back available
 	 */
 	private void prepareLayer(final String direcetion) {
-		new Thread(new Runnable() {
+		ThreadUtil.doInBackgroundWithTip(new Runnable() {
 
 			@Override
 			public void run() {
@@ -409,8 +407,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}
 				mHandler.sendMessage(mHandler.obtainMessage(3));
 			}
-		}).start();
-
+		}, mHandler);
 	}
 
 	@Override
@@ -473,16 +470,22 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			if (allDisabled) {
 				return;
 			}
-			// skip if no goods to remove
-			if (mPreviousGoods.getLast() != null) {
-				Goods g = mPreviousGoods.getLast();
-				setGoods(g, mCurrentDirect, DataHolder.getInstance()
-						.getMappingLayerByName(g.getCategoryName()));
-				drawModel();
-				mPreviousGoods.removeLast();
-				mNextGoods.addLast(g);
-				return;
-			}
+			ThreadUtil.doInBackground(new Runnable() {
+
+				@Override
+				public void run() {
+					// skip if no goods to remove
+					if (mPreviousGoods.getLast() != null) {
+						Goods g = mPreviousGoods.getLast();
+						setGoods(g, mCurrentDirect, DataHolder.getInstance()
+								.getMappingLayerByName(g.getCategoryName()));
+						drawModel();
+						mPreviousGoods.removeLast();
+						mNextGoods.addLast(g);
+						return;
+					}
+				}
+			});
 			break;
 		case R.id.Button_redo:
 			if (allDisabled) {
@@ -748,14 +751,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						return;
 					}
 					final Collocation collocation = (Collocation) v.getTag();
-					mHandler.sendMessage(mHandler.obtainMessage(97));
-					new Thread(new Runnable() {
+					ThreadUtil.doInBackgroundWithTip(new Runnable() {
 						public void run() {
 							setCollocation(collocation);
-							mHandler.sendMessage(mHandler.obtainMessage(98));
 							mHandler.sendMessage(mHandler.obtainMessage(8));
 						}
-					}).start();
+					}, mHandler);
 					break;
 				case R.id.Button_view_goods_info_next:
 					// check if is the last
@@ -779,7 +780,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// set value
 		createCartItem(layout, mCurrentGoods,
 				mTempCart.indexOfValue(mCurrentGoods), false);
-		new Thread(new Runnable() {
+		ThreadUtil.doInBackgroundWithTip(new Runnable() {
 
 			@Override
 			public void run() {
@@ -788,7 +789,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						StrUtil.intToString(mBrandModel.getAgeGroup()), 0, 0);
 				handler.sendMessage(handler.obtainMessage(0, list));
 			}
-		}).start();
+		}, mHandler);
 		dressWayOneButton.setOnClickListener(listener);
 		dressWayTwoButton.setOnClickListener(listener);
 		detailButton.setOnClickListener(listener);
@@ -1129,7 +1130,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	 * get category list from web
 	 */
 	private void prepareLeftSidebar() {
-		new Thread(new Runnable() {
+		ThreadUtil.doInBackgroundWithTip(new Runnable() {
 
 			@Override
 			public void run() {
@@ -1140,7 +1141,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 				}
 				mHandler.sendMessage(mHandler.obtainMessage(4));
 			}
-		}).start();
+		}, mHandler);
 	}
 
 	static final int PAGE = 1;
@@ -1410,12 +1411,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		}
 		final boolean isCollocationMod = categoryId == -1
 				&& "-1".equals(brandIds);
-		new Thread(new Runnable() {
+		ThreadUtil.doInBackgroundWithTip(new Runnable() {
 
 			@Override
 			public void run() {
 				if (isNew) {
-					mHandler.sendMessage(mHandler.obtainMessage(97));
 					if (isCollocationMod) {
 						mCollocationsList = Collocation.doCollocationgetList(
 								-1, -1, gender, "",
@@ -1452,7 +1452,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					LogUtil.logDebug("goods list is null", TAG);
 				}
 			}
-		}).start();
+		}, mHandler);
 	}
 
 	/**
@@ -1463,7 +1463,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 	private void buildBottomBar() {
 		if (mGoodsList == null && mCollocationsList == null) {
 			mGoodsLayout.setVisibility(View.INVISIBLE);
-			mHandler.sendMessage(mHandler.obtainMessage(98));
 			NotificUtil
 					.showShortToast(R.string.toast_no_goods_item_under_the_type);
 			return;
@@ -1473,11 +1472,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 
 			@Override
 			public void onClick(final View v) {
-				new Thread(new Runnable() {
+				ThreadUtil.doInBackgroundWithTip(new Runnable() {
 
 					@Override
 					public void run() {
-						mHandler.sendMessage(mHandler.obtainMessage(97));
 						// get the goods object from array
 						Goods goods = mGoodsList.get(StrUtil.ObjToInt(v
 								.getTag()));
@@ -1497,7 +1495,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 						if ((tmpG = mTempCart.get(mCurrentLayer)) != null
 								&& tmpG.getId() == goods.getId()) {
 							removeGoodsFromTempCartAndRefreshUI(mCurrentLayer);
-							mHandler.sendMessage(mHandler.obtainMessage(98));
 							return;
 						}
 						// deploy this goods
@@ -1508,10 +1505,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 									"current id = " + goods.getName());
 						} else {
 							mHandler.sendMessage(mHandler.obtainMessage(11));
-							mHandler.sendMessage(mHandler.obtainMessage(98));
 						}
 					}
-				}).start();
+				}, mHandler);
 			}
 		};
 		// listener for each item click when collocation list
@@ -1571,7 +1567,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		// set count at header
 		prepareRightSidebar();
 		mGoodsLayout.setVisibility(View.VISIBLE);
-		mHandler.sendMessage(mHandler.obtainMessage(98));
 	}
 
 	/**
