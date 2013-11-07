@@ -86,9 +86,18 @@ public class NetUtil {
 		return NetUtil.DOMAIN_FILE + preview + "views/" + "/1.txt";
 	}
 
+	/**
+	 * Image URL
+	 * is:http://files.ihomebay.com/7/goods/372/variants/0/front/front_##.png
+	 * 
+	 * @param preview
+	 * @param direction
+	 * @return
+	 */
 	public static String buildURLForNormal(String preview, String direction) {
 		return NetUtil.DOMAIN_FILE + preview + "variants/0/" + direction + "/"
-				+ direction + ".png";
+				+ direction + "_"
+				+ DataHolder.getInstance().getProperResolution() + ".png";
 	}
 
 	public static String buildURLForNormalConf(String preview) {

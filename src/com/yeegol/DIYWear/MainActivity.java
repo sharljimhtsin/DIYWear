@@ -335,7 +335,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 			mPopupWindow.update(mSurfaceView.getWidth(),
 					mSurfaceView.getHeight());
 		} else {
-			mBrandModel = list.get(1);// make lady default
+			mBrandModel = list.get(2);// make lady default
 			Model.getInstance().setCurrentBrandModel(mBrandModel);
 			mHandler.sendMessage(mHandler.obtainMessage(2));
 		}
@@ -410,8 +410,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 											.getPreview()),
 									NetUtil.DOMAIN_FILE_PURE), mCurrentDirect);
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LogUtil.logException(e, TAG);
 				}
 				mHandler.sendMessage(mHandler.obtainMessage(3));
 			}
@@ -1642,8 +1641,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		try {
 			Model.getInstance().setPosDescribe(json, layer);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LogUtil.logException(e, TAG);
 		}
 		return true;
 	}
@@ -1711,7 +1709,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		undoButton.setOnClickListener(this);
 		redoButton.setOnClickListener(this);
 		diffButton.setOnClickListener(this);
-
 		switchModelButton.setOnTouchListener(this);
 		turnBackButton.setOnTouchListener(this);
 		undoButton.setOnTouchListener(this);

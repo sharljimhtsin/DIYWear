@@ -44,4 +44,17 @@ public class StrUtil {
 	public static String longToString(long l) {
 		return String.valueOf(l);
 	}
+
+	/**
+	 * @param str
+	 *            "abcdefg" -> "cdefg"
+	 * @param chars
+	 *            "["a","b"]"
+	 */
+	public static String purgeChar(String str, String... chars) {
+		for (String c : chars) {
+			str = str.replace(c, "");
+		}
+		return str;
+	}
 }

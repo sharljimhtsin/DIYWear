@@ -184,22 +184,19 @@ public class Model {
 	 * @throws JSONException
 	 */
 	public void setPosDescribe(String json, int layer) throws JSONException {
-		JSONObject jsonObject = new JSONObject(json);
+		JSONObject jsonObject = new JSONObject(
+				StrUtil.purgeChar(json, "[", "]"));
 		for (Iterator<?> iterator = jsonObject.keys(); iterator.hasNext();) {
 			String type = (String) iterator.next();// front,back,etc
-			JSONObject innerJsonObject = jsonObject.getJSONObject(type);
-			for (Iterator<?> iterator2 = innerJsonObject.keys(); iterator2
-					.hasNext();) {
-				String type2 = (String) iterator2.next();// face,hair,etc
-				int currentPercent = 16;
-				// pick up right scale
-				if (type2.endsWith(StrUtil.intToString(currentPercent))) {
-					Integer[] xy = getNodeValueAsListFromJson(innerJsonObject
-							.getJSONObject(type2));
-					String[] item = type2.split("_");
-					// save the x,y position of every direct
-					layer_pos.put(layer + "#" + item[0], xy); // e.g. 1#front
-				}
+			int currentPercent = DataHolder.getInstance().getProperResolution();
+			if (type.endsWith(StrUtil.intToString(currentPercent))) {
+				JSONObject innerJsonObject = jsonObject.getJSONObject(type);
+				Integer[] xy = getNodeValueAsListFromJson(innerJsonObject);
+				// save the x,y position of every direct
+				layer_pos
+						.put(layer + "#"
+								+ StrUtil.purgeChar(type, "_" + currentPercent),
+								xy); // e.g. 1#front
 			}
 		}
 	}
