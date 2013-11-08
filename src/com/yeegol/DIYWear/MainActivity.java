@@ -228,7 +228,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 					buildCollocationPanel((Object[]) msg.obj);
 					break;
 				case 97:
-					NotificUtil.showShortToast("networking error");
 					mProgressDialog.show();
 					break;
 				case 98:
